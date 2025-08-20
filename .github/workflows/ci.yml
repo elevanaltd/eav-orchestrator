@@ -33,12 +33,21 @@ jobs:
           ./scripts/validate-docs.sh --blocking-only
           
       # Security scanning - MUST PASS
-      - name: Check for Committed Secrets
+      - name: Check for Committed Secrets (PR)
+        if: github.event_name == 'pull_request'
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+          extra_args: --debug --only-verified
+          
+      # For push events, scan the whole repository
+      - name: Check for Committed Secrets (Push)
+        if: github.event_name == 'push'
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
           extra_args: --debug --only-verified
           
       # File size validation - MUST PASS
