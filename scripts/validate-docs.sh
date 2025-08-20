@@ -64,8 +64,13 @@ check_naming_conventions() {
             continue
         fi
         
-        # Check main naming pattern for docs
+        # Check main naming pattern for docs (exempt README.md)
         if [[ "$dirname" == "./docs" ]] || [[ "$dirname" == "docs" ]]; then
+            # Skip README.md files - they are standard project files
+            if [[ "$filename" == "README.md" ]]; then
+                continue
+            fi
+            
             if ! [[ "$filename" =~ $NAMING_PATTERN ]]; then
                 print_error "File '$file' doesn't follow naming convention"
                 print_info "  Expected: NNN-{CATEGORY}[-{QUALIFIER}]-{NAME}.md"
