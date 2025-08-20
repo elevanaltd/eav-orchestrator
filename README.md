@@ -92,11 +92,50 @@ build/                      # Git repository root
 ├── src/                    # Source code (to be created)
 ├── tests/                  # Test suites (to be created)
 ├── docs/                   # Implementation artifacts
-│   └── adr/               # Architectural Decision Records
+│   ├── adr/               # Architectural Decision Records
+│   ├── 103-DOC-STRUCTURE-AND-NAMING-STANDARDS.md
+│   └── README.md          # Directory purpose
+├── reports/                # Time-bound analyses
+│   └── README.md          # Category guidelines
+├── _archive/               # Retired documents
+│   ├── docs/              # Archived docs
+│   ├── reports/           # Archived reports
+│   └── adr/               # Archived ADRs
+├── sessions/               # Raw logs, explorations
+├── scripts/                # Automation tools
 ├── reference-old/         # Symlink to old system (git-ignored)
 ├── README.md              # This file
 └── CLAUDE.md             # Development instructions
 ```
+
+## Documentation Categories
+
+### Naming Convention Pattern
+`{CATEGORY}{NN}-{CONTEXT}[-{QUALIFIER}]-{NAME}.{EXT}`
+
+### Category Ranges
+```
+0xx :: SYSTEM_META      → Core system design, workflows, north stars
+1xx :: DOCUMENTATION    → Standards, guides, rules, conventions  
+2xx :: PROJECT_BUILD    → Plans, workflows, deliverables (requires phase)
+3xx :: UI_FRONTEND      → Components, patterns, design systems (future)
+4xx :: SECURITY_AUTH    → Models, policies, authentication (future)
+5xx :: RUNTIME_OPS      → Deployment, monitoring, operations (future)
+6xx :: DATA_STORAGE     → Schemas, migrations, data models (future)
+7xx :: INTEGRATION_API  → Contracts, clients, protocols (future)
+8xx :: REPORTS          → Audits, analyses, retrospectives
+9xx :: SCRIPTS_TOOLS    → Automation, generators, validators (future)
+```
+
+### Context Tokens
+**Active:** `DOC`, `SYSTEM`, `PROJECT`, `BUILD`, `REPORT`  
+**Reserved:** `SCRIPT`, `AUTH`, `UI`, `RUNTIME`, `DATA`, `SEC`, `OPS`
+
+### Examples
+- `000-SYSTEM-NORTH-STAR.oct.md`
+- `103-DOC-STRUCTURE-AND-NAMING-STANDARDS.md`
+- `201-PROJECT-EAV-B0-VISION-ANALYSIS.md`
+- `801-REPORT-SECURITY-AUDIT.oct.md`
 
 ## Project Management
 
