@@ -154,17 +154,14 @@ build/                      # Git repository root
 ## Links
 
 ### Coordination
-- [Project Context](/.coord/PROJECT_CONTEXT.md)
-- [Team Charter](/.coord/CHARTER.md)
-- [RACI Assignments](/.coord/ASSIGNMENTS.md)
+Available via `.coord/` symlink or coordination repository
 
 ### Reference System
 - [Phoenix Analysis](/Volumes/HestAI-old/builds/eav-orchestrator-old/phoenix/)
 - [Old Implementation](/Volumes/HestAI-old/builds/eav-orchestrator-old/modules/)
 
 ### HestAI Standards
-- [Complete Workflow](/Volumes/HestAI/docs/HESTAI_COMPLETE_WORKFLOW.md)
-- [Agent Capabilities](/Volumes/HestAI/docs/guides/AGENT_CAPABILITY_LOOKUP.oct.md)
+Available in local development environment
 
 ## Getting Started
 
