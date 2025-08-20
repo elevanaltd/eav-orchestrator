@@ -15,6 +15,11 @@ on:
       - '**.md'
       - 'docs/**'
 
+# Required permissions for creating issues
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   check-links:
     runs-on: ubuntu-latest
@@ -34,8 +39,8 @@ jobs:
           file-extension: '.md'
           check-modified-files-only: 'no'
           max-depth: 10
-          retry-after: '5s'
-          retry-count: 3  # Retry to handle transient failures
+          config-file: '.github/markdown-link-check-config.json'
+          # Note: retry settings are in the config file, not as action inputs
           
       - name: Create Issue for Broken Links
         if: failure()
@@ -57,24 +62,33 @@ jobs:
             *This is an automated issue from the Documentation Quality workflow*
             `;
             
-            // Check if issue already exists
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'documentation,automated'
-            });
-            
-            const existingIssue = issues.data.find(issue => issue.title === title);
-            
-            if (!existingIssue) {
-              await github.rest.issues.create({
+            try {
+              // Check if issue already exists
+              const issues = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: title,
-                body: body,
-                labels: ['documentation', 'automated']
+                state: 'open',
+                labels: 'documentation,automated'
               });
+              
+              const existingIssue = issues.data.find(issue => issue.title === title);
+              
+              if (!existingIssue) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['documentation', 'automated']
+                });
+                console.log('Created new issue for broken links');
+              } else {
+                console.log('Issue already exists, skipping creation');
+              }
+            } catch (error) {
+              console.log('Could not create issue (likely permissions issue in fork/PR context)');
+              console.log('Error:', error.message);
+              // Don't fail the workflow just because we can't create an issue
             }
       
       - name: Update Status Badge Data
