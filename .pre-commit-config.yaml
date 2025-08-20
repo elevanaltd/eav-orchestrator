@@ -1,0 +1,79 @@
+# HestAI Pre-commit Hooks Configuration
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1024']  # 1MB limit
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      
+  # HestAI documentation standards
+  - repo: local
+    hooks:
+      - id: hestai-doc-standards
+        name: HestAI Documentation Standards
+        entry: scripts/validate-docs.sh
+        language: script
+        files: \.(md|oct\.md)$
+        pass_filenames: false
+        always_run: true
+        
+      - id: no-version-suffixes
+        name: Check for forbidden version suffixes
+        entry: '(_v[0-9]+|_final|_latest|_draft|_old|_new|_copy|_backup)'
+        language: pygrep
+        files: \.(md|oct\.md)$
+        
+      - id: project-phase-validation
+        name: Validate PROJECT document phases
+        entry: '^[0-9]{3}-PROJECT'
+        language: pygrep
+        files: '^docs/.*\.md$'
+        args: ['--negate']  # This ensures PROJECT docs have proper phase
+        exclude: '.*-(D1|D2|D3|B0|B1|B2|B3|B4)-.*'
+        
+  # Security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package\.lock\.json
+        
+  # Markdown quality
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: ['--config', '.markdownlint.json', '--fix']
+        
+# Future additions (commented out until technology chosen):
+# 
+# # JavaScript/TypeScript (add after B0)
+# - repo: https://github.com/pre-commit/mirrors-eslint
+#   rev: v8.56.0
+#   hooks:
+#     - id: eslint
+#       files: \.(js|jsx|ts|tsx)$
+#       
+# # Python (add after B0)
+# - repo: https://github.com/astral-sh/ruff-pre-commit
+#   rev: v0.1.13
+#   hooks:
+#     - id: ruff
+#     - id: ruff-format
+#     
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: v1.8.0
+#   hooks:
+#     - id: mypy
