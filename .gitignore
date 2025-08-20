@@ -1,6 +1,10 @@
 # Git worktrees
 worktrees/
 
+# Coordination overlay (dev-only)
+.coord
+coordination
+
 # Dependencies
 node_modules/
 .pnp
