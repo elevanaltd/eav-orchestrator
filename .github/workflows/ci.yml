@@ -1,0 +1,104 @@
+# TESTGUARD_APPROVED: Maintains zero-tolerance CI integrity per consultation be92c7f5-0d20-47cf-b626-5f1e06c613be
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, project-migration]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Essential structural checks - MUST PASS
+      - name: Validate Directory Structure
+        run: |
+          echo "Checking required files and directories..."
+          test -d docs || (echo "❌ docs/ directory missing" && exit 1)
+          test -f README.md || (echo "❌ README.md missing" && exit 1)
+          test -f CLAUDE.md || (echo "❌ CLAUDE.md missing" && exit 1)
+          echo "✅ Directory structure valid"
+      
+      # HestAI Documentation Standards Validation - MUST PASS
+      # Based on hestai-doc-steward consultation
+      - name: Validate HestAI Documentation Standards
+        run: |
+          echo "Running HestAI documentation standards validation..."
+          # Make script executable
+          chmod +x scripts/validate-docs.sh
+          # Run validation with blocking checks only
+          ./scripts/validate-docs.sh --blocking-only
+          
+      # Security scanning - MUST PASS
+      - name: Check for Committed Secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+          
+      # File size validation - MUST PASS
+      - name: Validate No Large Files
+        run: |
+          echo "Checking for large files..."
+          large_files=$(find . -type f -size +1M | grep -v "^./.git" | grep -v "node_modules" || true)
+          if [ -n "$large_files" ]; then
+            echo "❌ Large files detected (>1MB):"
+            echo "$large_files"
+            exit 1
+          fi
+          echo "✅ No large files detected"
+        
+      # Document required ADRs exist - WARNING ONLY during early phases
+      - name: Check for ADRs
+        run: |
+          echo "Checking for Architectural Decision Records..."
+          if [ -d "docs/adr" ]; then
+            adr_count=$(find docs/adr -name "*.md" -type f | wc -l)
+            echo "✅ Found $adr_count ADR(s)"
+          else
+            echo "⚠️  Warning: No ADR directory found (will be required after B0)"
+            # Not failing during initial setup
+          fi
+
+  # Technology detection for future enhancement
+  prepare-next-phase:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Detect Technology Stack
+        run: |
+          echo "Detecting technology stack for future CI enhancements..."
+          tech_detected=false
+          
+          # Check for Node.js
+          if [ -f "package.json" ]; then
+            echo "📦 Node.js project detected"
+            echo "TODO: Add npm install, test, lint, typecheck in B2 phase"
+            tech_detected=true
+          fi
+          
+          # Check for Python
+          if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "🐍 Python project detected"
+            echo "TODO: Add pip install, pytest, ruff, mypy in B2 phase"
+            tech_detected=true
+          fi
+          
+          # Check for Rust
+          if [ -f "Cargo.toml" ]; then
+            echo "🦀 Rust project detected"
+            echo "TODO: Add cargo build, test, clippy in B2 phase"
+            tech_detected=true
+          fi
+          
+          if [ "$tech_detected" = false ]; then
+            echo "ℹ️  No technology stack detected yet (expected before B0)"
+          fi
+          
+          echo "✅ Technology detection complete"
