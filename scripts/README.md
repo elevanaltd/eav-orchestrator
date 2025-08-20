@@ -1,45 +1,17 @@
-# Scripts Directory
+# Scripts
 
-**Purpose:** Automation tools, generators, validators, and development utilities
+Development and automation tools for EAV Orchestrator.
 
-## Future Content (9xx Category)
+## Current Scripts
 
-### 9xx :: SCRIPTS_TOOLS Range
-When scripts are added, they should follow documentation standards:
+- **validate-docs.sh** - Documentation standards validation
 
-```
-901-SCRIPT-VALIDATION-HOOKS.md        # Pre-commit hook documentation
-902-SCRIPT-DOC-GENERATORS.md          # Documentation generation tools
-903-SCRIPT-DEPLOYMENT-AUTOMATION.md   # Deployment scripts
-904-SCRIPT-TEST-UTILITIES.md          # Testing support scripts
-905-SCRIPT-DEVELOPMENT-TOOLS.md       # Development environment setup
-```
+## Purpose
 
-## Current Status
+This directory contains tools for:
+- Development automation
+- Documentation validation  
+- Build and deployment support
+- Testing utilities
 
-This directory is prepared for future automation needs but currently empty. As the EAV Orchestrator project grows, scripts will be added in these categories:
-
-### Planned Script Categories
-- **Validation Scripts:** Pre-commit hooks, CI/CD validation
-- **Documentation Tools:** Auto-generation, link checking, format validation
-- **Development Utilities:** Environment setup, database seeding, mock data
-- **Deployment Automation:** Build scripts, container management, deployment
-- **Testing Support:** Test data generation, coverage reporting, performance testing
-
-## Guidelines
-
-### Script Documentation
-Each significant script or tool should have corresponding documentation in the 9xx range explaining:
-- Purpose and usage
-- Configuration options
-- Integration points
-- Maintenance procedures
-
-### Organization
-- Keep actual scripts in appropriate directories (`scripts/`, `.github/workflows/`, etc.)
-- Document scripts in `docs/9xx-SCRIPT-*.md` files
-- Reference scripts from main project documentation
-
----
-
-**Status:** Prepared for future expansion as automation needs emerge
+Additional scripts will be added as development needs emerge.
