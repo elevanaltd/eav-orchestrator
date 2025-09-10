@@ -53,12 +53,13 @@ All development activities must follow TRACED protocol with evidence receipts:
 Testing infrastructure stabilized with Jest→Vitest migration complete. Technology stack confirmed and constitutional baseline established.
 
 ### Technology Stack (Confirmed)
-- **Backend:** Supabase + PostgreSQL with UUID primary keys and JSONB storage
+- **Backend:** Supabase PRO tier + PostgreSQL 17 with UUID primary keys and JSONB storage
 - **Frontend:** React 19 + TypeScript + TipTap rich text editor
 - **Collaboration:** Yjs + Supabase Real-time for conflict-free editing
 - **Testing:** Vitest + Testing Library with TRACED methodology compliance
 - **Real-time:** Required for collaborative script editing (comment sync <200ms)
 - **Authentication:** 5-role system (Admin, Internal, Freelancer, Client, Viewer)
+- **Infrastructure:** Supavisor connection pooling, session/transaction modes, singleton pattern
 
 ### Infrastructure Status
 - **Testing Framework:** Vitest migration complete (9 test files operational)
