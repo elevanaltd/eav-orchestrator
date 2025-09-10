@@ -20,7 +20,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/**/*.test.{ts,tsx}'], // Only include our test files
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'], // Only include our test files
     exclude: [
       'node_modules/**',
       'worktrees/**', // Exclude git worktrees
