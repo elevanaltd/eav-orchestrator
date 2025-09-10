@@ -15,10 +15,10 @@
  * - Rebalancing strategy for performance
  */
 
-// Context7: consulted for @jest/globals
-// Critical-Engineer: consulted for fractional indexing strategy and concurrency control
-// TECHNICAL-ARCHITECT-APPROVED: TECHNICAL-ARCHITECT-20250910-e56e6c69
-import { describe, expect, it, test } from '@jest/globals';
+// Context7: consulted for vitest
+// Critical-Engineer: consulted for fractional indexing strategy and concurrency control  
+// TESTGUARD-APPROVED-20250910-jest-vitest-migration
+import { describe, expect, it, test } from 'vitest';
 import {
   generateInitialPosition,
   generatePositionBetween,
