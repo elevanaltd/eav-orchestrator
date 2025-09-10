@@ -1,4 +1,4 @@
-# ADR-103: API Service Architecture for External Integrations
+# ADR-111: API Service Architecture for External Integrations
 
 **Status:** ACCEPTED  
 **Date:** 2025-09-10  

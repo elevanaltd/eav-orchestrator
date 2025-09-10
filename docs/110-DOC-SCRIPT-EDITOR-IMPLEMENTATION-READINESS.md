@@ -178,7 +178,7 @@ Blocker_2_API_Failure_Isolation: ✅ ARCHITECTURAL DECISION COMPLETE - READY FOR
   Status: Serverless functions with Vercel KV circuit breaker approved
   Implementation: External API timeout + fallback via Vercel functions + KV state
   Test_Contract: API failure simulation tests exist
-  Dependencies: ADR-103 (Serverless functions with Vercel KV state management)
+  Dependencies: ADR-111 (Serverless functions with Vercel KV state management)
 
 Blocker_3_Fractional_Indexing: 📋 READY FOR IMPLEMENTATION
   Status: LexoRank algorithm tests prepared

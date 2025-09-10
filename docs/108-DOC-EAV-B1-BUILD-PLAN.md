@@ -72,7 +72,7 @@ Task_1B_Yjs_CRDT_Implementation:
 **Status:** ARCHITECTURAL DECISION COMPLETE - READY FOR IMPLEMENTATION  
 **Technical Solution:** Serverless functions with Vercel KV circuit breaker state management  
 **Source:** 106-DOC-B0-VALIDATION.md lines 45-55  
-**RESOLUTION:** ADR-103 serverless functions approach approved by critical-engineer
+**RESOLUTION:** ADR-111 serverless functions approach approved by critical-engineer
 
 ```yaml
 Task_2A_ARCHITECTURAL_RESOLUTION:
@@ -80,7 +80,7 @@ Task_2A_ARCHITECTURAL_RESOLUTION:
   Dependencies: ESCALATION TO TECHNICAL ARCHITECT
   Success_Criteria: API service architecture decided (BFF vs serverless vs proxy)
   TRACED_A: Critical engineer identified security flaw in frontend API approach
-  Status: ✅ COMPLETE - ADR-103 documents serverless functions decision
+  Status: ✅ COMPLETE - ADR-111 documents serverless functions decision
   RESOLUTION_DETAILS: |
     - Serverless functions approach selected (Vercel + KV)
     - Frontend API key exposure eliminated (security validated)
