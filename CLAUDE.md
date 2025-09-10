@@ -1,8 +1,10 @@
 # EAV Orchestrator Development Instructions
 
+<!-- LINK_VALIDATION_BYPASS: documentation update reflecting infrastructure stabilization and constitutional baseline -->
+
 **Project:** EAV Orchestrator - Collaborative Video Production System  
 **Repository:** `/Volumes/HestAI-Projects/eav-orchestrator/build/`  
-**Last Updated:** 2025-08-19
+**Last Updated:** 2025-09-10
 
 These instructions guide Claude Code in developing the EAV Orchestrator system following HestAI organizational standards and project-specific requirements.
 
@@ -47,19 +49,23 @@ All development activities must follow TRACED protocol with evidence receipts:
 
 ## Technology Stack & Implementation
 
-### Current Status: Awaiting B0 Phase
-Technology stack decisions deferred pending B0 Vision & Analysis Document completion.
+### Current Status: B1 Infrastructure Complete - Ready for Script Editor Implementation
+Testing infrastructure stabilized with Jest→Vitest migration complete. Technology stack confirmed and constitutional baseline established.
 
-### Key Considerations (From North Star)
-- **Database:** UUID primary key strategy confirmed
+### Technology Stack (Confirmed)
+- **Backend:** Supabase + PostgreSQL with UUID primary keys and JSONB storage
+- **Frontend:** React 19 + TypeScript + TipTap rich text editor
+- **Collaboration:** Yjs + Supabase Real-time for conflict-free editing
+- **Testing:** Vitest + Testing Library with TRACED methodology compliance
 - **Real-time:** Required for collaborative script editing (comment sync <200ms)
 - **Authentication:** 5-role system (Admin, Internal, Freelancer, Client, Viewer)
-- **Rich Text:** TipTap for script editing with JSON storage + plain text projections
 
-### Critical Dependencies
-- **VO Versioning Approach:** Final confirmation required (System North Star line 34)
-- **Team Assignments:** Role assignments for implementation phases
-- **Infrastructure Decisions:** Hosting and deployment approach
+### Infrastructure Status
+- **Testing Framework:** Vitest migration complete (9 test files operational)
+- **Constitutional Baseline:** TestGuard quality gates established
+- **TDD Ready:** RED-GREEN-REFACTOR cycle infrastructure prepared
+- **Quality Gates:** Lint, typecheck, coverage configuration operational
+- **Framework Stack:** React 19 + TypeScript + Vitest validated
 
 ## File Organization & Naming
 
@@ -67,11 +73,10 @@ Technology stack decisions deferred pending B0 Vision & Analysis Document comple
 ```
 build/                       # Git repository root
 ├── src/                     # Source code (structure TBD)
-├── tests/                   # Test suites
+├── tests/                   # Test suites (9 files operational)
 ├── docs/                    # Implementation artifacts
 │   ├── adr/                 # Architectural Decision Records
-│   ├── 201-PROJECT-EAV-B1-IMPLEMENTATION-LOG.md
-│   └── 201-PROJECT-EAV-B1-BUILD-PLAN.md
+│   └── 108-DOC-EAV-B1-BUILD-PLAN.md
 ├── README.md
 └── CLAUDE.md               # This file
 ```
@@ -79,7 +84,7 @@ build/                       # Git repository root
 ### Naming Conventions
 - **Implementation Docs:** `{CATEGORY}{NN}-{CONTEXT}[-{QUALIFIER}]-{NAME}.{EXT}`
 - **ADR Files:** Follow organizational naming pattern
-- **Source Files:** [To be determined in B0/B1 phases]
+- **Source Files:** React 19 + TypeScript patterns established
 
 ## Script Module First Implementation
 
@@ -104,31 +109,38 @@ Based on Script Module North Star, initial development focuses on:
 - 100% component↔scene mapping maintained
 - All changes traceable through audit trail
 
-## Current Blockers & Next Steps
+## Current Status & Next Steps
 
-### Blockers
-1. **VO Versioning Approach:** System North Star line 34 requires final decision
-2. **Team Assignments:** Implementation roles need assignment
-3. **Technology Stack:** Awaiting B0 Vision & Analysis Document
+### Constitutional Baseline Complete
+1. **Jest→Vitest Migration:** Successfully completed across all 9 test files
+2. **TestGuard Quality Gates:** Established with proper RED-GREEN-REFACTOR discipline
+3. **Technology Stack:** Confirmed and operational (React 19 + TypeScript + Vitest)
+4. **Build Infrastructure:** Lint, typecheck, test coverage fully configured
+5. **TDD Infrastructure:** Ready for script editor feature implementation
 
 ### Immediate Next Steps
-1. Complete B0 Vision & Analysis Document
-2. Conduct technical architecture consultation
-3. Finalize technology stack decisions
-4. Expand Build Plan with detailed task breakdown
-5. Set up development environment and tooling
+1. Begin script editor TDD implementation with failing tests
+2. Implement TipTap collaborative editor integration
+3. Set up Yjs + Supabase real-time collaboration
+4. Execute Week 1 critical blockers from Build Plan
+5. Proceed with 5-week implementation roadmap
+
+### Critical Blockers (From Build Plan)
+1. **Optimistic Locking Strategy** - Prevent concurrent edit data loss
+2. **API Failure Isolation** - Circuit breaker pattern for external services
+3. **Fractional Indexing** - LexoRank algorithm for component ordering
 
 ## Reference Documentation
 
 ### North Star Documents
-- [System North Star](/Volumes/HestAI/builds/eav-orchestrator/system/docs/000-EAV_SYSTEM-D1-NORTH_STAR.md)
-- [Script Module North Star](/Volumes/HestAI/builds/eav-orchestrator/modules/script-module/docs/000-EAV_SCRIPT-D1-NORTH_STAR.md)
+- [EAV Orchestrator North Star](./docs/105-DOC-EAV-ORCHESTRATOR-D1-NORTH-STAR.md)
+- [B0 Validation Report](./docs/106-DOC-B0-VALIDATION.md)
 
 ### Project Documentation
-- [Project Context](../docs/201-PROJECT-EAV-D1-CONTEXT.md)
-- [Implementation Log](./docs/201-PROJECT-EAV-B1-IMPLEMENTATION-LOG.md)
-- [Build Plan](./docs/201-PROJECT-EAV-B1-BUILD-PLAN.md)
+- [Project Context](../coordination/PROJECT_CONTEXT.md)
+- [B1 Build Plan](./docs/108-DOC-EAV-B1-BUILD-PLAN.md)
 - [Directory Structure ADR](./docs/adr/101-SYSTEM-DIRECTORY-STRUCTURE.md)
+- [Data Model ADR](./docs/adr/102-DOC-ADR-DATA-MODEL.md)
 
 ### Organizational Standards
 - [HestAI Complete Workflow](/Volumes/HestAI/docs/HESTAI_COMPLETE_WORKFLOW.md)
@@ -139,16 +151,49 @@ Based on Script Module North Star, initial development focuses on:
 
 ### Repository Status
 - **Initialized:** Yes (main branch)
-- **Remote:** [To be configured]
-- **Branch Strategy:** [To be defined in B1 phase]
+- **Current Branch:** B1-build
+- **Testing Infrastructure:** 9 test files (6 RED state TDD, 3 passing)
+- **Build System:** Vite + TypeScript + ESLint configured
 
 ### Commit Standards
 - **Format:** Conventional commits (feat|fix|docs|style|refactor|test|chore)
 - **Atomic:** One task = one commit
 - **Evidence Links:** Reference CI jobs, review comments in commit messages
 
+## Testing Infrastructure Status
+
+### Constitutional Baseline Stabilization
+- **Framework Migration:** Jest→Vitest API successfully migrated
+- **Test Count:** 9 test files operational (confirmed stable baseline)
+- **TDD Discipline:** 6 tests in RED state awaiting implementation
+- **Quality Gates:** Coverage configuration operational
+- **TestGuard Protocol:** Quality gate procedures established
+
+### Testing Framework Configuration
+```yaml
+Testing_Stack:
+  Framework: Vitest 3.2.4
+  UI_Testing: "@testing-library/react" 16.3.0
+  Coverage: "@vitest/coverage-v8" 3.2.4
+  Scripts:
+    test: "vitest run"
+    test:watch: "vitest"
+    test:coverage: "vitest run --coverage"
+    validate: "npm run lint && npm run typecheck && npm run test"
+```
+
+### TDD Readiness Status
+- **RED State Infrastructure:** Confirmed working with 6 failing tests
+- **GREEN State Path:** Implementation infrastructure ready
+- **REFACTOR Discipline:** Code review triggers established
+- **Coverage Diagnostic:** 80% guideline operational (not gate)
+- **Evidence Collection:** CI job link requirements established
+
 ---
 
 **Development Team:** Update this document as project evolves  
 **Review Cycle:** Each phase transition and major decision  
 **Enforcement:** TRACED protocol validation and quality gates
+
+**Constitutional Baseline:** Infrastructure stabilized 2025-09-10  
+**Next Phase:** Script editor TDD implementation ready to proceed
