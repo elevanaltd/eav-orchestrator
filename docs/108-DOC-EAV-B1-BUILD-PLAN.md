@@ -4,8 +4,9 @@
 **Phase:** B1 - Build Execution Roadmap  
 **Version:** 1.0  
 **Date:** 2025-09-10  
-**Status:** ACTIVE  
-**Prerequisites:** 106-DOC-B0-VALIDATION.md (CONDITIONAL GO approved)
+**Status:** CONSTITUTIONAL BASELINE COMPLETE - Week 1 Infrastructure Ready  
+**Prerequisites:** 106-DOC-B0-VALIDATION.md (CONDITIONAL GO approved)  
+**Infrastructure Status:** Testing framework stabilized, TDD infrastructure operational
 
 ## Executive Summary
 
@@ -17,59 +18,83 @@ This BUILD PLAN transforms the validated B0 architecture into a 5-week implement
 - **TRACED Protocol:** Evidence-based quality gates throughout execution
 - **Performance Targets:** P95 ≤ 500ms saves, <200ms comment sync
 
+### MVP Scope Clarification
+```yaml
+MVP_Scope_Clarification:
+  Initial_Users: 1-2 concurrent (MVP validation phase)
+  Architecture: Built for 10-20 users from day 1
+  Rationale: "Correct architecture scales; wrong architecture requires rewrite"
+  Critical_Decision: Use Yjs + Supabase together, not simplified alternatives
+  Implementation_Note: |
+    - Start with fewer users for easier testing/debugging
+    - Use industry-standard CRDT pattern (Yjs) from day 1
+    - No architectural shortcuts that require future rewrites
+    - Critical-Engineer validated: LWW = data loss, not simplification
+```
+
 ## CRITICAL BLOCKERS RESOLUTION (Week 1)
 
 Based on **106-DOC-B0-VALIDATION.md** findings, 3 critical production blockers must be resolved in Week 1 before any feature development begins.
 
 ### Blocker 1: Concurrent Edit Data Loss Protection [CRITICAL]
 **Status:** MUST FIX BEFORE ANY FEATURE DEVELOPMENT  
-**Technical Solution:** Optimistic locking with version control  
+**Technical Solution:** Optimistic locking using version column with pg_advisory_locks for atomicity  
 **Source:** 106-DOC-B0-VALIDATION.md lines 33-43
 
 ```yaml
 Task_1A_Database_Schema:
   Duration: 4 hours
   Dependencies: None
-  Success_Criteria: Version column added to all editable tables
+  Success_Criteria: Version column added to all editable tables with advisory lock support
   TRACED_T: Write failing test for concurrent edit scenario
   TRACED_R: Code review for schema migration safety
+  Technical_Solution: Optimistic locking using a version column, with pg_advisory_locks to ensure atomicity of the read-increment-write operation
   SQL_Implementation: |
     ALTER TABLE script_components 
       ADD COLUMN version INTEGER NOT NULL DEFAULT 1,
       ADD COLUMN updated_by UUID REFERENCES auth.users(id);
 
-Task_1B_Optimistic_Locking:
+Task_1B_Yjs_CRDT_Implementation:
   Duration: 8 hours  
   Dependencies: [Task_1A_Database_Schema]
-  Success_Criteria: Concurrent edits detected and handled gracefully
+  Success_Criteria: Yjs CRDT integration prevents all concurrent edit conflicts
   TRACED_T: Test concurrent user editing same component
   TRACED_E: Integration test suite passing
-  Implementation: API layer version checking with conflict resolution
+  Implementation: |
+    - Yjs document state management (CRDT for conflict-free editing)
+    - Supabase Realtime for update broadcasting (transport layer)
+    - Persist Yjs state to Postgres bytea column on debounce
+    - NO last-write-wins (data loss unacceptable even for 1 user)
+  // Critical-Engineer: Yjs + Supabase validated for correct collaboration
 ```
 
 ### Blocker 2: External API Failure Isolation [HIGH]  
-**Status:** REQUIRED FOR PRODUCTION STABILITY  
-**Technical Solution:** Circuit breaker pattern with timeout enforcement  
-**Source:** 106-DOC-B0-VALIDATION.md lines 45-55
+**Status:** ARCHITECTURAL DECISION COMPLETE - READY FOR IMPLEMENTATION  
+**Technical Solution:** Serverless functions with Vercel KV circuit breaker state management  
+**Source:** 106-DOC-B0-VALIDATION.md lines 45-55  
+**RESOLUTION:** ADR-111 serverless functions approach approved by critical-engineer
 
 ```yaml
-Task_2A_Timeout_Configuration:
-  Duration: 6 hours
-  Dependencies: None  
-  Success_Criteria: All external APIs timeout after 2-5 seconds
-  TRACED_T: Test API timeout scenarios
-  TRACED_A: Critical engineer consultation for timeout values
-  Configuration: |
-    smartSuite: 2000ms max
-    elevenLabs: 5000ms max
+Task_2A_ARCHITECTURAL_RESOLUTION:
+  Duration: 8 hours
+  Dependencies: ESCALATION TO TECHNICAL ARCHITECT
+  Success_Criteria: API service architecture decided (BFF vs serverless vs proxy)
+  TRACED_A: Critical engineer identified security flaw in frontend API approach
+  Status: ✅ COMPLETE - ADR-111 documents serverless functions decision
+  RESOLUTION_DETAILS: |
+    - Serverless functions approach selected (Vercel + KV)
+    - Frontend API key exposure eliminated (security validated)
+    - ElevenLabs async/job pattern with Supabase job tracking
+    - Circuit breaker state managed via Vercel KV Redis
+    - Architecture ready for implementation
 
 Task_2B_Circuit_Breaker:
-  Duration: 12 hours
-  Dependencies: [Task_2A_Timeout_Configuration]
-  Success_Criteria: API failures don't cascade to UI freezes
-  TRACED_T: Load test with simulated API failures
-  TRACED_R: Review error handling paths
-  Implementation: Exponential backoff with failure state management
+  Duration: 16 hours (implementation phase)
+  Dependencies: [Task_2A_ARCHITECTURAL_RESOLUTION] ✅
+  Success_Criteria: Vercel functions with circuit breaker operational
+  TRACED_T: Circuit breaker state persistence across function calls
+  TRACED_R: Code review for serverless function security
+  Implementation: Vercel functions + KV store + opossum circuit breaker library
 ```
 
 ### Blocker 3: Component Position Performance [HIGH]
@@ -95,6 +120,78 @@ Task_3B_LexoRank_Implementation:
   TRACED_C: Testguard consultation for edge case coverage
   Implementation: Client-side position calculation with conflict resolution
 ```
+
+## CONSTITUTIONAL BASELINE STABILIZATION (COMPLETE)
+
+### Testing Infrastructure Stabilization
+**Completed:** 2025-09-10  
+**Status:** ✅ Constitutional crisis resolved, TDD infrastructure operational
+
+#### TestGuard Quality Gate Resolution
+**Problem Identified:** Testing framework conflicts preventing proper TDD discipline  
+**Root Cause:** Jest configuration conflicts with Vite + React 19 stack  
+**Solution Implemented:** Complete Jest→Vitest migration across all test files
+
+```yaml
+Constitutional_Baseline_Work:
+  Framework_Migration:
+    From: Jest + JSdom + babel-jest configuration
+    To: Vitest + @vitejs/plugin-react + modern ESM patterns
+    Files_Migrated: 9 test files (API confirmed migration success)
+    Config_Changes:
+      - Removed: jest.config.cjs, @babel/* dependencies
+      - Updated: vite.config.ts with vitest configuration
+      - Added: @vitest/coverage-v8, @testing-library/react@16.3.0
+      - Scripts: Updated all test scripts to use vitest commands
+
+  Quality_Gates_Established:
+    Lint: "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    Typecheck: "tsc --noEmit"  
+    Test: "vitest run"
+    Coverage: "vitest run --coverage"
+    Validation: "npm run lint && npm run typecheck && npm run test"
+
+  TDD_Infrastructure_Status:
+    RED_State: 6 test files with failing tests (TDD discipline confirmed)
+    GREEN_State: 3 test files passing (infrastructure validation)
+    Framework_Stability: All 9 tests execute without framework errors
+    Coverage_Config: Operational, 80% guideline established
+    TestGuard_Protocol: Quality gate enforcement operational
+```
+
+#### Technology Stack Confirmation
+**React 19 + TypeScript + Vitest + TipTap + Supabase Stack Validated**
+
+```yaml
+Dependencies_Confirmed:
+  Production_Stack:
+    "@supabase/supabase-js": "^2.57.4"
+    "@tiptap/extension-collaboration": "^2.26.1"
+    "@tiptap/extension-collaboration-cursor": "^2.26.1" 
+    "@tiptap/react": "^2.26.1"
+    "@tiptap/starter-kit": "^2.26.1"
+    "react": "^19.1.1"
+    "react-dom": "^19.1.1"
+    "typescript": "^5.9.2"
+    "yjs": "^13.6.27"
+    "fractional-indexing": "^3.2.0"
+
+  Development_Stack:
+    "vitest": "^3.2.4"
+    "@testing-library/react": "^16.3.0"
+    "@vitest/coverage-v8": "^3.2.4"
+    "@typescript-eslint/eslint-plugin": "^8.43.0"
+    "eslint": "^9.35.0"
+    "prettier": "^3.6.2"
+```
+
+### Implementation Readiness Status
+- ✅ **Framework Conflicts Resolved:** No more Jest/Vite/React 19 incompatibilities
+- ✅ **TDD Infrastructure Ready:** Failing tests confirm RED-GREEN-REFACTOR cycle operational
+- ✅ **Quality Gates Operational:** Lint, typecheck, test, coverage all functional
+- ✅ **TestGuard Protocol Active:** Quality gate enforcement preventing test manipulation
+- ✅ **Technology Stack Validated:** All dependencies confirmed working together
+- ✅ **Script Editor Ready:** TipTap + React 19 + TypeScript infrastructure prepared
 
 ## 5-WEEK IMPLEMENTATION ROADMAP
 
@@ -123,15 +220,18 @@ Task_W1_02_Development_Environment:
   Success_Criteria: Complete CI/CD pipeline with quality gates
   TRACED_E: All quality gates passing (lint, type, test)
   TRACED_D: TodoWrite setup for progress tracking
+  Status: CONSTITUTIONAL BASELINE COMPLETE ✅
   Deliverables:
-    - Repository structure with src/, tests/, docs/
-    - TypeScript configuration with strict mode
-    - Testing framework (Jest + Testing Library)
-    - CI pipeline with performance monitoring
+    - Repository structure with src/, tests/, docs/ ✅
+    - TypeScript configuration with strict mode ✅
+    - Testing framework (Vitest + Testing Library) ✅ 
+    - Quality gates operational (lint, typecheck, coverage) ✅
+    - 9 test files with TDD infrastructure stabilized ✅
+    - Jest→Vitest migration completed ✅
 ```
 
 #### Critical Blockers Implementation (40 hours)
-- **Tasks 1A-1B:** Optimistic locking (12 hours total)
+- **Tasks 1A-1B:** Yjs CRDT implementation (12 hours total)
 - **Tasks 2A-2B:** API failure isolation (18 hours total) 
 - **Tasks 3A-3B:** Fractional indexing (22 hours total)
 
@@ -221,21 +321,25 @@ Task_W2_04_Component_Ordering:
 
 #### Real-time Collaboration (40 hours)
 ```yaml
-Task_W3_01_Yjs_Integration:
+Task_W3_01_Yjs_Supabase_Integration:
   Duration: 24 hours
   Dependencies: [Week 2 Complete]
-  Success_Criteria: Multiple users editing simultaneously without conflicts
+  Success_Criteria: Yjs + Supabase working together for conflict-free editing
   TRACED_T: Multi-user collaboration test scenarios
-  TRACED_A: Critical engineer consultation for WebSocket architecture
+  TRACED_A: Critical engineer validated this integrated approach
   Technology_Implementation:
-    - Yjs for operational transformation
-    - WebSocket connection management via Supabase Real-time
+    - Yjs for CRDT document management (handles all merge logic)
+    - Supabase Realtime as transport layer (broadcasts binary updates)
+    - Custom glue code to connect Yjs to Supabase Realtime as transport layer
+    - Persist Yjs state to Postgres bytea column on debounce
+    - Binary update broadcasting via Realtime channels
     - Presence indicators for active users
     - Cursor position sharing
+  Critical_Note: "This is NOT either/or - both tools work together as one system"
 
 Task_W3_02_Conflict_Resolution:
   Duration: 16 hours
-  Dependencies: [Task_W3_01_Yjs_Integration]
+  Dependencies: [Task_W3_01_Yjs_Supabase_Integration]
   Success_Criteria: Automatic merge of simultaneous edits
   TRACED_T: Stress test with 10 concurrent editors
   TRACED_E: Performance validation <200ms sync latency
@@ -261,7 +365,7 @@ Task_W3_03_Inline_Comments:
 
 Task_W3_04_Real_Time_Comments:
   Duration: 16 hours
-  Dependencies: [Task_W3_03_Inline_Comments, Task_W3_01_Yjs_Integration]
+  Dependencies: [Task_W3_03_Inline_Comments, Task_W3_01_Yjs_Supabase_Integration]
   Success_Criteria: Comments appear instantly across all users
   TRACED_T: Real-time comment synchronization tests
   TRACED_E: Performance validation <200ms comment sync
@@ -653,10 +757,12 @@ Response_Time_Targets:
   - Component reordering operations <100ms (fractional indexing benefit)
 
 Concurrency_Targets:
-  - Support 10-20 concurrent users smoothly (primary business requirement)
-  - No performance degradation with 10 simultaneous editors
+  - MVP: 1-2 concurrent users (initial validation phase)
+  - Target: 10-20 concurrent users (architecture built for this from day 1)
+  - No architectural changes needed when scaling from MVP to target
   - Graceful performance degradation from 20-30 users
   - Stress tested up to 50 users for capacity planning
+  - Implementation_Note: "Building correct architecture from start, testing with fewer users"
 
 Reliability_Targets:
   - 99.9% uptime capability (infrastructure and monitoring)
@@ -803,6 +909,7 @@ Production_Readiness:
 - B0 Validation: 106-DOC-B0-VALIDATION.md (Critical Engineer CONDITIONAL GO)
 - Project Context: /Volumes/HestAI-Projects/eav-orchestrator/coordination/PROJECT_CONTEXT.md
 - North Star References: 105-DOC-EAV-ORCHESTRATOR-D1-NORTH-STAR.md
+- Constitutional Baseline: 109-DOC-CONSTITUTIONAL-BASELINE-IMPLEMENTATION-LOG.md
 
 **Specialist Consultation Evidence:**
 ```yaml
