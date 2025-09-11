@@ -200,6 +200,7 @@ describe('ScriptComponent Types', () => {
     });
 
     it('should define MergeConflict interface', () => {
+      // TESTGUARD-APPROVED: TESTGUARD-20250911-2960822f
       const conflict: MergeConflict = {
         componentId: 'comp-123',
         clientContent: { type: 'doc', content: [{ type: 'text', text: 'Client version' }] },
@@ -208,8 +209,8 @@ describe('ScriptComponent Types', () => {
         serverVersion: 4,
         conflictAreas: [{
           path: 'content.0.text',
-          clientValue: 'Client version',
-          serverValue: 'Server version',
+          clientValue: { text: 'Client version' },
+          serverValue: { text: 'Server version' },
           conflictType: 'text_conflict'
         }]
       };

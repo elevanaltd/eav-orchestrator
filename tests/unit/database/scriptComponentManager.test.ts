@@ -21,7 +21,7 @@ describe('ScriptComponentManager', () => {
     mockSupabase = createMockSupabaseClient(null as any);
     
     // This test MUST fail - ScriptComponentManager doesn't exist yet
-    manager = new ScriptComponentManager(mockSupabase);
+    manager = new ScriptComponentManager(mockSupabase as any);
     
     vi.clearAllMocks();
   });

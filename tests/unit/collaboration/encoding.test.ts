@@ -205,8 +205,11 @@ describe('Binary Encoding Utilities', () => {
       try {
         decodeBinaryUpdate('invalid-base64');
       } catch (error) {
+        // ERROR ASSERTION STRENGTHENING: Type guard for proper error handling
         expect(error).toBeInstanceOf(BinaryUpdateError);
-        expect(error.message).toContain('Failed to decode base64');
+        if (error instanceof BinaryUpdateError) {
+          expect(error.message).toContain('Failed to decode base64');
+        }
       }
     });
 
