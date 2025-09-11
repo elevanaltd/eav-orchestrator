@@ -1,4 +1,5 @@
 # TESTGUARD_APPROVED: Maintains zero-tolerance CI integrity per consultation be92c7f5-0d20-47cf-b626-5f1e06c613be
+# Critical-Engineer: consulted for CI/CD quality gate implementation
 name: CI
 
 on:
@@ -8,10 +9,56 @@ on:
     branches: [main, project-migration]
 
 jobs:
-  validate:
+  # P0 CRITICAL: Core quality gates implementation per critical-engineer blocking assessment
+  test-and-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      # Node.js setup for quality gate execution
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      # Cache optimization for faster builds
+      - name: Cache node modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          
+      # Install dependencies - BLOCKING if fails
+      - name: Install Dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        
+      # TRACED Protocol E-gate enforcement: Lint must pass
+      - name: Lint Check (Zero Tolerance)
+        run: npm run lint
+        
+      # TRACED Protocol E-gate enforcement: TypeScript must pass
+      - name: Type Check
+        run: npm run typecheck
+        
+      # TRACED Protocol E-gate enforcement: Tests must pass
+      - name: Run Tests
+        run: npm test
+        env:
+          # Test environment configuration
+          NODE_ENV: test
+          
+      # Upload test artifacts on failure for debugging
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_id }}
+          path: |
+            coverage/
+            test-results.xml
+            *.log
       
       # Essential structural checks - MUST PASS
       - name: Validate Directory Structure
@@ -73,41 +120,3 @@ jobs:
             echo "⚠️  Warning: No ADR directory found (will be required after B0)"
             # Not failing during initial setup
           fi
-
-  # Technology detection for future enhancement
-  prepare-next-phase:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Detect Technology Stack
-        run: |
-          echo "Detecting technology stack for future CI enhancements..."
-          tech_detected=false
-          
-          # Check for Node.js
-          if [ -f "package.json" ]; then
-            echo "📦 Node.js project detected"
-            echo "TODO: Add npm install, test, lint, typecheck in B2 phase"
-            tech_detected=true
-          fi
-          
-          # Check for Python
-          if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
-            echo "🐍 Python project detected"
-            echo "TODO: Add pip install, pytest, ruff, mypy in B2 phase"
-            tech_detected=true
-          fi
-          
-          # Check for Rust
-          if [ -f "Cargo.toml" ]; then
-            echo "🦀 Rust project detected"
-            echo "TODO: Add cargo build, test, clippy in B2 phase"
-            tech_detected=true
-          fi
-          
-          if [ "$tech_detected" = false ]; then
-            echo "ℹ️  No technology stack detected yet (expected before B0)"
-          fi
-          
-          echo "✅ Technology detection complete"
