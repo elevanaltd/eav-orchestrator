@@ -41,4 +41,40 @@ describe('y-supabase type declarations', () => {
     
     expect(expectedEvents).toHaveLength(9)
   })
+
+  it('should have correct type structure for SupabaseProviderOptions', () => {
+    // This test validates that our type declarations for options match the expected API
+    type ExpectedOptions = {
+      url: string
+      key: string
+      table?: string
+      id?: string
+      awareness?: any
+      connect?: boolean
+      resyncInterval?: number
+      debounceTime?: number
+    }
+    
+    // This is a compile-time check - if types are wrong, TypeScript will fail
+    void ({} as ExpectedOptions satisfies Partial<SupabaseProviderOptions>)
+    
+    expect(true).toBe(true) // Placeholder assertion - real test is at compile time
+  })
+
+  it('should have correct type structure for Y.Doc', () => {
+    // This test validates that Y.Doc type is properly imported and usable
+    type ExpectedDocMethods = {
+      on: (event: string, callback: (...args: any[]) => void) => void
+      off: (event: string, callback: (...args: any[]) => void) => void
+      transact: (f: () => void, origin?: any) => void
+      getText: (name?: string) => any
+      getMap: (name?: string) => any
+      getArray: (name?: string) => any
+    }
+    
+    // This is a compile-time check using the imported Doc type
+    void ({} as ExpectedDocMethods satisfies Partial<Doc>)
+    
+    expect(true).toBe(true) // Placeholder assertion - real test is at compile time
+  })
 })

@@ -64,7 +64,7 @@ export class CircuitBreaker {
   private config: CircuitBreakerConfig
   private state: CircuitBreakerState = CircuitBreakerState.CLOSED
   private metrics: CircuitBreakerMetrics
-  private lastFailureTime: number = 0
+  // Removed unused variable - was tracking but not reading lastFailureTime
   private responseTimes: number[] = []
   private stateChangeTime: number = 0
   
@@ -141,7 +141,7 @@ export class CircuitBreaker {
   private recordFailure(responseTime: number): void {
     this.metrics.failureCount++
     this.metrics.consecutiveFailures++
-    this.lastFailureTime = Date.now()
+    // Last failure time tracking removed - not used in current implementation
     this.updateResponseTime(responseTime)
     this.updateFailureRate()
 
@@ -241,7 +241,7 @@ export class CircuitBreaker {
     this.transitionTo(CircuitBreakerState.CLOSED)
     this.metrics = this.initializeMetrics()
     this.responseTimes = []
-    this.lastFailureTime = 0
+    // Reset of lastFailureTime removed - not used
   }
 
   /**

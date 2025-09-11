@@ -136,16 +136,17 @@ describe('BFF Security Server', () => {
   describe('gracefulShutdown', () => {
     it('should accept Server type and handle shutdown', (done) => {
       const mockServer: Partial<Server> = {
-        close: vi.fn((callback) => {
-          callback?.(undefined as any);
-        })
+        close: vi.fn((callback?: (err?: Error) => void) => {
+          callback?.(undefined);
+          return {} as Server;
+        }) as Server['close']
       };
 
       // Mock process.exit
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {
         done();
         return undefined as never;
-      });
+      }) as any);
 
       gracefulShutdown(mockServer as Server, 'SIGTERM');
 
@@ -155,15 +156,16 @@ describe('BFF Security Server', () => {
 
     it('should handle server close errors', (done) => {
       const mockServer: Partial<Server> = {
-        close: vi.fn((callback) => {
+        close: vi.fn((callback?: (err?: Error) => void) => {
           callback?.(new Error('Close error'));
-        })
+          return {} as Server;
+        }) as Server['close']
       };
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {
         done();
         return undefined as never;
-      });
+      }) as any);
 
       gracefulShutdown(mockServer as Server, 'SIGTERM');
 

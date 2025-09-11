@@ -206,7 +206,8 @@ export class YjsSupabaseProvider {
   }
 
   public on<K extends keyof ProviderEventHandler>(event: K, handler: ProviderEventHandler[K]): void {
-    this.eventHandlers[event] = handler as ProviderEventHandler[keyof ProviderEventHandler]
+    // Type-safe assignment without casting
+    this.eventHandlers[event] = handler
   }
 
   public getStatus(): ProviderStatus {
