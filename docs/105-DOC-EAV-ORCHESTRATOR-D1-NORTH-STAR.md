@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-A focused collaborative tool for video production content workflows, handling script creation through edit guidance. SmartSuite manages all project coordination, asset management, and business operations.
+A focused collaborative tool for video production content workflows, handling script creation through edit guidance. SmartSuite separately manages all project coordination, asset management, and business operations for EAV. This tool is for operations, and will start off standalone.
 
 **Critical Scope Constraint:** Build ONLY what enables V2-V8 workflows. Everything else is explicitly out of scope.
 
@@ -25,7 +25,7 @@ A focused collaborative tool for video production content workflows, handling sc
 - Real-time collaborative script editing with <200ms comment sync
 - 1:1 script component to scene mapping with automated VO generation
 - Edit guidance system connecting all workflow outputs
-- SmartSuite handles all project/business coordination
+- No project/business coordination. SmartSuite handles this separately.
 
 ## Scope Definition (IMMUTABLE)
 
@@ -71,11 +71,12 @@ Client_Relations: Delivery management, invoicing, contracts
 Team_Management: User provisioning, role assignments, capacity planning
 ```
 
-### 🔄 INTEGRATION HANDOFFS
+### 🔄 FUTURE INTEGRATION DESIGN (Phase 4+)
+- PHASE 1-3 = NONE. This will be standalone
+
+- PHASE 4 = SmartSuite Integration (pending Phase 3 completion review)
 ```yaml
 SmartSuite_To_EAV:
-  - Project specifications (replaces P8-Spec Collection)
-  - User manual data (when applicable)
   - Basic project metadata and client information
   
 EAV_To_SmartSuite:
@@ -83,6 +84,8 @@ EAV_To_SmartSuite:
   - Scene planning deliverables
   - VO generation completion notifications
   - Edit guidance package delivery
+
+Note: Integration specifications for Phase 4+ planning only. Phases 1-3 operate standalone with manual data entry.
 ```
 
 ## Business Requirements
@@ -132,14 +135,60 @@ Rich_Text: TipTap editor with JSON storage + plain text projections
 Change_Detection: Semantic hashing for content versioning
 ```
 
+### Supabase Infrastructure Requirements
+```yaml
+Tier_Requirement: Supabase PRO (minimum)
+Project_ID: tsizhlsbmwytqccjavap
+
+Pro_Tier_Rationale:
+  Connection_Pooling:
+    - Supavisor pooler required for 10-20 concurrent users
+    - Session mode (port 5432) for migrations and long operations
+    - Transaction mode (port 6543) for API/BFF connections
+    - Current config: Shared pooler (IPv4 compatible)
+    
+  Real_time_Requirements:
+    - Yjs CRDT synchronization via broadcast channels
+    - Comment sync <200ms latency target
+    - Presence tracking for collaborative editing
+    - Events per second limit: 10 (configured in client)
+    
+  Database_Features:
+    - JSONB storage for TipTap rich text content
+    - Row Level Security (RLS) for 5-role system
+    - Optimistic locking functions for concurrent editing
+    - UUID primary keys with PostgreSQL 17
+    
+  Production_Needs:
+    - Point-in-time recovery for data protection
+    - Database branching for safe migrations
+    - Connection monitoring and alerting
+    - 99.5% uptime SLA requirement
+
+Connection_Architecture:
+  BFF_Service:
+    - Singleton pattern for connection reuse
+    - HTTP keep-alive for persistent connections  
+    - Service role authentication (no token refresh)
+    - Connection pooling via x-connection-pool header
+    
+  Frontend_Collaboration:
+    - y-supabase provider for CRDT sync
+    - IndexedDB fallback for offline resilience
+    - Circuit breaker pattern for API failures
+    - Debounced saves (1s) to prevent overload
+
+Production_Configuration:
+  Primary_URL: aws-1-eu-west-2.pooler.supabase.com
+  Pooler_Port: 6543 (transaction mode)
+  Direct_Port: 5432 (session mode for migrations)
+  Database_Version: PostgreSQL 17
+  Max_Connections: 100 (pooler limit)
+  Default_Pool_Size: 20 per user/database pair
+```
+
 ### Integration Architecture  
 ```yaml
-SmartSuite_API:
-  - REST endpoints for project data sync
-  - Response time: <2s for standard queries
-  - Fallback: Local cache for 24-hour offline capability
-  - Error handling: Graceful degradation with user notifications
-  
 ElevenLabs_API:
   - Voice generation with pronunciation management
   - Batch processing for efficiency
@@ -156,7 +205,6 @@ Data_Integrity:
   - 1:1 component-to-scene mapping guaranteed
   
 Security:
-  - GDPR compliance as standard practice
   - Role-based access enforcement
   - Secure API key management
   - Audit retention: 365 days
@@ -289,7 +337,10 @@ Edit_Direction:
   - V8: Categorized direction system
   - Multi-role collaboration for editors
   - Export capabilities for edit handoff
-  
+```
+
+### Phase 4: SmartSuite integration
+```yaml
 Integration:
   - SmartSuite API connection
   - Status synchronization

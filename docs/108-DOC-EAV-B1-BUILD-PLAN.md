@@ -1,22 +1,25 @@
-# B1 BUILD PLAN - EAV Orchestrator Implementation Roadmap
+# B1 BUILD PLAN - EAV Orchestrator Selective Salvage Implementation
 
 **Project:** EAV Orchestrator - Collaborative Video Production System  
-**Phase:** B1 - Build Execution Roadmap  
-**Version:** 1.0  
-**Date:** 2025-09-10  
-**Status:** CONSTITUTIONAL BASELINE COMPLETE - Week 1 Infrastructure Ready  
-**Prerequisites:** 106-DOC-B0-VALIDATION.md (CONDITIONAL GO approved)  
-**Infrastructure Status:** Testing framework stabilized, TDD infrastructure operational
+**Phase:** B1 - Selective Salvage Execution Strategy  
+**Version:** 2.0 (STRATEGIC PIVOT UPDATE)  
+**Date:** 2025-09-11  
+**Status:** STRATEGIC PIVOT COMPLETE - Selective Salvage Approach Validated  
+**Prerequisites:** Cross-Repository Analysis (206-DOC-CROSS-REPOSITORY-ANALYSIS.md)  
+**Strategic Decision:** Selective salvage of production-grade reference-old components
 
 ## Executive Summary
 
-This BUILD PLAN transforms the validated B0 architecture into a 5-week implementation roadmap addressing 3 critical production blockers while delivering a functional Script Module with collaborative editing capabilities.
+**STRATEGIC PIVOT:** Following specialist investigations (research-analyst, security-specialist, technical-architect), this BUILD PLAN has been updated from 5-week rebuild to **3-4 week selective salvage** approach. This constitutional pivot prevents 60-80% development waste by adopting proven production systems.
 
-### Critical Success Factors
-- **Week 1:** Resolve all 3 production-blocking issues before feature development
-- **Week 2-5:** Implement Script Module core with real-time collaboration  
+This BUILD PLAN now implements selective adoption of validated reference-old components while delivering a functional Script Module with enterprise-grade collaborative editing capabilities.
+
+### Critical Success Factors (UPDATED)
+- **Week 1:** Strategic salvage assessment and component validation
+- **Week 2-4:** Selective adoption of proven systems with integration testing
 - **TRACED Protocol:** Evidence-based quality gates throughout execution
-- **Performance Targets:** P95 ≤ 500ms saves, <200ms comment sync
+- **Performance Targets:** P95 ≤ 500ms saves (already achieved in reference-old)
+- **Constitutional Compliance:** Prevent 60-80% waste through systematic salvage
 
 ### MVP Scope Clarification
 ```yaml
@@ -193,12 +196,27 @@ Dependencies_Confirmed:
 - ✅ **Technology Stack Validated:** All dependencies confirmed working together
 - ✅ **Script Editor Ready:** TipTap + React 19 + TypeScript infrastructure prepared
 
-## 5-WEEK IMPLEMENTATION ROADMAP
+## UPDATED IMPLEMENTATION TIMELINE: STRATEGIC PIVOT TO SELECTIVE SALVAGE
 
-### WEEK 1: Foundation & Infrastructure
-**Sprint Goal:** Resolve critical blockers + establish development foundation  
-**Total Effort:** 80 hours (2 developers × 40 hours)  
-**MANDATORY:** No feature development until all blockers resolved
+### Constitutional Authority for Strategic Pivot
+
+**Evidence Base:**
+- **Cross-Repository Analysis:** 206-DOC-CROSS-REPOSITORY-ANALYSIS.md identifies 60-80% waste in rebuild approach  
+- **Specialist Consensus:** Unanimous recommendations from research-analyst, security-specialist, technical-architect
+- **Constitutional Principle:** "Complete with subtraction" - proven systems should be preserved, not rebuilt
+- **Timeline Improvement:** 5 weeks rebuild → 3-4 weeks selective adoption
+
+**Salvage Priority Assessment:**
+1. **CRITICAL SALVAGE:** Y.js CRDT collaboration system (6+ months development time saved)
+2. **HIGH SALVAGE:** Database optimizations and security architecture (sub-10ms queries proven)
+3. **MEDIUM SALVAGE:** Testing infrastructure and monitoring patterns (3,150+ test lines)
+
+## 3-4 WEEK SELECTIVE SALVAGE ROADMAP
+
+### WEEK 1: Salvage Assessment & Critical Integration (UPDATED)
+**Sprint Goal:** Import and validate reference-old production systems  
+**Total Effort:** 60 hours (reduced due to existing proven components)  
+**STRATEGIC FOCUS:** Salvage over rebuild to prevent constitutional waste
 
 #### Infrastructure Setup (20 hours)
 ```yaml
