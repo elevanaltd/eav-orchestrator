@@ -1,4 +1,12 @@
 // Critical-Engineer: consulted for security wrapper architecture (credential proxy, rate limiting)
+// Context7: consulted for express
+// Context7: consulted for helmet
+// Context7: consulted for cors
+// Context7: consulted for express-rate-limit
+// Context7: consulted for pino
+// Context7: consulted for zod
+// Context7: consulted for crypto
+// Context7: consulted for http
 
 import express from 'express';
 import helmet from 'helmet';
@@ -6,7 +14,9 @@ import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import pino from 'pino';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
+import type { Server } from 'http';
 
 // Types
 export interface SecurityConfig {
@@ -66,7 +76,7 @@ export function getConfig(): SecurityConfig {
 // Request context middleware
 export function requestContext(req: Request, res: Response, next: NextFunction) {
   const context: RequestContext = {
-    requestId: crypto.randomUUID(),
+    requestId: randomUUID(),
     startTime: Date.now(),
   };
   
@@ -84,7 +94,8 @@ export function requestContext(req: Request, res: Response, next: NextFunction) 
 }
 
 // Error handling middleware
-export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
   const context = req.context as RequestContext;
   const statusCode = err.name === 'ZodError' ? 400 : 500;
   
@@ -126,7 +137,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 }
 
 // Health check endpoint
-export function healthCheck(req: Request, res: Response) {
+export function healthCheck(_req: Request, res: Response) {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -224,10 +235,10 @@ export function createApp(config: SecurityConfig): express.Application {
 }
 
 // Graceful shutdown handler
-export function gracefulShutdown(server: any, signal: string) {
+export function gracefulShutdown(server: Server, signal: string) {
   logger.info({ signal }, 'Received shutdown signal, starting graceful shutdown');
   
-  server.close((err: Error) => {
+  server.close((err?: Error) => {
     if (err) {
       logger.error({ error: err }, 'Error during server shutdown');
       process.exit(1);
@@ -264,11 +275,9 @@ export function startServer() {
   return server;
 }
 
-// Extend Express Request interface
-declare global {
-  namespace Express {
-    interface Request {
-      context: RequestContext;
-    }
+// Extend Express Request interface using module augmentation
+declare module 'express-serve-static-core' {
+  interface Request {
+    context: RequestContext;
   }
 }

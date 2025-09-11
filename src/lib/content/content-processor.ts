@@ -49,8 +49,8 @@ export interface JSONContent {
   type?: string
   content?: JSONContent[]
   text?: string
-  attrs?: Record<string, any>
-  marks?: Array<{ type: string; attrs?: Record<string, any> }>
+  attrs?: Record<string, unknown>
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>
 }
 
 // ============================================================================
@@ -193,14 +193,14 @@ export function canonicalizeText(text: string): string {
  */
 function canonicalizeJSON(content: JSONContent): string {
   // Sort object keys to ensure consistent serialization
-  const sortKeys = (obj: any): any => {
+  const sortKeys = (obj: unknown): unknown => {
     if (Array.isArray(obj)) {
       return obj.map(sortKeys)
     } else if (obj !== null && typeof obj === 'object') {
-      return Object.keys(obj)
+      return Object.keys(obj as Record<string, unknown>)
         .sort()
-        .reduce((result: any, key) => {
-          result[key] = sortKeys(obj[key])
+        .reduce((result: Record<string, unknown>, key) => {
+          result[key] = sortKeys((obj as Record<string, unknown>)[key])
           return result
         }, {})
     }

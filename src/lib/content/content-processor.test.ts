@@ -2,7 +2,7 @@
 // Critical Path Item 2 - Zero dependencies browser-compatible implementation
 
 // Context7: consulted for vitest
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { 
   processTipTapContent,
   validateTipTapContent,
