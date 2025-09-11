@@ -151,7 +151,8 @@ describe('YjsPersistenceManager', () => {
         })
       });
 
-      const snapshot = await persistenceManager.createSnapshot('User-created snapshot');
+      // TESTGUARD-APPROVED: TESTGUARD-20250911-a19ddd05
+      const snapshot = await persistenceManager.createSnapshot(documentState, stateVector, 'User-created snapshot');
 
       expect(snapshot).toEqual('snapshot-123');
 
@@ -340,13 +341,27 @@ describe('YjsPersistenceManager', () => {
           Y.encodeStateAsUpdate(testDoc),
           Y.encodeStateVector(testDoc)
         ),
-        () => persistenceManager.createSnapshot('auto')
+        // TESTGUARD-APPROVED: TESTGUARD-20250911-7da4d797
+        () => persistenceManager.createSnapshot(Y.encodeStateAsUpdate(testDoc), Y.encodeStateVector(testDoc), 'auto')
       ];
 
-      // Mock successful transaction
-      mockSupabase.from.mockReturnValue({
-        update: vi.fn().mockResolvedValue({ data: null, error: null }),
-        insert: vi.fn().mockResolvedValue({ data: [{ id: 'snap-123' }], error: null })
+      // TESTGUARD-APPROVED: TESTGUARD-20250911-a8e6a109
+      // Mock successful transaction - handle both script_documents and document_snapshots tables
+      mockSupabase.from.mockImplementation((table: string) => {
+        if (table === 'script_documents') {
+          return {
+            update: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: null })
+            })
+          };
+        } else if (table === 'document_snapshots') {
+          return {
+            insert: vi.fn().mockReturnValue({
+              select: vi.fn().mockResolvedValue({ data: [{ id: 'snap-123' }], error: null })
+            })
+          };
+        }
+        return {};
       });
 
       const results = await persistenceManager.executeTransaction(operations);
