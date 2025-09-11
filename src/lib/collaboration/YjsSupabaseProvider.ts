@@ -180,7 +180,7 @@ export class YjsSupabaseProvider {
     } catch (error: unknown) {
       // OCTAVE::TA+ERROR_PROPAGATION→[PROVIDER]+CIRCUIT_BREAKER+EXPLICIT_REJECTION
       // Re-throw circuit breaker errors to properly reject the promise
-      if (error.message?.includes('Circuit breaker is open')) {
+      if (error instanceof Error && error.message?.includes('Circuit breaker is open')) {
         throw error
       }
       
@@ -205,8 +205,8 @@ export class YjsSupabaseProvider {
     }
   }
 
-  public on(event: keyof ProviderEventHandler, handler: unknown): void {
-    this.eventHandlers[event] = handler
+  public on<K extends keyof ProviderEventHandler>(event: K, handler: ProviderEventHandler[K]): void {
+    this.eventHandlers[event] = handler as ProviderEventHandler[keyof ProviderEventHandler]
   }
 
   public getStatus(): ProviderStatus {

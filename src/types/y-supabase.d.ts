@@ -20,11 +20,11 @@ declare module 'y-supabase' {
     on(event: 'disconnect', callback: () => void): void
     on(event: 'sync', callback: () => void): void
     on(event: 'error', callback: (error: unknown) => void): void
-    on(event: 'message', callback: (update: any) => void): void
-    on(event: 'awareness', callback: (awarenessUpdate: any) => void): void
+    on(event: 'message', callback: (update: unknown) => void): void
+    on(event: 'awareness', callback: (awarenessUpdate: unknown) => void): void
     on(event: 'save', callback: (version: number) => void): void
-    on(event: 'status', callback: (status: any) => void): void
-    on(event: 'synced', callback: (state: any) => void): void
+    on(event: 'status', callback: (status: unknown) => void): void
+    on(event: 'synced', callback: (state: unknown) => void): void
     
     connect(): Promise<void>
     disconnect(): void
