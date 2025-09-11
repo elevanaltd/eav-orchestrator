@@ -43,7 +43,7 @@ export interface ProviderConfig extends YjsProviderConfig {
   enableQuarantine?: boolean
   
   /** Supabase client (optional for testing) */
-  supabaseClient?: any
+  supabaseClient?: unknown
 }
 
 export interface ProviderStatus {
@@ -79,7 +79,7 @@ export interface ProviderError {
   message: string
   timestamp: number
   retryable: boolean
-  originalError?: any
+  originalError?: Error | unknown
   userAction?: string
 }
 

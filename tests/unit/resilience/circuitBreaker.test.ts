@@ -18,7 +18,6 @@ import {
   CircuitBreaker,
   CircuitBreakerState,
   type CircuitBreakerConfig,
-  type CircuitBreakerMetrics
 } from '../../../src/lib/resilience/circuitBreaker'
 
 describe('CircuitBreaker', () => {

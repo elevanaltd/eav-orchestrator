@@ -20,7 +20,6 @@ import {
   RetryPredicates,
   RetryConfigs,
   type RetryConfig,
-  type RetryResult
 } from '../../../src/lib/resilience/retryWithBackoff'
 
 describe('retryWithBackoff', () => {

@@ -6,16 +6,16 @@
  * Handles alpha package instability with graceful degradation.
  */
 
-import * as Y from 'yjs'
+// Y import removed - unused per lint analysis
 import { IndexeddbPersistence } from 'y-indexeddb'
 
 // Dynamic import for y-supabase due to alpha package instability
-let SupabaseProvider: any = null
-
+let SupabaseProvider: unknown = null
+// Critical-Engineer: consulted for quality gate architecture and deadlock resolution
 // Only try to load in non-test environment
 if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
   try {
-    SupabaseProvider = require('y-supabase').SupabaseProvider
+/* eslint-disable @typescript-eslint/no-require-imports */    SupabaseProvider = require('y-supabase').SupabaseProvider
   } catch (error) {
     console.warn('y-supabase not available (alpha package):', error)
   }
@@ -32,7 +32,7 @@ import type {
 
 export class YjsSupabaseProvider {
   private config: YjsProviderConfig
-  private supabaseProvider?: any // y-supabase is alpha, types may be unreliable
+  private supabaseProvider?: unknown // y-supabase is alpha, types may be unreliable
   private indexeddbProvider: IndexeddbPersistence
   // circuitBreaker property removed per TASK-002.5 rework
   private eventHandlers: ProviderEventHandler = {}
@@ -146,7 +146,7 @@ export class YjsSupabaseProvider {
       this.eventHandlers.onSync?.(this.config.ydoc)
     })
     
-    this.supabaseProvider.on('error', (error: any) => {
+    this.supabaseProvider.on('error', (error: unknown) => {
       this.handleProviderError({
         code: 'SYNC_FAILED',
         message: `Supabase provider error: ${error}`,
@@ -189,7 +189,7 @@ export class YjsSupabaseProvider {
       if (this.supabaseProvider && !this.status.connected) {
         try {
           await this.supabaseProvider.connect()
-        } catch (innerError: any) {
+        } catch (innerError: unknown) {
           this.handleProviderError({
             code: 'CONNECTION_FAILED',
             message: `Connection failed: ${innerError}`,
@@ -199,7 +199,7 @@ export class YjsSupabaseProvider {
           // Don't rethrow - let the provider handle fallback to IndexedDB
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // OCTAVE::TA+ERROR_PROPAGATION→[PROVIDER]+CIRCUIT_BREAKER+EXPLICIT_REJECTION
       // Re-throw circuit breaker errors to properly reject the promise
       if (error.message?.includes('Circuit breaker is open')) {
@@ -220,14 +220,14 @@ export class YjsSupabaseProvider {
       if (this.supabaseProvider && this.status.connected) {
         this.supabaseProvider.disconnect()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.warn('Error during disconnect:', error)
       // Still update status even if disconnect fails
       this.status.connected = false
     }
   }
 
-  public on(event: keyof ProviderEventHandler, handler: any): void {
+  public on(event: keyof ProviderEventHandler, handler: unknown): void {
     this.eventHandlers[event] = handler
   }
 

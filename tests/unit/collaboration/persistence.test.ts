@@ -11,7 +11,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as Y from 'yjs';
 import { 
   YjsPersistenceManager,
-  DocumentSnapshot,
   PersistenceError
 } from '../../../src/lib/collaboration/persistence';
 import { createMockSupabaseClient } from '../../mocks/supabase';

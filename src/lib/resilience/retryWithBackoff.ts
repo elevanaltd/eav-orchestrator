@@ -26,14 +26,14 @@ export interface RetryConfig {
   /** Add jitter to prevent thundering herd */
   jitter: boolean
   /** Predicate to determine if error is retryable */
-  retryPredicate?: (error: any) => boolean
+  retryPredicate?: (error: Error | unknown) => boolean
 }
 
 export interface RetryResult<T> {
   /** Result of the operation if successful */
   result?: T
   /** Final error if all retries failed */
-  error?: any
+  error?: Error | unknown
   /** Number of attempts made */
   attempts: number
   /** Total time spent in milliseconds */
@@ -48,7 +48,7 @@ const DEFAULT_CONFIG: RetryConfig = {
   maxDelayMs: 30000,
   multiplier: 2,
   jitter: true,
-  retryPredicate: (error: any) => {
+  retryPredicate: (error: Error | unknown) => {
     // Default: retry on network errors but not on client errors
     if (error?.code >= 400 && error?.code < 500) return false
     return true
@@ -69,7 +69,7 @@ export async function retryWithBackoff<T>(
   const finalConfig = { ...DEFAULT_CONFIG, ...config }
   const startTime = performance.now()
   
-  let lastError: any
+  let lastError: Error | unknown
   let attempts = 0
   
   for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
@@ -124,7 +124,7 @@ export async function retryWithBackoff<T>(
  * @param config Retry configuration
  * @returns Function that retries on failure
  */
-export function withRetry<T extends any[], R>(
+export function withRetry<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   config: Partial<RetryConfig> = {}
 ): (...args: T) => Promise<R> {
@@ -150,7 +150,7 @@ export const RetryPredicates = {
   never: () => false,
   
   /** Retry network errors (5xx, timeouts, connection errors) */
-  networkErrors: (error: any) => {
+  networkErrors: (error: Error | unknown) => {
     if (error?.code >= 500) return true
     if (error?.code === 'TIMEOUT') return true
     if (error?.code === 'ECONNRESET') return true
@@ -159,7 +159,7 @@ export const RetryPredicates = {
   },
   
   /** Retry transient errors (rate limits, temporary unavailable) */
-  transientErrors: (error: any) => {
+  transientErrors: (error: Error | unknown) => {
     if (error?.code === 429) return true // Rate limit
     if (error?.code === 503) return true // Service unavailable
     if (error?.code === 502) return true // Bad gateway

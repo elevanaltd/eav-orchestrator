@@ -5,7 +5,6 @@
 // Context7: consulted for supabase
 import { SupabaseClient } from '@supabase/supabase-js';
 import { 
-  ScriptComponent,
   OptimisticLockError,
   UpdateResult,
   BatchUpdateOperation,

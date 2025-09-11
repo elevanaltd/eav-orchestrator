@@ -216,8 +216,8 @@ describe('Fractional Index Generation', () => {
           // Critical-Engineer: prevents beforePos >= afterPos constraint violation
           
           // 1. Remove the item being moved (creates consistent intermediate state)
-          const [movedItem] = positions.splice(fromIndex, 1);
-          
+          // Remove item and store reference for potential debugging
+          positions.splice(fromIndex, 1);          
           // 2. Calculate correct insertion index in the MODIFIED array
           const newInsertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
           

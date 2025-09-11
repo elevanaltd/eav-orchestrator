@@ -162,9 +162,9 @@ export interface MergeConflict {
  */
 export interface ConflictArea {
   path: string; // JSON path to conflicted field
-  clientValue: any;
-  serverValue: any;
-  baseValue?: any;
+  clientValue: Record<string, unknown>;
+  serverValue: Record<string, unknown>;
+  baseValue?: Record<string, unknown>;
   conflictType: 'text_conflict' | 'structural_conflict' | 'deletion_conflict';
 }
 

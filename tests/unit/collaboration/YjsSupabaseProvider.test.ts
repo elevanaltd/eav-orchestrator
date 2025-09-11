@@ -72,9 +72,9 @@ describe('YjsSupabaseProvider', () => {
       };
 
       mockSupabase.from.mockReturnValue({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockDocumentData,
               error: null
             })
@@ -154,12 +154,12 @@ describe('YjsSupabaseProvider', () => {
 
   describe('Database Persistence', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       provider = new YjsSupabaseProvider(doc, mockConfig);
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should debounce database saves', async () => {
@@ -176,7 +176,7 @@ describe('YjsSupabaseProvider', () => {
       expect(mockSupabase.from).not.toHaveBeenCalled();
 
       // Fast-forward debounce timer (1 second)
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
 
       // Verify save called once with combined state
       expect(mockSupabase.from).toHaveBeenCalledWith('script_documents');
@@ -194,15 +194,15 @@ describe('YjsSupabaseProvider', () => {
       
       // Mock database error
       mockSupabase.from.mockReturnValue({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             error: new Error('Database connection failed')
           })
         })
       });
 
       text.insert(0, 'Test');
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
 
       expect(mockConfig.onError).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -271,7 +271,7 @@ describe('YjsSupabaseProvider', () => {
       // Simulate disconnection
       mockChannel.subscribe.mockResolvedValueOnce('CHANNEL_ERROR');
 
-      const reconnectSpy = jest.spyOn(provider, 'reconnect');
+      const reconnectSpy = vi.spyOn(provider, 'reconnect');
       
       // Trigger reconnection logic
       provider.handleConnectionError();
@@ -284,7 +284,7 @@ describe('YjsSupabaseProvider', () => {
     it('should cleanup resources on destroy', () => {
       provider = new YjsSupabaseProvider(doc, mockConfig);
       
-      const awarenessDestroySpy = jest.spyOn(provider.awareness, 'destroy');
+      const awarenessDestroySpy = vi.spyOn(provider.awareness, 'destroy');
       
       provider.destroy();
 
