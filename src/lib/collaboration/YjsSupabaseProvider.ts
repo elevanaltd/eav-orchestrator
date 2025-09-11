@@ -6,20 +6,11 @@
  * Handles alpha package instability with graceful degradation.
  */
 
-// Y import removed - unused per lint analysis
+// Critical-Engineer: consulted for Architectural coherence and dependency validation
+// Context7: consulted for y-indexeddb
+// Context7: consulted for y-supabase
 import { IndexeddbPersistence } from 'y-indexeddb'
-
-// Dynamic import for y-supabase due to alpha package instability
-let SupabaseProvider: unknown = null
-// Critical-Engineer: consulted for quality gate architecture and deadlock resolution
-// Only try to load in non-test environment
-if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
-  try {
-/* eslint-disable @typescript-eslint/no-require-imports */    SupabaseProvider = require('y-supabase').SupabaseProvider
-  } catch (error) {
-    console.warn('y-supabase not available (alpha package):', error)
-  }
-}
+import { SupabaseProvider } from 'y-supabase'
 
 import type { 
   YjsProviderConfig, 
@@ -32,7 +23,7 @@ import type {
 
 export class YjsSupabaseProvider {
   private config: YjsProviderConfig
-  private supabaseProvider?: unknown // y-supabase is alpha, types may be unreliable
+  private supabaseProvider?: SupabaseProvider
   private indexeddbProvider: IndexeddbPersistence
   // circuitBreaker property removed per TASK-002.5 rework
   private eventHandlers: ProviderEventHandler = {}
@@ -76,19 +67,6 @@ export class YjsSupabaseProvider {
 
   private async initializeSupabaseProvider(): Promise<void> {
     try {
-      // Check if y-supabase is available
-      if (!SupabaseProvider) {
-        this.handleProviderError({
-          code: 'CONNECTION_FAILED',
-          message: 'y-supabase package not available (alpha package issue)',
-          timestamp: Date.now(),
-          retryable: false
-        })
-        return
-      }
-      
-      // Circuit breaker check removed per TASK-002.5 rework
-      
       this.metrics.connectionAttempts++
       this.connectionStartTime = performance.now()
       
@@ -242,7 +220,10 @@ export class YjsSupabaseProvider {
   public destroy(): void {
     this.disconnect()
     this.indexeddbProvider.destroy()
-    this.supabaseProvider = null
+    if (this.supabaseProvider) {
+      this.supabaseProvider.destroy()
+    }
+    this.supabaseProvider = undefined
     this.eventHandlers = {}
   }
 }
