@@ -20,11 +20,17 @@ module.exports = [
         document: 'readonly',
         window: 'readonly',
         console: 'readonly',
+        performance: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
         // Node globals for config files
         process: 'readonly',
         Buffer: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
+        require: 'readonly',
       },
     },
     plugins: {
@@ -51,7 +57,7 @@ module.exports = [
         project: './tsconfig.json',
       },
       globals: {
-        // Jest globals
+        // Vitest globals
         describe: 'readonly',
         it: 'readonly',
         test: 'readonly',
@@ -60,12 +66,19 @@ module.exports = [
         beforeEach: 'readonly',
         afterAll: 'readonly',
         afterEach: 'readonly',
-        jest: 'readonly',
+        vi: 'readonly',
+        // Browser globals needed in tests
+        performance: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
         // Node globals
         process: 'readonly',
         Buffer: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
+        require: 'readonly',
       },
     },
     plugins: {

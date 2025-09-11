@@ -21,6 +21,7 @@ export interface MockChannel {
 export interface MockSupabaseClient {
   channel: ReturnType<typeof vi.fn>;
   from: ReturnType<typeof vi.fn>;
+  rpc: ReturnType<typeof vi.fn>;
   auth: {
     getUser: ReturnType<typeof vi.fn>;
   };
@@ -54,6 +55,7 @@ export function createMockSupabaseClient(mockChannel: MockChannel): MockSupabase
   return {
     channel: vi.fn().mockReturnValue(mockChannel),
     from: mockFrom,
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: { id: 'test-user-id' } },
