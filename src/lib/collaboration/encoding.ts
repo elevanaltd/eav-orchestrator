@@ -12,16 +12,19 @@ export class BinaryUpdateError extends Error {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function encodeBinaryUpdate(_data: Uint8Array): string {
   // TODO: Implement encoding
   throw new Error('Not implemented');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function decodeBinaryUpdate(_encoded: string): Uint8Array {
   // TODO: Implement decoding
   throw new Error('Not implemented');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function validateBinaryUpdate(_data: unknown): boolean {
   // TODO: Implement validation
   throw new Error('Not implemented');

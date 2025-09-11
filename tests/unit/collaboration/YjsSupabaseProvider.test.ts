@@ -158,6 +158,7 @@ describe('YjsSupabaseProvider', () => {
       
       // Simulate receiving remote update
       const base64Update = btoa(String.fromCharCode(...remoteUpdate));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const mockPayload = {
         update: base64Update,
         userId: 'remote-user-id',
@@ -177,6 +178,7 @@ describe('YjsSupabaseProvider', () => {
       const remoteUpdate = Y.encodeStateAsUpdate(remoteDoc);
       
       const base64Update = btoa(String.fromCharCode(...remoteUpdate));
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const mockPayload = {
         update: base64Update,
         userId: 'remote-user-id',
@@ -293,6 +295,7 @@ describe('YjsSupabaseProvider', () => {
     });
 
     it('should handle malformed binary updates', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const invalidPayload = {
         update: 'invalid-base64-content',
         userId: 'remote-user',

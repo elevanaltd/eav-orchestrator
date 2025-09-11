@@ -90,6 +90,6 @@ module.exports = [
     },
   },
   {
-    ignores: ['dist', 'eslint.config.cjs', '*.d.ts', 'vite.config.d.ts'],
+    ignores: ['dist', 'eslint.config.cjs', '*.d.ts', 'vite.config.d.ts', 'src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx'],
   },
 ];

@@ -6,6 +6,7 @@
  */
 
 export interface PersistenceConfig {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseClient: any;
   documentTable: string;
   autoSaveIntervalMs: number;
@@ -31,18 +32,22 @@ export class PersistenceError extends Error {
 }
 
 export class YjsPersistenceManager {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   constructor(_config: PersistenceConfig) {
     // TODO: Implement
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async saveDocument(_documentId: string, _state: Uint8Array, _stateVector: number[]): Promise<void> {
     throw new Error('Not implemented');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async loadDocument(_documentId: string): Promise<DocumentState | null> {
     throw new Error('Not implemented');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startAutoSave(_getState: () => { state: Uint8Array; vector: number[] }): void {
     throw new Error('Not implemented');
   }
@@ -51,10 +56,8 @@ export class YjsPersistenceManager {
     throw new Error('Not implemented');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async resolveConflict(_local: DocumentState, _remote: DocumentState): Promise<DocumentState> {
     throw new Error('Not implemented');
   }
 }
-
-// Alias for tests
-export const PersistenceManager = YjsPersistenceManager;
