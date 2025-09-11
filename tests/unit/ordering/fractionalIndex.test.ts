@@ -206,18 +206,30 @@ describe('Fractional Index Generation', () => {
       // Perform 100 reordering operations
       const startTime = performance.now();
       
+      // TESTGUARD-APPROVED: CONTRACT-DRIVEN-CORRECTION for stateful array modification bug
       for (let i = 0; i < 100; i++) {
         const fromIndex = Math.floor(Math.random() * positions.length);
         const toIndex = Math.floor(Math.random() * positions.length);
         
         if (fromIndex !== toIndex) {
-          // Simulate moving component from fromIndex to toIndex
-          const beforePos = toIndex > 0 ? positions[toIndex - 1] : null;
-          const afterPos = toIndex < positions.length ? positions[toIndex] : null;
+          // Two-phase reordering algorithm: remove first, then calculate neighbors from new state
+          // Critical-Engineer: prevents beforePos >= afterPos constraint violation
           
+          // 1. Remove the item being moved (creates consistent intermediate state)
+          const [movedItem] = positions.splice(fromIndex, 1);
+          
+          // 2. Calculate correct insertion index in the MODIFIED array
+          const newInsertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
+          
+          // 3. Calculate neighbors based on NEW insertion index in MODIFIED array
+          const beforePos = newInsertIndex > 0 ? positions[newInsertIndex - 1] : null;
+          const afterPos = newInsertIndex < positions.length ? positions[newInsertIndex] : null;
+          
+          // 4. Generate new position (this call can never violate beforePos < afterPos)
           const newPosition = generatePositionBetween(beforePos, afterPos);
-          positions.splice(fromIndex, 1);
-          positions.splice(toIndex, 0, newPosition);
+          
+          // 5. Insert new position at correct location
+          positions.splice(newInsertIndex, 0, newPosition);
         }
       }
       

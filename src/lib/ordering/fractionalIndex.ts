@@ -20,6 +20,7 @@
 
 // Context7: consulted for fractional-indexing library
 // Critical-Engineer: consulted for fractional indexing strategy and concurrency control  
+// Critical-Engineer: consulted for stateful reordering logic in fractional index tests
 // Testguard: approved RED-GREEN-REFACTOR methodology
 import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 
