@@ -75,6 +75,7 @@ export class YjsPersistenceManager {
   }
 
   // CONTRACT-DRIVEN: Additional methods expected by tests
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async createSnapshot(_description?: string): Promise<string> {
     throw new Error('Not implemented');
   }
