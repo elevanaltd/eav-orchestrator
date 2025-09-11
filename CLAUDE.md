@@ -4,9 +4,10 @@
 
 **Project:** EAV Orchestrator - Collaborative Video Production System  
 **Repository:** `/Volumes/HestAI-Projects/eav-orchestrator/build/`  
-**Last Updated:** 2025-09-10
+**Last Updated:** 2025-09-11  
+**Strategic Status:** STRATEGIC PIVOT COMPLETE - Selective Salvage Approach Validated
 
-These instructions guide Claude Code in developing the EAV Orchestrator system following HestAI organizational standards and project-specific requirements.
+These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from reference-old production systems, preventing 60-80% development waste.
 
 ## Project Context & Constraints
 
@@ -112,24 +113,24 @@ Based on Script Module North Star, initial development focuses on:
 
 ## Current Status & Next Steps
 
-### Constitutional Baseline Complete
-1. **Jest→Vitest Migration:** Successfully completed across all 9 test files
-2. **TestGuard Quality Gates:** Established with proper RED-GREEN-REFACTOR discipline
-3. **Technology Stack:** Confirmed and operational (React 19 + TypeScript + Vitest)
-4. **Build Infrastructure:** Lint, typecheck, test coverage fully configured
-5. **TDD Infrastructure:** Ready for script editor feature implementation
+### STRATEGIC PIVOT COMPLETE - Selective Salvage Validated
+1. **Constitutional Crisis Resolved:** 60-80% waste prevention through reference-old salvage
+2. **Specialist Consensus:** Unanimous validation from research-analyst, security-specialist, technical-architect  
+3. **Cross-Repository Analysis:** 206-DOC identifies production-grade systems available for adoption
+4. **Strategic Timeline:** 5-week rebuild → 3-4 week selective salvage approach
+5. **Build Plan Updated:** 108-DOC reflects constitutional pivot with salvage priorities
 
-### Immediate Next Steps
-1. Begin script editor TDD implementation with failing tests
-2. Implement TipTap collaborative editor integration
-3. Set up Yjs + Supabase real-time collaboration
-4. Execute Week 1 critical blockers from Build Plan
-5. Proceed with 5-week implementation roadmap
+### Immediate Next Steps (UPDATED STRATEGIC APPROACH)
+1. **Execute Salvage Assessment:** Import and validate reference-old CRDT collaboration system
+2. **Adopt Database Optimizations:** Implement proven sub-10ms performance patterns  
+3. **Integrate BFF Security Architecture:** Restore hardened API security patterns
+4. **Validate Performance Targets:** Confirm P95 ≤ 500ms (already achieved in reference-old)
+5. **Proceed with 3-4 week salvage roadmap:** Constitutional compliance through proven component adoption
 
-### Critical Blockers (From Build Plan)
-1. **Optimistic Locking Strategy** - Prevent concurrent edit data loss
-2. **API Failure Isolation** - Circuit breaker pattern for external services
-3. **Fractional Indexing** - LexoRank algorithm for component ordering
+### Strategic Salvage Priorities (UPDATED FROM CRITICAL BLOCKERS)
+1. **CRITICAL SALVAGE:** Y.js CRDT collaboration system (6+ months development saved)
+2. **HIGH SALVAGE:** Database optimizations and BFF security architecture  
+3. **MEDIUM SALVAGE:** Testing infrastructure and monitoring patterns (3,150+ lines validated)
 
 ## Reference Documentation
 
@@ -140,6 +141,8 @@ Based on Script Module North Star, initial development focuses on:
 ### Project Documentation
 - [Project Context](../coordination/PROJECT_CONTEXT.md)
 - [B1 Build Plan](./docs/108-DOC-EAV-B1-BUILD-PLAN.md)
+- [Strategic Pivot Decision Archive](./docs/207-DOC-STRATEGIC-PIVOT-DECISION-ARCHIVE.md)
+- [Cross-Repository Analysis](./docs/206-DOC-CROSS-REPOSITORY-ANALYSIS.md)
 - [Directory Structure ADR](./docs/adr/101-SYSTEM-DIRECTORY-STRUCTURE.md)
 - [Data Model ADR](./docs/adr/102-DOC-ADR-DATA-MODEL.md)
 
@@ -197,4 +200,5 @@ Testing_Stack:
 **Enforcement:** TRACED protocol validation and quality gates
 
 **Constitutional Baseline:** Infrastructure stabilized 2025-09-10  
-**Next Phase:** Script editor TDD implementation ready to proceed
+**Strategic Pivot:** Completed 2025-09-11 - Selective salvage approach validated  
+**Next Phase:** Reference-old component salvage and integration (3-4 week timeline)
