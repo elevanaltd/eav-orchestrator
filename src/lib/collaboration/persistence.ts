@@ -79,7 +79,7 @@ export class YjsPersistenceManager {
     throw new Error('Not implemented');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   async listSnapshots(): Promise<Array<{ id: string; description: string; createdAt: Date }>> {
     throw new Error('Not implemented');
   }

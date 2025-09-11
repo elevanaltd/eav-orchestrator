@@ -167,8 +167,8 @@ describe('YjsSupabaseProvider', () => {
     it('should not rebroadcast updates that came from remote', async () => {
       const remoteDoc = new Y.Doc();
       remoteDoc.getText('content').insert(0, 'Remote content');
-      const remoteUpdate = Y.encodeStateAsUpdate(remoteDoc);
-      void remoteUpdate; // Mark as intentionally unused
+      const _remoteUpdate = Y.encodeStateAsUpdate(remoteDoc);
+      void _remoteUpdate; // Mark as intentionally unused
       
       // Simulate receiving remote update
       // Would create base64Update from remoteUpdate and mockPayload
@@ -190,8 +190,9 @@ describe('YjsSupabaseProvider', () => {
     it('should apply remote updates to local document', () => {
       const remoteDoc = new Y.Doc();
       remoteDoc.getText('content').insert(0, 'Remote content');
-      const remoteUpdate = Y.encodeStateAsUpdate(remoteDoc);
+      const _remoteUpdate = Y.encodeStateAsUpdate(remoteDoc);
       
+      void _remoteUpdate; // Mark as intentionally unused
       // Would create base64Update and mockPayload but handleRemoteUpdate is not exposed
       // const base64Update = btoa(String.fromCharCode(...remoteUpdate));
       // const mockPayload = {
