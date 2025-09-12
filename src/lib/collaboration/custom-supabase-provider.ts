@@ -155,7 +155,7 @@ export class CustomSupabaseProvider {
 
   private setupYjsUpdateHandler(): void {
     // CRITICAL FIX: Use update data parameter instead of encoding full state
-    this.ydoc.on('update', (update: Uint8Array, origin: any) => {
+    this.ydoc.on('update', (update: Uint8Array, origin: unknown) => {
       if (origin !== this) {
         // Only persist updates that didn't originate from this provider (avoid loops)
         this.persistUpdate(update);

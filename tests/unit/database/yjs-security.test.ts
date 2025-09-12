@@ -18,6 +18,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Test interfaces for the database schema we expect
+// Note: These interfaces document expected schema but are not used in mocked tests
+// They serve as documentation for the migration implementation
+/*
 interface YjsDocument {
   id: string
   project_id: string
@@ -40,11 +43,12 @@ interface AppendYjsUpdateResult {
   sequence_number: number | null
   error_message: string | null
 }
+*/
 
 describe('Y.js Security Migration', () => {
-  let mockSupabase: jest.Mocked<SupabaseClient>
-  let mockFrom: jest.Mock
-  let mockRpc: jest.Mock
+  let mockSupabase: SupabaseClient
+  let mockFrom: ReturnType<typeof vi.fn>
+  let mockRpc: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -71,7 +75,7 @@ describe('Y.js Security Migration', () => {
         })
       })
 
-      const { data, error } = await mockSupabase
+      const { error } = await mockSupabase
         .from('yjs_documents')
         .select('*')
         .limit(1)
@@ -90,7 +94,7 @@ describe('Y.js Security Migration', () => {
         })
       })
 
-      const { data, error } = await mockSupabase
+      const { error } = await mockSupabase
         .from('yjs_document_updates')
         .select('*')
         .limit(1)
@@ -111,7 +115,7 @@ describe('Y.js Security Migration', () => {
         error: { code: '42883', message: 'function append_yjs_update does not exist' }
       })
 
-      const { data, error } = await mockSupabase.rpc('append_yjs_update', {
+      const { error } = await mockSupabase.rpc('append_yjs_update', {
         p_document_id: 'doc-123',
         p_update_data: mockUpdateData,
         p_new_state_vector: mockStateVector
@@ -166,7 +170,7 @@ describe('Y.js Security Migration', () => {
         error: { message: 'function does not exist' }
       })
 
-      const { data, error } = await mockSupabase.rpc('append_yjs_update', {
+      const { error } = await mockSupabase.rpc('append_yjs_update', {
         p_document_id: 'doc-123',
         p_update_data: updateData,
         p_new_state_vector: stateVector
@@ -187,7 +191,7 @@ describe('Y.js Security Migration', () => {
         })
       })
 
-      const { data, error } = await mockSupabase
+      const { data } = await mockSupabase
         .from('yjs_documents')
         .select('*')
         .eq('project_id', 'unauthorized-project')
@@ -212,7 +216,7 @@ describe('Y.js Security Migration', () => {
       })
 
       // Client role should be denied write access
-      const { data, error } = await mockSupabase
+      const { error } = await mockSupabase
         .from('yjs_documents')
         .insert(mockUpdate)
 
@@ -227,7 +231,7 @@ describe('Y.js Security Migration', () => {
         error: { message: 'function is_project_editor does not exist' }
       })
 
-      const { data, error } = await mockSupabase.rpc('is_project_editor', {
+      const { error } = await mockSupabase.rpc('is_project_editor', {
         p_project_id: 'project-123'
       })
 
@@ -265,7 +269,7 @@ describe('Y.js Security Migration', () => {
 
       const startTime = performance.now()
       
-      const { data, error } = await mockSupabase
+      await mockSupabase
         .from('yjs_documents')
         .select('*')
         .eq('project_id', 'project-123')
@@ -286,7 +290,7 @@ describe('Y.js Security Migration', () => {
       })
 
       // Should be able to replay updates in order
-      const { data, error } = await mockSupabase.rpc('get_yjs_document_updates_since', {
+      const { error } = await mockSupabase.rpc('get_yjs_document_updates_since', {
         p_document_id: 'doc-123',
         p_since_sequence: 0
       })
@@ -303,7 +307,7 @@ describe('Y.js Security Migration', () => {
         })
       })
 
-      const { data, error } = await mockSupabase
+      const { error } = await mockSupabase
         .from('yjs_document_updates')
         .select('sequence_number, update_data')
         .eq('document_id', 'doc-123')
@@ -321,7 +325,7 @@ describe('Y.js Security Migration', () => {
         error: { message: 'function does not exist' }
       })
 
-      const { data, error } = await mockSupabase.rpc('append_yjs_update', {
+      const { error } = await mockSupabase.rpc('append_yjs_update', {
         p_document_id: 'doc-123',
         p_update_data: new Uint8Array([1, 2, 3])
       })
