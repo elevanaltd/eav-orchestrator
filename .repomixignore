@@ -3,7 +3,7 @@
 # Last Updated: 2025-09-12 (System-Steward Phase 3 Configuration)
 
 # === REFERENCE MATERIALS & OLD CODE ===
-# Strategic pivot requires clean context from reference-old repository
+# strategic pivot requires clean context from reference-old repository
 ../coordination/reference-old-eav-orch-repo/
 ../coordination/reference-old-eav-orch-repo/**/*
 /Volumes/HestAI-old/builds/eav-orchestrator-old/
