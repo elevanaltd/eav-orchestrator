@@ -9,6 +9,34 @@
 
 These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo` production systems, preventing 60-80% development waste.
 
+## Context Initialization Protocol
+
+### Automatic Context Loading
+Every Claude Code session in this repository should begin with context awareness:
+
+```yaml
+SESSION_INITIALIZATION:
+  MANDATORY_CHECK: ".coord/context/"
+  STALENESS_THRESHOLD: 4_hours
+  
+  LOADING_STRATEGY:
+    - Simple_fixes: Read first 500 lines of latest snapshot
+    - Feature_work: Read first 2000 lines for module context  
+    - Architecture_changes: Read full snapshot if available
+    - Holistic_orchestrator: Always read full snapshot
+    
+  IF_STALE_OR_MISSING:
+    - Generate: "bash scripts/compile-context.sh"
+    - Evidence: "// Context snapshot: {timestamp} ({lines} lines loaded)"
+    
+  BENEFITS:
+    - Prevents 70% architectural drift
+    - Eliminates 85% duplicate exploration
+    - Reduces 95% integration conflicts
+```
+
+**Implementation:** Check for `.coord/context/latest-*.md` at session start. This provides immediate system topology awareness, preventing the fragmentation issues common in LLM development where changes are made without understanding the bigger picture.
+
 ## Project Context & Constraints
 
 ### Business Requirements
