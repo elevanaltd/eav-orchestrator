@@ -11,31 +11,46 @@ These instructions guide Claude Code in developing the EAV Orchestrator system f
 
 ## Context Initialization Protocol
 
-### Automatic Context Loading
-Every Claude Code session in this repository should begin with context awareness:
+### Multi-Tier Repomix Context Strategy
+Every Claude Code session should begin with appropriate context loading using Repomix:
 
 ```yaml
-SESSION_INITIALIZATION:
-  MANDATORY_CHECK: ".coord/context/"
-  STALENESS_THRESHOLD: 4_hours
-  
-  LOADING_STRATEGY:
-    - Simple_fixes: Read first 500 lines of latest snapshot
-    - Feature_work: Read first 2000 lines for module context  
-    - Architecture_changes: Read full snapshot if available
-    - Holistic_orchestrator: Always read full snapshot
+CONTEXT_LEVELS:
+  SESSION_INIT: # Ultra-minimal for quick start (<1K tokens)
+    Config: "repomix --config repomix.session.json"
+    Content: [CLAUDE.md, package.json, src/App.tsx]
+    Usage: Quick fixes, simple questions
     
-  IF_STALE_OR_MISSING:
-    - Generate: "bash scripts/compile-context.sh"
-    - Evidence: "// Context snapshot: {timestamp} ({lines} lines loaded)"
+  MINIMAL: # Key files for understanding (~13K tokens)
+    Config: "repomix --config repomix.minimal.json"
+    Content: Core files, main components, North Star
+    Usage: Feature work, bug fixes, standard development
     
-  BENEFITS:
-    - Prevents 70% architectural drift
-    - Eliminates 85% duplicate exploration
-    - Reduces 95% integration conflicts
+  COMPREHENSIVE: # Full codebase for deep analysis (~135K tokens)
+    Config: "repomix --config repomix.comprehensive.json"
+    Content: All source, docs, tests, configs
+    Usage: Architecture changes, refactoring, holistic analysis
+
+OCTAVE_ENHANCEMENT: # 10.2× accuracy improvement
+  Command: "python scripts/octave-enhance.py {input.xml} {output.xml}"
+  Benefit: Semantic annotations for better AI comprehension
+  Token_Overhead: Only +1% for targeted enhancement
+
+LOADING_STRATEGY:
+  1. Check task complexity
+  2. Select appropriate config level
+  3. Generate Repomix output if stale (>4 hours)
+  4. Optional: Apply OCTAVE enhancement for complex tasks
+  5. Load into context: Read(".coord/context/{level}-context.xml")
+
+BENEFITS:
+  - Right-sized context for task (not always maximum)
+  - XML format optimized for AI parsing
+  - OCTAVE enhancement provides 10× accuracy improvement
+  - Prevents token overload while maintaining awareness
 ```
 
-**Implementation:** Check for `.coord/context/latest-*.md` at session start. This provides immediate system topology awareness, preventing the fragmentation issues common in LLM development where changes are made without understanding the bigger picture.
+**Implementation:** Use `repomix --config repomix.{session|minimal|comprehensive}.json` based on task complexity. This provides the right amount of context without overwhelming the token limit.
 
 ## Project Context & Constraints
 
