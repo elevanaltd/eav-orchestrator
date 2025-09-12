@@ -132,7 +132,7 @@ Error_Resolution_Approach:
 
 ### Selective Salvage Success Metrics
 ```yaml
-Development_Waste_Prevention: 60-80% achieved through selective reference-old adoption
+Development_Waste_Prevention: 60-80% achieved through selective reference system adoption
 Critical_Salvage_Success: ✅ Content processor library + optimistic locking patterns
 High_Salvage_Operational: ✅ BFF security patterns (circuit breaker, retry logic)
 Foundation_Complete: ✅ Testing infrastructure with TDD methodology (91.3% success)

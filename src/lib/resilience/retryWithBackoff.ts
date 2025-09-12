@@ -1,7 +1,7 @@
 /**
  * @fileoverview Retry utility with exponential backoff
  * 
- * Salvaged from reference-old implementation for selective adoption
+ * Salvaged from reference-old implementation (now at coordination/reference-old-eav-orch-repo) for selective adoption
  * Supports resilient network operations with configurable backoff strategy
  * 
  * Requirements:

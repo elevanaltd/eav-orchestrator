@@ -7,14 +7,14 @@ CROSS-REPOSITORY DOCUMENTATION ANALYSIS REPORT
      After comprehensive analysis of both repositories, I've discovered a critical
      strategic gap: the current build is planning to rebuild from scratch what
      already exists as a complete, production-validated collaborative editing system
-     in reference-old. This represents potential waste of 60-80% of development
+     in the reference system (located at `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo`). This represents potential waste of 60-80% of development
      effort and introduces unnecessary technical risk.
 
      🚨 CRITICAL FINDINGS (IMMEDIATE ACTION REQUIRED)
 
      1. COMPLETE CRDT COLLABORATION SYSTEM EXISTS [CRITICAL]
 
-     Discovery: Reference-old contains a fully implemented Y.js + Supabase Real-time
+     Discovery: The reference system contains a fully implemented Y.js + Supabase Real-time
      collaboration system with:
      - Production-ready CRDT implementation with optimistic locking
      - Advanced quarantine validation pattern for server-side validation
@@ -41,7 +41,7 @@ CROSS-REPOSITORY DOCUMENTATION ANALYSIS REPORT
      Current Status: Current build plans basic database setup without these
      optimizations
 
-     Impact: Will hit same production bottlenecks that reference-old already solved
+     Impact: Will hit same production bottlenecks that the reference system already solved
 
      Recommendation: Import proven database migrations and optimization patterns
      immediately
@@ -98,7 +98,7 @@ CROSS-REPOSITORY DOCUMENTATION ANALYSIS REPORT
      IMMEDIATE (Week 1)
 
      1. Execute Salvage Assessment
-       - Import reference-old Script Module into current build structure
+       - Import reference system Script Module into current build structure
        - Run existing test suite against current Supabase instance
        - Identify gaps between reference implementation and current requirements
      2. Adopt Proven Database Patterns
@@ -106,7 +106,7 @@ CROSS-REPOSITORY DOCUMENTATION ANALYSIS REPORT
        - Implement optimistic locking functions from reference
        - Use proven RLS policy patterns for 5-role system
      3. Reinstate Security Architecture
-       - Import BFF module from reference-old/modules/script-module/bff
+       - Import BFF module from coordination/reference-old-eav-orch-repo/modules/script-module/bff
        - Configure circuit breaker patterns for external APIs
        - Implement proven secret management procedures
 
@@ -158,7 +158,7 @@ CROSS-REPOSITORY DOCUMENTATION ANALYSIS REPORT
      🚀 IMMEDIATE NEXT STEPS
 
      1. Halt current Week 1 infrastructure work until salvage assessment complete
-     2. Create salvage-assessment branch to evaluate reference-old components
+     2. Create salvage-assessment branch to evaluate reference system components
      3. Import and test existing CRDT collaboration system
      4. Validate database optimization patterns against current schema
      5. Establish revised timeline based on salvage opportunities (likely 3-4 weeks

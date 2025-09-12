@@ -1,7 +1,7 @@
 /**
  * @fileoverview Circuit breaker pattern implementation
  * 
- * Salvaged from reference-old implementation for selective adoption
+ * Salvaged from reference-old implementation (now at coordination/reference-old-eav-orch-repo) for selective adoption
  * Implements circuit breaker pattern for resilient network operations
  * 
  * Features:

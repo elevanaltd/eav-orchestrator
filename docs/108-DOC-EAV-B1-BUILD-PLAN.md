@@ -6,19 +6,19 @@
 **Date:** 2025-09-11  
 **Status:** STRATEGIC PIVOT COMPLETE - Selective Salvage Approach Validated  
 **Prerequisites:** Cross-Repository Analysis (206-DOC-CROSS-REPOSITORY-ANALYSIS.md)  
-**Strategic Decision:** Selective salvage of production-grade reference-old components
+**Strategic Decision:** Selective salvage of production-grade components from reference system (coordination/reference-old-eav-orch-repo)
 
 ## Executive Summary
 
 **STRATEGIC PIVOT:** Following specialist investigations (research-analyst, security-specialist, technical-architect), this BUILD PLAN has been updated from 5-week rebuild to **3-4 week selective salvage** approach. This constitutional pivot prevents 60-80% development waste by adopting proven production systems.
 
-This BUILD PLAN now implements selective adoption of validated reference-old components while delivering a functional Script Module with enterprise-grade collaborative editing capabilities.
+This BUILD PLAN now implements selective adoption of validated reference system components while delivering a functional Script Module with enterprise-grade collaborative editing capabilities.
 
 ### Critical Success Factors (UPDATED)
 - **Week 1:** Strategic salvage assessment and component validation
 - **Week 2-4:** Selective adoption of proven systems with integration testing
 - **TRACED Protocol:** Evidence-based quality gates throughout execution
-- **Performance Targets:** P95 ≤ 500ms saves (already achieved in reference-old)
+- **Performance Targets:** P95 ≤ 500ms saves (already achieved in reference system)
 - **Constitutional Compliance:** Prevent 60-80% waste through systematic salvage
 
 ### MVP Scope Clarification
@@ -214,7 +214,7 @@ Dependencies_Confirmed:
 ## 3-4 WEEK SELECTIVE SALVAGE ROADMAP
 
 ### WEEK 1: Salvage Assessment & Critical Integration (UPDATED)
-**Sprint Goal:** Import and validate reference-old production systems  
+**Sprint Goal:** Import and validate reference system production components  
 **Total Effort:** 60 hours (reduced due to existing proven components)  
 **STRATEGIC FOCUS:** Salvage over rebuild to prevent constitutional waste
 

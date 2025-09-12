@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-The proposed CircuitBreakerUIManager.ts integration from reference-old is architecturally viable but requires significant adaptation. The current implementation has a critical resilience gap (circuit breaker removed from YjsSupabaseProvider) that must be addressed immediately. However, the proposed Redis-backed distributed state and complex Opossum patterns represent premature optimization for the 10-20 concurrent user scale.
+The proposed CircuitBreakerUIManager.ts integration from the reference system (coordination/reference-old-eav-orch-repo) is architecturally viable but requires significant adaptation. The current implementation has a critical resilience gap (circuit breaker removed from YjsSupabaseProvider) that must be addressed immediately. However, the proposed Redis-backed distributed state and complex Opossum patterns represent premature optimization for the 10-20 concurrent user scale.
 
 ## Architectural Compatibility Assessment
 

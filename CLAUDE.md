@@ -7,7 +7,7 @@
 **Last Updated:** 2025-09-12 (System-Steward Phase 3 Documentation Update)  
 **Strategic Status:** PHASE 3 INTEGRATION COMPLETE - CustomSupabaseProvider Production Ready
 
-These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from reference-old production systems, preventing 60-80% development waste.
+These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo` production systems, preventing 60-80% development waste.
 
 ## Project Context & Constraints
 

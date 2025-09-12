@@ -25,13 +25,13 @@ This document archives the strategic pivot from 5-week rebuild to 3-4 week selec
 - **Recommendation:** Import proven collaboration patterns immediately
 
 #### Security Specialist Assessment  
-- **Discovery:** Hardened BFF security architecture in reference-old
+- **Discovery:** Hardened BFF security architecture in reference system (coordination/reference-old-eav-orch-repo)
 - **Risk:** Direct frontend-API communication increases attack surface
 - **Recommendation:** Reinstate proven security patterns to prevent regression
 
 #### Technical Architect Validation
 - **Discovery:** Sub-10ms database optimizations and linear scaling validation
-- **Impact:** Current build would hit same bottlenecks reference-old already solved
+- **Impact:** Current build would hit same bottlenecks reference system already solved
 - **Recommendation:** Adopt proven performance patterns systematically
 
 ### Unanimous Specialist Consensus
@@ -46,7 +46,7 @@ This document archives the strategic pivot from 5-week rebuild to 3-4 week selec
 - **Risk Reduction:** Eliminate rebuild technical risk through validated patterns
 
 ### Critical Blockers Resolution Status
-1. **Optimistic Locking Strategy** → RESOLVED: Import proven reference-old implementation
+1. **Optimistic Locking Strategy** → RESOLVED: Import proven reference system implementation
 2. **API Failure Isolation** → RESOLVED: Adopt BFF architecture with circuit breakers  
 3. **Fractional Indexing** → RESOLVED: Use validated performance patterns
 

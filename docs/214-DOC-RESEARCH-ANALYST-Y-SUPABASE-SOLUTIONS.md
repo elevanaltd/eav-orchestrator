@@ -7,12 +7,12 @@
 
 ## Executive Summary
 
-The research-analyst has discovered comprehensive Y-supabase collaboration solutions in reference-old that directly solve all current implementation blockers. This represents a strategic breakthrough enabling immediate resolution of critical path issues and significant timeline acceleration.
+The research-analyst has discovered comprehensive Y-supabase collaboration solutions in the reference system (coordination/reference-old-eav-orch-repo) that directly solve all current implementation blockers. This represents a strategic breakthrough enabling immediate resolution of critical path issues and significant timeline acceleration.
 
 ## Critical Discoveries Summary
 
 ### Complete Y-Supabase Working Implementation
-**Location:** Reference-old production systems  
+**Location:** Reference system production components (coordination/reference-old-eav-orch-repo)  
 **Impact:** Solves current y-supabase import resolution blocker  
 **Timeline Impact:** Eliminates 6+ months of collaborative editing development
 

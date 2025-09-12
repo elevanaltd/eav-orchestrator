@@ -15,7 +15,7 @@
 - **Testing Infrastructure:** 12 test files, 132/137 tests passing, zero lint violations
 
 ### ✅ SELECTIVE SALVAGE VALIDATION
-- **Prevented 60-80% development waste** through reference-old component adoption
+- **Prevented 60-80% development waste** through reference system component adoption
 - **Production-grade patterns** successfully integrated with modern stack
 - **Constitutional compliance** achieved through specialist consensus validation
 - **Quality gates** operational with TRACED methodology evidence
@@ -119,7 +119,7 @@
 ## Risk Mitigation & Contingency
 
 ### IDENTIFIED RISKS
-1. **Y.js Integration Complexity:** Mitigated by reference-old salvaged patterns
+1. **Y.js Integration Complexity:** Mitigated by reference system salvaged patterns
 2. **Real-time Performance:** Addressed by Supabase provider optimization
 3. **Conflict Resolution:** Handled by optimistic locking + CRDT combination
 4. **Role-based Security:** Validated through Supabase RLS implementation
@@ -137,7 +137,7 @@ With Week 2 collaborative editor complete, Week 3 focuses on:
 - SmartSuite API integration using established circuit breaker patterns
 - External voice generation integration (ElevenLabs) with BFF security
 - Production performance optimization and monitoring implementation
-- Security audit with reference-old testing patterns
+- Security audit with reference system testing patterns
 
 ### SUCCESS METRICS
 - **Collaborative Editing:** Multi-user script editing operational
