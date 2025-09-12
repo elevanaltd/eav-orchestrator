@@ -48,7 +48,8 @@ describe('CustomSupabaseProvider Integration', () => {
     const provider = new CustomSupabaseProvider({
       supabaseClient: mockSupabaseClient,
       ydoc,
-      documentId: 'test-doc-123'
+      documentId: 'test-doc-123',
+      projectId: 'test-project-123'
     });
     
     await provider.connect();
@@ -71,7 +72,8 @@ describe('CustomSupabaseProvider Integration', () => {
       new CustomSupabaseProvider({
         supabaseClient: mockClient,
         ydoc,
-        documentId: 'concurrent-test'
+        documentId: 'concurrent-test',
+        projectId: 'test-project-concurrent'
       })
     );
 
@@ -90,7 +92,8 @@ describe('CustomSupabaseProvider Integration', () => {
     const provider = new CustomSupabaseProvider({
       supabaseClient: mockSupabaseClient,
       ydoc,
-      documentId: 'state-test'
+      documentId: 'state-test',
+      projectId: 'test-project-state'
     });
 
     await provider.connect();

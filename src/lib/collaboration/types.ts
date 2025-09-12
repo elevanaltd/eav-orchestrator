@@ -19,6 +19,7 @@ export interface YjsProviderConfig {
   
   /** Document configuration */
   documentId: string
+  projectId: string  // CRITICAL: Required for RLS security
   ydoc: Y.Doc
   
   /** Provider behavior */

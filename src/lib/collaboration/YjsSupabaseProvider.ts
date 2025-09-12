@@ -81,6 +81,7 @@ export class YjsSupabaseProvider {
         supabaseClient: this.config.supabaseClient,
         ydoc: this.config.ydoc,
         documentId: this.config.documentId,
+        projectId: this.config.projectId, // CRITICAL: RLS security requirement
         tableName: 'yjs_documents'
       })
       
