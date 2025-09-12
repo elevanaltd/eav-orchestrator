@@ -18,14 +18,9 @@ export interface MockChannel {
   presenceState: ReturnType<typeof vi.fn>;
 }
 
-export interface MockSupabaseClient {
-  channel: ReturnType<typeof vi.fn>;
-  from: ReturnType<typeof vi.fn>;
-  rpc: ReturnType<typeof vi.fn>;
-  auth: {
-    getUser: ReturnType<typeof vi.fn>;
-  };
-}
+// MockSupabaseClient interface removed - using 'any' type for test mocks
+// This allows test mocks to satisfy SupabaseClient interface without
+// implementing all 20+ required properties that aren't used in tests
 
 export function createMockChannel(): MockChannel {
   return {
@@ -42,16 +37,19 @@ export function createMockChannel(): MockChannel {
   };
 }
 
-export function createMockSupabaseClient(mockChannel: MockChannel): MockSupabaseClient {
+export function createMockSupabaseClient(mockChannel: MockChannel): any {
   const mockFrom = vi.fn().mockImplementation(() => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
     update: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis()
+    delete: vi.fn().mockReturnThis(),
+    match: vi.fn().mockReturnThis() // Added for optimistic locking support
   }));
 
+  // Return a mock that satisfies SupabaseClient interface requirements
+  // Using 'any' return type to bypass strict type checking in test environment
   return {
     channel: vi.fn().mockReturnValue(mockChannel),
     from: mockFrom,
@@ -62,5 +60,5 @@ export function createMockSupabaseClient(mockChannel: MockChannel): MockSupabase
         error: null
       })
     }
-  };
+  } as any; // Type assertion for test mock compatibility
 }

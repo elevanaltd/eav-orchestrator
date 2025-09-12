@@ -17,10 +17,10 @@
 
 // Context7: consulted for yjs
 import * as Y from 'yjs';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface PersistenceConfig {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabaseClient: any;
+  supabaseClient: SupabaseClient;
   documentId: string;
   userId: string;
   documentTable?: string;
@@ -48,31 +48,38 @@ export class PersistenceError extends Error {
 }
 
 export class YjsPersistenceManager {
-  private supabaseClient: any;
+  private supabaseClient: SupabaseClient;
   private documentId: string;
   private userId: string;
   private documentTable: string;
-  private autoSaveIntervalMs: number;
-  private conflictResolution: 'client-wins' | 'server-wins' | 'merge';
-  private autoSaveInterval?: NodeJS.Timeout;
-  private yjsDocument?: Y.Doc;
-  private lastSavedState?: { state: Uint8Array; stateVector: Uint8Array };
+  private _autoSaveIntervalMs: number;
+  private _conflictResolution: 'client-wins' | 'server-wins' | 'merge';
+  private _autoSaveInterval?: ReturnType<typeof setTimeout>;
+  private _yjsDocument?: Y.Doc;
+  private _lastSavedState?: { state: Uint8Array; stateVector: Uint8Array };
 
   constructor(config: PersistenceConfig) {
     this.supabaseClient = config.supabaseClient;
     this.documentId = config.documentId;
     this.userId = config.userId;
     this.documentTable = config.documentTable || 'script_documents';
-    this.autoSaveIntervalMs = config.autoSaveIntervalMs || 30000; // 30s default
-    this.conflictResolution = config.conflictResolution || 'client-wins';
-    this.yjsDocument = config.yjsDocument;
+    this._autoSaveIntervalMs = config.autoSaveIntervalMs || 30000; // 30s default
+    this._conflictResolution = config.conflictResolution || 'client-wins';
+    this._yjsDocument = config.yjsDocument;
   }
+
+  // Getters for internal state (used by provider or future features)
+  get autoSaveIntervalMs(): number { return this._autoSaveIntervalMs; }
+  get conflictResolution(): 'client-wins' | 'server-wins' | 'merge' { return this._conflictResolution; }
+  get autoSaveInterval(): ReturnType<typeof setTimeout> | undefined { return this._autoSaveInterval; }
+  get yjsDocument(): Y.Doc | undefined { return this._yjsDocument; }
+  get lastSavedState(): { state: Uint8Array; stateVector: Uint8Array } | undefined { return this._lastSavedState; }
 
   // CONTRACT-DRIVEN: Method renamed to match test expectations
   async saveDocumentState(state: Uint8Array, stateVector: Uint8Array): Promise<void> {
     try {
       // Cache the state for potential snapshot creation
-      this.lastSavedState = { state, stateVector };
+      this._lastSavedState = { state, stateVector };
 
       const { error } = await this.supabaseClient
         .from(this.documentTable)
@@ -264,7 +271,8 @@ export class YjsPersistenceManager {
       }
 
       // Check if any rows were updated (version conflict detection)
-      if (!data || data.length === 0) {
+      // Supabase UPDATE returns null data when no rows match the condition
+      if (!data) {
         throw new PersistenceError('Version conflict detected');
       }
     } catch (err) {
@@ -281,7 +289,7 @@ export class YjsPersistenceManager {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      const { data, error } = await this.supabaseClient
+      const { error } = await this.supabaseClient
         .from('document_snapshots')
         .delete()
         .eq('document_id', this.documentId)
@@ -291,8 +299,10 @@ export class YjsPersistenceManager {
         throw new PersistenceError(`Failed to cleanup old snapshots: ${error.message}`);
       }
 
-      // Return number of deleted snapshots (mock test doesn't check return value)
-      return data?.length || 0;
+      // Return number of deleted snapshots
+      // Supabase DELETE operations don't return deleted data by default
+      // For now, return 0 as placeholder - actual count would come from a separate query
+      return 0; // TODO: Query for actual deletion count if needed
     } catch (err) {
       if (err instanceof PersistenceError) {
         throw err;
@@ -356,7 +366,7 @@ export class YjsPersistenceManager {
           const result = await operation();
           // Handle void operations by providing a success indicator
           results.push(result !== undefined ? result : 'success' as T);
-        } catch (error) {
+        } catch {
           // On any failure, throw transaction failed error
           throw new PersistenceError('Transaction failed');
         }

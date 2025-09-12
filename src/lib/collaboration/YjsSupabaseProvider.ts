@@ -7,6 +7,7 @@
  */
 
 // Critical-Engineer: consulted for Architectural coherence and dependency validation
+// Critical-Engineer: consulted for resilience architecture (Circuit Breaker, Opossum integration)
 // Context7: consulted for y-indexeddb
 // Context7: consulted for y-supabase
 import { IndexeddbPersistence } from 'y-indexeddb'
