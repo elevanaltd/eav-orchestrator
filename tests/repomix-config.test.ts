@@ -32,8 +32,12 @@ describe('Repomix Configuration Files', () => {
       expect(config.include).toBeDefined();
       expect(Array.isArray(config.include)).toBe(true);
       
-      // Should include core files but be minimal
-      expect(config.include).toContain('CLAUDE.md');
+      // CLAUDE.md is now explicitly excluded.
+      // It is automatically loaded by the Claude Code environment at session start,
+      // and including it here would cause redundant token consumption.
+      expect(config.include).not.toContain('CLAUDE.md');
+      
+      // Should include other core files but be minimal
       expect(config.include).toContain('README.md');
       expect(config.include).toContain('package.json');
       
@@ -132,7 +136,9 @@ describe('Repomix Configuration Files', () => {
       
       // Should only include absolute essentials
       expect(config.include.length).toBeLessThanOrEqual(5);
-      expect(config.include).toContain('CLAUDE.md');
+      
+      // CLAUDE.md excluded - auto-loaded by environment
+      expect(config.include).not.toContain('CLAUDE.md');
       expect(config.include).toContain('package.json');
     });
   });

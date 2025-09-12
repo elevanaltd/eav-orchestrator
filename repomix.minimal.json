@@ -21,13 +21,13 @@
     }
   },
   "include": [
-    "CLAUDE.md",
     "README.md",
     "package.json",
     "src/main.tsx",
     "src/App.tsx",
     "src/types/scriptComponent.ts",
     "src/lib/collaboration/YjsSupabaseProvider.ts",
+    "src/lib/collaboration/custom-supabase-provider.ts",
     "docs/105-DOC-EAV-ORCHESTRATOR-D1-NORTH-STAR.md",
     "supabase/migrations/*.sql"
   ],

@@ -18,8 +18,9 @@ Every Claude Code session should begin with appropriate context loading using Re
 CONTEXT_LEVELS:
   SESSION_INIT: # Ultra-minimal for quick start (<1K tokens)
     Config: "repomix --config repomix.session.json"
-    Content: [CLAUDE.md, package.json, src/App.tsx]
+    Content: [package.json, src/App.tsx, core types]
     Usage: Quick fixes, simple questions
+    Note: CLAUDE.md already loaded automatically - not included
     
   MINIMAL: # Key files for understanding (~13K tokens)
     Config: "repomix --config repomix.minimal.json"

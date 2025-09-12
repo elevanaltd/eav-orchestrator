@@ -20,18 +20,18 @@
     }
   },
   "include": [
-    "CLAUDE.md",
     "package.json",
-    "src/App.tsx"
+    "src/App.tsx",
+    "src/types/scriptComponent.ts"
   ],
   "ignore": {
     "useGitignore": true,
     "useDefaultPatterns": true,
     "customPatterns": [
       "**",
-      "!CLAUDE.md",
       "!package.json",
-      "!src/App.tsx"
+      "!src/App.tsx",
+      "!src/types/scriptComponent.ts"
     ]
   },
   "security": {
