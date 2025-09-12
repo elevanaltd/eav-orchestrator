@@ -1,0 +1,43 @@
+{
+  "output": {
+    "filePath": ".coord/context/session-context.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "compress": true,
+    "headerText": "EAV Orchestrator Session Context - Ultra Minimal",
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false,
+    "includeEmptyDirectories": false,
+    "git": {
+      "sortByChanges": false,
+      "includeDiffs": false
+    }
+  },
+  "include": [
+    "CLAUDE.md",
+    "package.json",
+    "src/App.tsx"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "**",
+      "!CLAUDE.md",
+      "!package.json",
+      "!src/App.tsx"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": false
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
