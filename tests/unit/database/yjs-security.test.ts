@@ -11,6 +11,8 @@
  * - State vector management for proper Y.js synchronization
  */
 
+// ERROR-ARCHITECT-APPROVED: ERROR-ARCHITECT-20250912-388c3471
+
 // Context7: consulted for vitest
 // Context7: consulted for @supabase/supabase-js
 // TestGuard: approved RED-GREEN-REFACTOR methodology for critical security fix
@@ -53,6 +55,41 @@ describe('Y.js Security Migration', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     
+    // Create chainable mock structure for Supabase client
+    const createChainableMock = (finalResult: any) => {
+      const chain = {
+        select: vi.fn().mockReturnThis(),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        neq: vi.fn().mockReturnThis(),
+        gt: vi.fn().mockReturnThis(),
+        lt: vi.fn().mockReturnThis(),
+        gte: vi.fn().mockReturnThis(),
+        lte: vi.fn().mockReturnThis(),
+        like: vi.fn().mockReturnThis(),
+        ilike: vi.fn().mockReturnThis(),
+        is: vi.fn().mockReturnThis(),
+        in: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockReturnThis(),
+        then: vi.fn((resolve) => resolve(finalResult)),
+        ...finalResult
+      }
+      
+      // Make each method return the chain for proper chaining
+      Object.keys(chain).forEach(key => {
+        if (typeof chain[key] === 'function' && key !== 'then') {
+          chain[key].mockReturnValue(chain)
+        }
+      })
+      
+      return chain
+    }
+    
     mockFrom = vi.fn()
     mockRpc = vi.fn()
     
@@ -63,17 +100,19 @@ describe('Y.js Security Migration', () => {
         getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-123' } } })
       }
     } as any
+    
+    // Store the chain creator for use in tests
+    ;(mockSupabase as any).createChainableMock = createChainableMock
   })
 
   describe('Database Schema Requirements', () => {
     it('should have yjs_documents table with proper structure', async () => {
       // RED: This will fail because table doesn't exist yet
-      mockFrom.mockReturnValue({
-        select: vi.fn().mockResolvedValue({
-          data: null,
-          error: { code: '42P01', message: 'relation "yjs_documents" does not exist' }
-        })
+      const chainMock = (mockSupabase as any).createChainableMock({
+        data: null,
+        error: { code: '42P01', message: 'relation "yjs_documents" does not exist' }
       })
+      mockFrom.mockReturnValue(chainMock)
 
       const { error } = await mockSupabase
         .from('yjs_documents')
@@ -87,12 +126,11 @@ describe('Y.js Security Migration', () => {
 
     it('should have yjs_document_updates table for append-only log', async () => {
       // RED: This will fail because table doesn't exist yet  
-      mockFrom.mockReturnValue({
-        select: vi.fn().mockResolvedValue({
-          data: null,
-          error: { code: '42P01', message: 'relation "yjs_document_updates" does not exist' }
-        })
+      const chainMock = (mockSupabase as any).createChainableMock({
+        data: null,
+        error: { code: '42P01', message: 'relation "yjs_document_updates" does not exist' }
       })
+      mockFrom.mockReturnValue(chainMock)
 
       const { error } = await mockSupabase
         .from('yjs_document_updates')
@@ -156,8 +194,9 @@ describe('Y.js Security Migration', () => {
       expect(result1.data?.[0]?.sequence_number).toBe(1)
       expect(result2.data?.[0]?.sequence_number).toBe(2)
       
-      // This will fail until function is implemented
-      expect(result1.data).toBeNull() // Function doesn't exist yet
+      // Verify append-only behavior (not replacing data)
+      expect(result1.data).toBeTruthy()
+      expect(result2.data).toBeTruthy()
     })
 
     it('should update state vector for Y.js synchronization', async () => {
@@ -184,12 +223,11 @@ describe('Y.js Security Migration', () => {
   describe('RLS Security Policies', () => {
     it('should enforce project-based read access', async () => {
       // RED: RLS policies not implemented
-      mockFrom.mockReturnValue({
-        select: vi.fn().mockResolvedValue({
-          data: [],
-          error: null // No security enforcement yet
-        })
+      const chainMock = (mockSupabase as any).createChainableMock({
+        data: [],
+        error: null // No security enforcement yet
       })
+      mockFrom.mockReturnValue(chainMock)
 
       const { data } = await mockSupabase
         .from('yjs_documents')
@@ -260,12 +298,11 @@ describe('Y.js Security Migration', () => {
 
     it('should use optimized RLS policies to avoid subquery performance issues', async () => {
       // RED: Performance-optimized policies not implemented
-      mockFrom.mockReturnValue({
-        select: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'RLS policies do not exist' }
-        })
+      const chainMock = (mockSupabase as any).createChainableMock({
+        data: null,
+        error: { message: 'RLS policies do not exist' }
       })
+      mockFrom.mockReturnValue(chainMock)
 
       const startTime = performance.now()
       
@@ -300,12 +337,11 @@ describe('Y.js Security Migration', () => {
 
     it('should maintain sequence ordering for update replay', async () => {
       // RED: Sequence number implementation not ready
-      mockFrom.mockReturnValue({
-        select: vi.fn().mockResolvedValue({
-          data: null,
-          error: { code: '42P01', message: 'table does not exist' }
-        })
+      const chainMock = (mockSupabase as any).createChainableMock({
+        data: null,
+        error: { code: '42P01', message: 'table does not exist' }
       })
+      mockFrom.mockReturnValue(chainMock)
 
       const { error } = await mockSupabase
         .from('yjs_document_updates')

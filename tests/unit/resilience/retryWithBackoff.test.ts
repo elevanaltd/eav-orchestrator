@@ -13,6 +13,7 @@
 
 // Context7: consulted for vitest
 // TestGuard: approved RED-GREEN-REFACTOR methodology
+// TEST-METHODOLOGY-GUARDIAN-20250912-17577016: Fix timer handling for async operations
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import {
   retryWithBackoff,
@@ -57,7 +58,17 @@ describe('retryWithBackoff', () => {
         .mockRejectedValueOnce(new Error('fail2'))
         .mockResolvedValue('success')
       
-      const result = await retryWithBackoff(operation, { maxRetries: 3 })
+      const promise = retryWithBackoff(operation, { 
+        maxRetries: 3,
+        initialDelayMs: 100,
+        jitter: false
+      })
+      
+      // Advance timers for each retry
+      await vi.advanceTimersByTimeAsync(100) // First retry
+      await vi.advanceTimersByTimeAsync(200) // Second retry (100 * 2)
+      
+      const result = await promise
       
       expect(result.success).toBe(true)
       expect(result.result).toBe('success')
@@ -68,7 +79,17 @@ describe('retryWithBackoff', () => {
     it('should fail after maxRetries exhausted', async () => {
       const operation = vi.fn().mockRejectedValue(new Error('persistent failure'))
       
-      const result = await retryWithBackoff(operation, { maxRetries: 2 })
+      const promise = retryWithBackoff(operation, { 
+        maxRetries: 2,
+        initialDelayMs: 100,
+        jitter: false
+      })
+      
+      // Advance timers for each retry
+      await vi.advanceTimersByTimeAsync(100) // First retry
+      await vi.advanceTimersByTimeAsync(200) // Second retry (100 * 2)
+      
+      const result = await promise
       
       expect(result.success).toBe(false)
       expect(result.error).toBeDefined()
@@ -247,9 +268,18 @@ describe('withRetry', () => {
 
   it('should throw error when all retries fail', async () => {
     const originalFn = vi.fn<() => Promise<void>>().mockRejectedValue(new Error('persistent error'))
-    const retryingFn = withRetry(originalFn, { maxRetries: 1 })
+    const retryingFn = withRetry(originalFn, { 
+      maxRetries: 1,
+      initialDelayMs: 100,
+      jitter: false
+    })
     
-    await expect(retryingFn()).rejects.toThrow('persistent error')
+    const promise = expect(retryingFn()).rejects.toThrow('persistent error')
+    
+    // Advance timer for retry
+    await vi.advanceTimersByTimeAsync(100)
+    
+    await promise
   })
 })
 
