@@ -146,10 +146,23 @@ export class YjsSupabaseProvider {
       
       // Track connection attempts even if no Supabase provider
       this.metrics.connectionAttempts++
+      this.connectionStartTime = performance.now()
       
       if (this.supabaseProvider && !this.status.connected) {
         try {
           await this.supabaseProvider.connect()
+          
+          // Update status after successful connection
+          this.status.connected = this.supabaseProvider.connected
+          this.status.lastSyncTimestamp = Date.now()
+          
+          if (this.connectionStartTime) {
+            const latency = performance.now() - this.connectionStartTime
+            this.updateLatencyMetrics(latency)
+          }
+          
+          this.metrics.successfulSyncs++
+          this.eventHandlers.onConnect?.()
         } catch (innerError: unknown) {
           this.handleProviderError({
             code: 'CONNECTION_FAILED',

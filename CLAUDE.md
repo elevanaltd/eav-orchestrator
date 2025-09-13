@@ -9,49 +9,50 @@
 
 These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo` production systems, preventing 60-80% development waste.
 
-## Context Initialization Protocol
+## Proactive Context-Gathering Protocol
 
-### Multi-Tier Repomix Context Strategy
-Every Claude Code session should begin with appropriate context loading using Repomix:
+**MANDATORY: Your first action for any new task is to prepare the context.** Do not begin analysis or coding until you have completed this protocol.
 
-```yaml
-CONTEXT_LEVELS:
-  SESSION_INIT: # Ultra-minimal for quick start (<1K tokens)
-    Config: "repomix --config repomix.session.json"
-    Content: [package.json, src/App.tsx, core types]
-    Usage: Quick fixes, simple questions
-    Note: CLAUDE.md already loaded automatically - not included
-    
-  MINIMAL: # Key files for understanding (~13K tokens)
-    Config: "repomix --config repomix.minimal.json"
-    Content: Core files, main components, North Star
-    Usage: Feature work, bug fixes, standard development
-    
-  COMPREHENSIVE: # Full codebase for deep analysis (~135K tokens)
-    Config: "repomix --config repomix.comprehensive.json"
-    Content: All source, docs, tests, configs
-    Usage: Architecture changes, refactoring, holistic analysis
+### Phase 1: Context Initialization
+1. **Verify Codebase is Packed:** Check for the existence of a Repomix `outputId` from the current session. This ID is stored in `.claude/session.vars`. If it doesn't exist, you must run `mcp__repomix__pack_codebase` first and save the new ID.
 
-OCTAVE_ENHANCEMENT: # 10.2× accuracy improvement
-  Command: "python scripts/octave-enhance.py {input.xml} {output.xml}"
-  Benefit: Semantic annotations for better AI comprehension
-  Token_Overhead: Only +1% for targeted enhancement
+2. **Analyze the Task:** Read the user's request and extract 2-4 key nouns, function names, or concepts (e.g., "CustomSupabaseProvider", "circuitBreaker", "database migration").
 
-LOADING_STRATEGY:
-  1. Check task complexity
-  2. Select appropriate config level
-  3. Generate Repomix output if stale (>4 hours)
-  4. Optional: Apply OCTAVE enhancement for complex tasks
-  5. Load into context: Read(".coord/context/{level}-context.xml")
+3. **Search the Codebase:** Use `mcp__repomix__grep_repomix_output` for each keyword you identified. Use a context of 3-5 lines to understand the surrounding code.
 
-BENEFITS:
-  - Right-sized context for task (not always maximum)
-  - XML format optimized for AI parsing
-  - OCTAVE enhancement provides 10× accuracy improvement
-  - Prevents token overload while maintaining awareness
-```
+4. **Cross-Reference Checks:** ALWAYS perform these additional searches:
+   - **Dependency Check:** Search for imports/requires in found files
+   - **Pattern Check:** Search for common patterns (cache, retry, auth, validation, circuit, provider, manager)
+   - **Impact Radius:** Search for files that import the one being modified
+   - **Architecture Check:** Grep for architectural patterns mentioned in README/CLAUDE.md
 
-**Implementation:** Use `repomix --config repomix.{session|minimal|comprehensive}.json` based on task complexity. This provides the right amount of context without overwhelming the token limit.
+5. **Present Your Findings:** Synthesize the results into a brief summary. Start your response with: **"I have prepared the context. Here is what I found relevant to your request:"**
+   - List the key files that appeared in the search
+   - Show 1-2 of the most relevant code snippets from your search
+   - Identify any existing patterns that relate to the task
+   - State that you are now ready to proceed with the task
+
+This protocol transforms the workflow from "go find context" to "I have found the context for you."
+
+### Phase 2: Precedent Search Protocol
+
+**Before implementing ANY new pattern** (caching, error handling, retry logic, authentication, etc.):
+
+1. **Search for existing implementations:** Use `mcp__repomix__grep_repomix_output(outputId, "pattern_name")` to find existing examples
+2. **If found:** Follow the existing pattern for consistency
+3. **If not found:** Check architectural docs (README.md, CLAUDE.md, ADR files) for guidance
+4. **Only create new pattern** after confirming no precedent exists and documenting why
+
+### Phase 3: Impact Analysis
+
+**Before making changes:**
+
+1. **Identify dependencies:** What calls this code? What does this code call?
+2. **Check test coverage:** Search for existing tests of the code being modified
+3. **Verify architectural fit:** Does this change align with system patterns?
+4. **Consider side effects:** What else might be affected by this change?
+
+This ensures changes fit the bigger picture and maintain system coherence.
 
 ## Project Context & Constraints
 
