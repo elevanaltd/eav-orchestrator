@@ -5,6 +5,10 @@ worktrees/
 .coord
 coordination
 
+# Claude session files (user-specific)
+.claude/
+*.claude
+
 # Dependencies
 node_modules/
 .pnp
@@ -44,4 +48,4 @@ pids
 
 # OS
 .DS_Store
-Thumbs.dbreference-old
+Thumbs.db

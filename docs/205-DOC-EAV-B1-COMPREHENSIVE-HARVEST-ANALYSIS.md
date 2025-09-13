@@ -3,17 +3,17 @@
 **Date**: 2025-09-11  
 **Prepared For**: EAV Orchestrator Development Team  
 **Assessed By**: Technical Architect  
-**Purpose**: Strategic component harvesting from reference-old repository for B1 Build acceleration
+**Purpose**: Strategic component harvesting from reference system (`/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo`) for B1 Build acceleration
 
 ---
 
 ## Executive Summary
 
-The reference-old repository contains **significant production-proven components** that directly accelerate the current B1 Build Plan. Most critically, the **TipTap content processor** and **optimistic locking patterns** are MANDATORY harvests to prevent guaranteed production failures. The repository's Supabase-native architecture aligns well with our current technology stack.
+The reference system contains **significant production-proven components** that directly accelerate the current B1 Build Plan. Most critically, the **TipTap content processor** and **optimistic locking patterns** are MANDATORY harvests to prevent guaranteed production failures. The repository's Supabase-native architecture aligns well with our current technology stack.
 
 **Critical Finding**: The optimistic locking implementation **MUST** be harvested immediately to fix the catastrophic 5-minute materialized view refresh bug that guarantees data loss in production.
 
-**Key Advantage**: No SmartSuite dependencies found in reference-old, confirming clean separation for our Phases 1-3 standalone implementation.
+**Key Advantage**: No SmartSuite dependencies found in reference system, confirming clean separation for our Phases 1-3 standalone implementation.
 
 ---
 
@@ -41,7 +41,7 @@ The reference-old repository contains **significant production-proven components
 **Integration Path**:
 ```typescript
 // Week 1 - Direct integration into Script Module
-cp reference-old/libs/content-processor build/src/libs/content-processor
+cp ../coordination/reference-old-eav-orch-repo/libs/content-processor build/src/libs/content-processor
 // Adapt imports and integrate with DeterministicProjector service
 ```
 
@@ -170,7 +170,7 @@ cp reference-old/libs/content-processor build/src/libs/content-processor
 1. **Harvest Optimistic Locking** (Day 1 Morning)
    ```bash
    # Copy and adapt SQL migration
-   cp reference-old/supabase/migrations/20250817054000_add_optimistic_locking_functions.sql \
+   cp ../coordination/reference-old-eav-orch-repo/supabase/migrations/20250817054000_add_optimistic_locking_functions.sql \
       build/supabase/migrations/
    # Adapt table names and test immediately
    ```
@@ -178,7 +178,7 @@ cp reference-old/libs/content-processor build/src/libs/content-processor
 2. **Harvest Content Processor** (Day 1 Afternoon)
    ```bash
    # Copy entire library with tests
-   cp -r reference-old/libs/content-processor build/src/libs/
+   cp -r ../coordination/reference-old-eav-orch-repo/libs/content-processor build/src/libs/
    # Update imports and integrate with current TypeScript config
    ```
 
@@ -356,7 +356,7 @@ describe('Performance Benchmarks', () => {
 
 ## CONCLUSION
 
-The reference-old repository provides **high-value, production-tested components** that directly accelerate the B1 Build Plan. The optimistic locking pattern is **CRITICAL** and must be implemented immediately to prevent data loss. The content processor and collaboration components save significant development time while maintaining architectural integrity.
+The reference system provides **high-value, production-tested components** that directly accelerate the B1 Build Plan. The optimistic locking pattern is **CRITICAL** and must be implemented immediately to prevent data loss. The content processor and collaboration components save significant development time while maintaining architectural integrity.
 
 **Recommended Approach**: Selective harvesting with careful testing. Focus on critical infrastructure first (optimistic locking, content processor), then gradually integrate UI components with necessary fixes.
 

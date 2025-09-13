@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostSessionStart": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Volumes/HestAI-Projects/eav-orchestrator/build/.claude/hooks/post-session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

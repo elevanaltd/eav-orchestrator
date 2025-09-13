@@ -5,16 +5,21 @@
  * Defines types for provider integration with circuit breaker support
  */
 
+// Context7: consulted for yjs
 import type * as Y from 'yjs'
+// Context7: consulted for @supabase/supabase-js
+import type { SupabaseClient } from '@supabase/supabase-js'
 // State-Reset imports removed per TASK-002.5 rework plan
 
 export interface YjsProviderConfig {
   /** Supabase configuration */
   supabaseUrl: string
   supabaseKey: string
+  supabaseClient?: SupabaseClient
   
   /** Document configuration */
   documentId: string
+  projectId: string  // CRITICAL: Required for RLS security
   ydoc: Y.Doc
   
   /** Provider behavior */
@@ -43,7 +48,7 @@ export interface ProviderConfig extends YjsProviderConfig {
   enableQuarantine?: boolean
   
   /** Supabase client (optional for testing) */
-  supabaseClient?: unknown
+  supabaseClient?: SupabaseClient
 }
 
 export interface ProviderStatus {

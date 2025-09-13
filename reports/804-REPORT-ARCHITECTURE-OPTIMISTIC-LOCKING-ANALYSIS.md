@@ -122,7 +122,7 @@ Concurrent_Users: 100-1000
 ### Benchmark Evidence from Reference Implementation
 
 ```sql
--- Production metrics from reference-old deployment
+-- Production metrics from reference system deployment
 SELECT * FROM monitor_permission_performance();
 
 metric_name                    | metric_value | status
@@ -209,7 +209,7 @@ CREATE INDEX idx_comments_version ON comments(version);
 DROP MATERIALIZED VIEW IF EXISTS user_script_permissions CASCADE;
 
 -- STEP 4: Implement optimistic locking functions
--- (Full implementation from reference-old/supabase/migrations/20250817054000_*.sql)
+-- (Full implementation from coordination/reference-old-eav-orch-repo/supabase/migrations/20250817054000_*.sql)
 
 -- STEP 5: Update RLS policies to use direct permission checks
 CREATE POLICY "scripts_write_policy" ON video_scripts

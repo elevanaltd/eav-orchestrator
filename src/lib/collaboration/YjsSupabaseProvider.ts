@@ -6,20 +6,13 @@
  * Handles alpha package instability with graceful degradation.
  */
 
-// Y import removed - unused per lint analysis
+// Critical-Engineer: consulted for Architectural coherence and dependency validation
+// Critical-Engineer: consulted for resilience architecture (Circuit Breaker, Opossum integration)
+// Context7: consulted for y-indexeddb
+// Context7: consulted for y-supabase
 import { IndexeddbPersistence } from 'y-indexeddb'
-
-// Dynamic import for y-supabase due to alpha package instability
-let SupabaseProvider: unknown = null
-// Critical-Engineer: consulted for quality gate architecture and deadlock resolution
-// Only try to load in non-test environment
-if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
-  try {
-/* eslint-disable @typescript-eslint/no-require-imports */    SupabaseProvider = require('y-supabase').SupabaseProvider
-  } catch (error) {
-    console.warn('y-supabase not available (alpha package):', error)
-  }
-}
+// import { SupabaseProvider } from 'y-supabase' // Replaced with CustomSupabaseProvider
+import { CustomSupabaseProvider } from './custom-supabase-provider'
 
 import type { 
   YjsProviderConfig, 
@@ -32,7 +25,7 @@ import type {
 
 export class YjsSupabaseProvider {
   private config: YjsProviderConfig
-  private supabaseProvider?: unknown // y-supabase is alpha, types may be unreliable
+  private supabaseProvider?: CustomSupabaseProvider
   private indexeddbProvider: IndexeddbPersistence
   // circuitBreaker property removed per TASK-002.5 rework
   private eventHandlers: ProviderEventHandler = {}
@@ -76,38 +69,40 @@ export class YjsSupabaseProvider {
 
   private async initializeSupabaseProvider(): Promise<void> {
     try {
-      // Check if y-supabase is available
-      if (!SupabaseProvider) {
-        this.handleProviderError({
-          code: 'CONNECTION_FAILED',
-          message: 'y-supabase package not available (alpha package issue)',
-          timestamp: Date.now(),
-          retryable: false
-        })
-        return
-      }
-      
-      // Circuit breaker check removed per TASK-002.5 rework
-      
       this.metrics.connectionAttempts++
       this.connectionStartTime = performance.now()
       
-      // Initialize y-supabase provider (alpha package - expect instability)
-      this.supabaseProvider = new SupabaseProvider(
-        this.config.ydoc,
-        {
-          url: this.config.supabaseUrl,
-          key: this.config.supabaseKey,
-          table: 'yjs_documents',
-          id: this.config.documentId
-        }
-      )
-      
-      this.setupSupabaseEventHandlers()
-      
-      if (this.config.connect !== false) {
-        await this.connect()
+      // Initialize CustomSupabaseProvider (replaces unstable y-supabase alpha)
+      if (!this.config.supabaseClient) {
+        throw new Error('supabaseClient is required for CustomSupabaseProvider');
       }
+      
+      this.supabaseProvider = new CustomSupabaseProvider({
+        supabaseClient: this.config.supabaseClient,
+        ydoc: this.config.ydoc,
+        documentId: this.config.documentId,
+        projectId: this.config.projectId, // CRITICAL: RLS security requirement
+        tableName: 'yjs_documents'
+      })
+      
+      // Connect to CustomSupabaseProvider
+      if (this.config.connect !== false) {
+        await this.supabaseProvider.connect()
+        
+        // Update status after successful connection
+        this.status.connected = this.supabaseProvider.connected
+        this.status.lastSyncTimestamp = Date.now()
+        
+        if (this.connectionStartTime) {
+          const latency = performance.now() - this.connectionStartTime
+          this.updateLatencyMetrics(latency)
+        }
+        
+        this.metrics.successfulSyncs++
+        this.eventHandlers.onConnect?.()
+      }
+      
+      // Original y-supabase integration disabled - using CustomSupabaseProvider
       
     } catch (error) {
       this.handleProviderError({
@@ -119,42 +114,8 @@ export class YjsSupabaseProvider {
     }
   }
 
-  private setupSupabaseEventHandlers(): void {
-    if (!this.supabaseProvider) return
-    
-    this.supabaseProvider.on('connect', () => {
-      this.status.connected = true
-      this.status.lastSyncTimestamp = Date.now()
-      
-      if (this.connectionStartTime) {
-        const latency = performance.now() - this.connectionStartTime
-        this.updateLatencyMetrics(latency)
-      }
-      
-      this.metrics.successfulSyncs++
-      this.eventHandlers.onConnect?.()
-    })
-    
-    this.supabaseProvider.on('disconnect', () => {
-      this.status.connected = false
-      this.eventHandlers.onDisconnect?.()
-    })
-    
-    this.supabaseProvider.on('sync', () => {
-      this.status.lastSyncTimestamp = Date.now()
-      this.metrics.successfulSyncs++
-      this.eventHandlers.onSync?.(this.config.ydoc)
-    })
-    
-    this.supabaseProvider.on('error', (error: unknown) => {
-      this.handleProviderError({
-        code: 'SYNC_FAILED',
-        message: `Supabase provider error: ${error}`,
-        timestamp: Date.now(),
-        retryable: true
-      })
-    })
-  }
+  // Event handling integrated into CustomSupabaseProvider connection logic
+  // No external event handlers needed for simplified provider interface
 
   private updateLatencyMetrics(latencyMs: number): void {
     this.latencyMeasurements.push(latencyMs)
@@ -185,10 +146,23 @@ export class YjsSupabaseProvider {
       
       // Track connection attempts even if no Supabase provider
       this.metrics.connectionAttempts++
+      this.connectionStartTime = performance.now()
       
       if (this.supabaseProvider && !this.status.connected) {
         try {
           await this.supabaseProvider.connect()
+          
+          // Update status after successful connection
+          this.status.connected = this.supabaseProvider.connected
+          this.status.lastSyncTimestamp = Date.now()
+          
+          if (this.connectionStartTime) {
+            const latency = performance.now() - this.connectionStartTime
+            this.updateLatencyMetrics(latency)
+          }
+          
+          this.metrics.successfulSyncs++
+          this.eventHandlers.onConnect?.()
         } catch (innerError: unknown) {
           this.handleProviderError({
             code: 'CONNECTION_FAILED',
@@ -202,7 +176,7 @@ export class YjsSupabaseProvider {
     } catch (error: unknown) {
       // OCTAVE::TA+ERROR_PROPAGATION→[PROVIDER]+CIRCUIT_BREAKER+EXPLICIT_REJECTION
       // Re-throw circuit breaker errors to properly reject the promise
-      if (error.message?.includes('Circuit breaker is open')) {
+      if (error instanceof Error && error.message?.includes('Circuit breaker is open')) {
         throw error
       }
       
@@ -227,11 +201,16 @@ export class YjsSupabaseProvider {
     }
   }
 
-  public on(event: keyof ProviderEventHandler, handler: unknown): void {
+  public on<K extends keyof ProviderEventHandler>(event: K, handler: ProviderEventHandler[K]): void {
+    // Type-safe assignment without casting
     this.eventHandlers[event] = handler
   }
 
   public getStatus(): ProviderStatus {
+    // Update circuit breaker state from CustomSupabaseProvider if available
+    if (this.supabaseProvider && this.supabaseProvider.getCircuitBreakerState) {
+      this.status.circuitBreakerState = this.supabaseProvider.getCircuitBreakerState() as 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    }
     return { ...this.status }
   }
 
@@ -242,7 +221,10 @@ export class YjsSupabaseProvider {
   public destroy(): void {
     this.disconnect()
     this.indexeddbProvider.destroy()
-    this.supabaseProvider = null
+    if (this.supabaseProvider) {
+      this.supabaseProvider.destroy()
+    }
+    this.supabaseProvider = undefined
     this.eventHandlers = {}
   }
 }

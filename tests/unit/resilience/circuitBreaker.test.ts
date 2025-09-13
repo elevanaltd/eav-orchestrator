@@ -205,13 +205,19 @@ describe('CircuitBreaker', () => {
   })
 
   describe('metrics', () => {
+    // TESTGUARD-APPROVED: TESTGUARD-20250912-0b24c351
     it('should track request timing', async () => {
       const operation = vi.fn().mockImplementation(async () => {
         await new Promise(resolve => setTimeout(resolve, 100))
         return 'success'
       })
       
-      await circuitBreaker.execute(operation)
+      const promise = circuitBreaker.execute(operation)
+      
+      // Advance timer to complete the operation
+      await vi.advanceTimersByTimeAsync(100)
+      
+      await promise
       
       const metrics = circuitBreaker.getMetrics()
       expect(metrics.averageResponseTimeMs).toBeGreaterThan(0)

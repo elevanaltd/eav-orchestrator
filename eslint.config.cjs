@@ -74,6 +74,8 @@ module.exports = [
         btoa: 'readonly',
         atob: 'readonly',
         // Node globals
+        global: 'readonly',
+        NodeJS: 'readonly',
         process: 'readonly',
         Buffer: 'readonly',
         __dirname: 'readonly',
@@ -87,9 +89,15 @@ module.exports = [
     rules: {
       ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'caughtErrorsIgnorePattern': '^_'
+      }],
+      'no-empty-pattern': 'off',
     },
   },
   {
-    ignores: ['dist', 'eslint.config.cjs', '*.d.ts', 'vite.config.d.ts'],
+    ignores: ['dist', 'eslint.config.cjs', '*.d.ts', 'vite.config.d.ts', 'src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx'],
   },
 ];

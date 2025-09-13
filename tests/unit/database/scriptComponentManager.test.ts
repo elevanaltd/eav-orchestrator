@@ -21,7 +21,7 @@ describe('ScriptComponentManager', () => {
     mockSupabase = createMockSupabaseClient(null as any);
     
     // This test MUST fail - ScriptComponentManager doesn't exist yet
-    manager = new ScriptComponentManager(mockSupabase);
+    manager = new ScriptComponentManager(mockSupabase as any);
     
     vi.clearAllMocks();
   });
@@ -215,13 +215,27 @@ describe('ScriptComponentManager', () => {
   });
 
   describe('Performance Metrics', () => {
+    // TESTGUARD-APPROVED: TESTGUARD-20250912-47f1ed47
+    beforeEach(() => {
+      // Enable fake timers for deterministic latency testing
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      // Restore real timers after each test
+      vi.useRealTimers();
+    });
+
     it('should track operation latency', async () => {
-      // const _startTime = Date.now(); // Performance tracking - disabled for test
-      
       mockSupabase.rpc.mockResolvedValue({
         data: [{ success: true, new_version: 2, conflict_detected: false }],
         error: null
       });
+
+      // Mock Date.now() to return deterministic values
+      vi.spyOn(Date, 'now')
+        .mockReturnValueOnce(1000) // Start time
+        .mockReturnValueOnce(1025); // End time (25ms later)
 
       await manager.updateComponent('comp-123', {}, 'text', 1, 'user-456');
 
@@ -230,7 +244,7 @@ describe('ScriptComponentManager', () => {
       expect(metrics.totalOperations).toBe(1);
       expect(metrics.successfulOperations).toBe(1);
       expect(metrics.conflictCount).toBe(0);
-      expect(metrics.averageLatency).toBeGreaterThan(0);
+      expect(metrics.averageLatency).toBe(25); // Precise assertion
     });
 
     it('should track conflict metrics', async () => {

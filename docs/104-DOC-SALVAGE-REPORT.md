@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-After comprehensive analysis of reference-old build and visual demo requirements, this report provides definitive guidance for restarting the EAV Orchestrator with proper architecture and narrowed scope.
+After comprehensive analysis of the reference system (now located at `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo`) and visual demo requirements, this report provides definitive guidance for restarting the EAV Orchestrator with proper architecture and narrowed scope.
 
 ## Critical Clarification
 
