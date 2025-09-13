@@ -14,7 +14,13 @@ These instructions guide Claude Code in developing the EAV Orchestrator system f
 **MANDATORY: Your first action for any new task is to prepare the context.** Do not begin analysis or coding until you have completed this protocol.
 
 ### Phase 1: Context Initialization
-1. **Verify Codebase is Packed:** Check for the existence of a Repomix `outputId` from the current session. This ID is stored in `.claude/session.vars`. If it doesn't exist, you must run `mcp__repomix__pack_codebase` first and save the new ID.
+1. **Verify Codebase is Packed:** 
+   - First, check if `.claude/session.vars` exists
+   - If not, run the hook: `bash .claude/hooks/post-session-start.sh` (if it exists)
+   - Then check for a Repomix `outputId` in `.claude/session.vars`
+   - If no outputId exists, run `mcp__repomix__pack_codebase` and save the new ID to both:
+     - `.claude/session.vars` as `REPOMIX_OUTPUT_ID=<outputId>`
+     - `.claude/last-pack-id.txt` as just the outputId
 
 2. **Analyze the Task:** Read the user's request and extract 2-4 key nouns, function names, or concepts (e.g., "CustomSupabaseProvider", "circuitBreaker", "database migration").
 
