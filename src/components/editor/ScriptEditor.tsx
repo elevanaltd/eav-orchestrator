@@ -256,7 +256,12 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
       // Cleanup collaboration provider
       if (collaborationProvider && !provider) {
-        collaborationProvider.destroy().catch(console.error);
+        if (typeof collaborationProvider.destroy === 'function') {
+          const destroyResult = collaborationProvider.destroy();
+          if (destroyResult && typeof destroyResult.catch === 'function') {
+            destroyResult.catch(console.error);
+          }
+        }
       }
 
       if (!ydoc) {
