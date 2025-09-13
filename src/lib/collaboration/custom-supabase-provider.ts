@@ -36,6 +36,10 @@ interface CircuitBreakerOptions {
   name?: string;
 }
 
+export interface CircuitBreakerStatus {
+  circuitBreakerState: string;
+}
+
 export interface CustomSupabaseProviderConfig {
   supabaseClient: SupabaseClient;
   ydoc: Y.Doc;
@@ -44,7 +48,7 @@ export interface CustomSupabaseProviderConfig {
   tableName?: string;
   onSync?: () => void;
   onError?: (error: Error) => void;
-  onStatusChange?: (status: 'connected' | 'disconnected' | 'syncing' | 'error') => void;
+  onStatusChange?: (status: string | CircuitBreakerStatus) => void;
 }
 
 export interface YjsDocument {
@@ -287,10 +291,12 @@ export class CustomSupabaseProvider {
 
     try {
       // Apply retry mechanism for resilience
-      await withRetry(persistOperation, {
+      const retryOperation = withRetry(persistOperation, {
         maxRetries: 3,
+        initialDelayMs: 100,
         maxDelayMs: 1000
       });
+      await retryOperation();
     } catch (error) {
       console.error('Error persisting update after retries:', error);
       throw error;
@@ -342,9 +348,9 @@ export class CustomSupabaseProvider {
   private notifyCircuitBreakerStateChange(state: string): void {
     // Notify config callback if provided
     if (this.config.onStatusChange) {
-      // Map circuit breaker state to provider status
-      const status = state === 'OPEN' ? 'error' : 'connected';
-      this.config.onStatusChange(status);
+      this.config.onStatusChange({
+        circuitBreakerState: state
+      });
     }
     
     // Notify additional handlers
@@ -397,6 +403,8 @@ export class CustomSupabaseProvider {
         this.loadInitialStateBreaker.open();
         this.setupRealtimeBreaker.open();
         this.persistUpdateBreaker.open();
+        // Directly notify the state change when manually opened
+        this.notifyCircuitBreakerStateChange('OPEN');
       },
       halfOpen: () => {
         // Opossum doesn't have a halfOpen method, use fallback
@@ -519,6 +527,8 @@ export class CustomSupabaseProvider {
 
     for (const updateData of queueToProcess) {
       try {
+        // Call persistUpdateOperation directly, bypassing the circuit breaker
+        // since drainOfflineQueue is typically called when the circuit is closed
         await this.persistUpdateOperation(updateData);
       } catch (error) {
         console.error('Error processing queued update:', error);

@@ -68,6 +68,7 @@ describe('Circuit Breaker Integration', () => {
   describe('Circuit Breaker State Management', () => {
     it('should open circuit after threshold failures', async () => {
       // Setup provider with mocked failures
+      (mockSupabaseClient.rpc as any).mockClear();
       (mockSupabaseClient.rpc as any).mockRejectedValue(new Error('Network error'));
       
       provider = new CustomSupabaseProvider({
@@ -83,19 +84,24 @@ describe('Circuit Breaker Integration', () => {
       const persistBreaker = provider.getPersistUpdateCircuitBreaker();
       
       // The circuit requires volumeThreshold (5) failures with errorThresholdPercentage (30%)
-      // So we need at least 5 requests with >30% failing
+      // We need to call persistUpdateOperation directly through the breaker
       const failures = [];
       for (let i = 0; i < 6; i++) {
-        failures.push(provider.persistUpdate(new Uint8Array([1, 2, 3])).catch(() => {}));
+        // Call the circuit breaker directly with the operation
+        failures.push(
+          persistBreaker.fire(new Uint8Array([1, 2, 3]))
+            .catch(() => {}) // Swallow errors but they're still counted
+        );
       }
       
       await Promise.allSettled(failures);
       
       // With 6 consecutive failures and 30% threshold, the circuit should open
-      // Opossum circuit breakers track state differently, so we'll check the stats
       const stats = persistBreaker.stats;
-      // After 6 failures, the circuit should have opened
+      // After 6 attempts, we should have at least 5 failures recorded
       expect(stats.failures).toBeGreaterThanOrEqual(5);
+      // The circuit should be open
+      expect(persistBreaker.opened).toBe(true);
     });
 
     it('should queue updates when circuit is open', async () => {
@@ -126,9 +132,12 @@ describe('Circuit Breaker Integration', () => {
     });
 
     it('should drain offline queue when circuit closes', async () => {
-      // Setup successful RPC responses
+      // Setup successful RPC responses - ensure it returns the expected format
       (mockSupabaseClient.rpc as any).mockClear();
-      (mockSupabaseClient.rpc as any).mockResolvedValue({ data: [{ success: true, new_version: 2 }] });
+      (mockSupabaseClient.rpc as any).mockResolvedValue({ 
+        data: [{ success: true, new_version: 2 }],
+        error: null 
+      });
       
       provider = new CustomSupabaseProvider({
         ydoc: ydoc,
