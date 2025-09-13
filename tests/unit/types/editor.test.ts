@@ -192,7 +192,7 @@ describe('Editor Types', () => {
         },
         ydoc: mockDoc,
         components: [],
-        onContentChange: (content, plainText) => {
+        onContentChange: (content, _plainText) => {
           console.log('Content changed:', content);
         },
         onSave: async (content) => {

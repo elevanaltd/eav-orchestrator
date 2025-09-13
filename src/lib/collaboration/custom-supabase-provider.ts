@@ -24,7 +24,17 @@
 import * as Y from 'yjs';
 import { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
 import { withRetry } from '../resilience/retryWithBackoff';
+// Context7: consulted for opossum
 import CircuitBreaker from 'opossum';
+
+// Define CircuitBreakerOptions type based on opossum documentation
+interface CircuitBreakerOptions {
+  timeout?: number;
+  errorThresholdPercentage?: number;
+  resetTimeout?: number;
+  volumeThreshold?: number;
+  name?: string;
+}
 
 export interface CustomSupabaseProviderConfig {
   supabaseClient: SupabaseClient;
@@ -34,7 +44,7 @@ export interface CustomSupabaseProviderConfig {
   tableName?: string;
   onSync?: () => void;
   onError?: (error: Error) => void;
-  onStatusChange?: (status: any) => void;
+  onStatusChange?: (status: 'connected' | 'disconnected' | 'syncing' | 'error') => void;
 }
 
 export interface YjsDocument {
@@ -332,9 +342,9 @@ export class CustomSupabaseProvider {
   private notifyCircuitBreakerStateChange(state: string): void {
     // Notify config callback if provided
     if (this.config.onStatusChange) {
-      this.config.onStatusChange({
-        circuitBreakerState: state
-      });
+      // Map circuit breaker state to provider status
+      const status = state === 'OPEN' ? 'error' : 'connected';
+      this.config.onStatusChange(status);
     }
     
     // Notify additional handlers
@@ -347,7 +357,7 @@ export class CustomSupabaseProvider {
     });
   }
 
-  public getCircuitBreakerConfig(): any {
+  public getCircuitBreakerConfig(): CircuitBreakerOptions {
     return {
       timeout: 5000,
       errorThresholdPercentage: 30,
@@ -370,49 +380,56 @@ export class CustomSupabaseProvider {
   }
 
   // Getter for test compatibility - returns the primary circuit breaker (persistUpdate)
-  get circuitBreaker(): any {
-    const self = this;
+  get circuitBreaker(): {
+    open: () => void;
+    halfOpen: () => void;
+    close: () => void;
+    fire: CircuitBreaker['fire'];
+    opened: boolean;
+    stats: CircuitBreaker['stats'];
+    reset?: () => void;
+    isOpen?: () => boolean;
+    getState?: () => string;
+  } {
     // Create a facade that exposes all breakers' functionality
     return {
       open: () => {
-        self.loadInitialStateBreaker.open();
-        self.setupRealtimeBreaker.open();
-        self.persistUpdateBreaker.open();
+        this.loadInitialStateBreaker.open();
+        this.setupRealtimeBreaker.open();
+        this.persistUpdateBreaker.open();
       },
       halfOpen: () => {
         // Opossum doesn't have a halfOpen method, use fallback
-        self.loadInitialStateBreaker.close();
-        self.setupRealtimeBreaker.close();
-        self.persistUpdateBreaker.close();
+        this.loadInitialStateBreaker.close();
+        this.setupRealtimeBreaker.close();
+        this.persistUpdateBreaker.close();
       },
       close: () => {
-        self.loadInitialStateBreaker.close();
-        self.setupRealtimeBreaker.close();
-        self.persistUpdateBreaker.close();
+        this.loadInitialStateBreaker.close();
+        this.setupRealtimeBreaker.close();
+        this.persistUpdateBreaker.close();
       },
-      fire: self.persistUpdateBreaker.fire.bind(self.persistUpdateBreaker),
-      get opened() {
-        return self.persistUpdateBreaker.opened;
-      },
-      get options() {
-        return self.persistUpdateBreaker.options;
-      },
-      get stats() {
-        return self.persistUpdateBreaker.stats;
-      }
+      fire: this.persistUpdateBreaker.fire.bind(this.persistUpdateBreaker),
+      opened: this.persistUpdateBreaker.opened,
+      stats: this.persistUpdateBreaker.stats
     };
   }
 
   public getCircuitBreakerState(): string {
     // Return the most restrictive state among all circuit breakers
-    const states = [
-      this.loadInitialStateBreaker.stats.state,
-      this.setupRealtimeBreaker.stats.state,
-      this.persistUpdateBreaker.stats.state
-    ];
+    // Check each breaker's state properties directly
+    if (this.loadInitialStateBreaker.opened || 
+        this.setupRealtimeBreaker.opened || 
+        this.persistUpdateBreaker.opened) {
+      return 'OPEN';
+    }
     
-    if (states.includes('open')) return 'OPEN';
-    if (states.includes('halfOpen')) return 'HALF_OPEN';
+    if (this.loadInitialStateBreaker.halfOpen || 
+        this.setupRealtimeBreaker.halfOpen || 
+        this.persistUpdateBreaker.halfOpen) {
+      return 'HALF_OPEN';
+    }
+    
     return 'CLOSED';
   }
 
@@ -420,7 +437,12 @@ export class CustomSupabaseProvider {
     this.circuitBreakerStateChangeHandlers.push(handler);
   }
 
-  public getCircuitBreakerMetrics(): any {
+  public getCircuitBreakerMetrics(): {
+    totalRequests: number;
+    successCount: number;
+    failureCount: number;
+    state: string;
+  } {
     // Aggregate metrics from all circuit breakers
     const aggregatedMetrics = {
       totalRequests: 0,
@@ -443,7 +465,7 @@ export class CustomSupabaseProvider {
 
   private loadOfflineQueue(): void {
     try {
-      const stored = localStorage.getItem(this.OFFLINE_QUEUE_KEY);
+      const stored = typeof window !== 'undefined' ? window.localStorage.getItem(this.OFFLINE_QUEUE_KEY) : null;
       if (stored) {
         const parsedQueue = JSON.parse(stored);
         this.offlineQueue = parsedQueue.map((item: number[]) => new Uint8Array(item));
@@ -457,7 +479,9 @@ export class CustomSupabaseProvider {
   private saveOfflineQueue(): void {
     try {
       const serializedQueue = this.offlineQueue.map(item => Array.from(item));
-      localStorage.setItem(this.OFFLINE_QUEUE_KEY, JSON.stringify(serializedQueue));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(this.OFFLINE_QUEUE_KEY, JSON.stringify(serializedQueue));
+      }
     } catch (error) {
       console.error('Error saving offline queue to localStorage:', error);
     }
@@ -474,7 +498,7 @@ export class CustomSupabaseProvider {
 
   public getPersistedQueue(): Uint8Array[] {
     try {
-      const stored = localStorage.getItem(this.OFFLINE_QUEUE_KEY);
+      const stored = typeof window !== 'undefined' ? window.localStorage.getItem(this.OFFLINE_QUEUE_KEY) : null;
       if (stored) {
         const parsedQueue = JSON.parse(stored);
         return parsedQueue.map((item: number[]) => new Uint8Array(item));

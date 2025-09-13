@@ -12,11 +12,11 @@ import { YjsSupabaseProvider } from '../lib/collaboration/YjsSupabaseProvider';
 // TipTap JSON Content Type (matches TipTap's JSONContent)
 export interface EditorJSONContent {
   type?: string;
-  attrs?: Record<string, any>;
+  attrs?: Record<string, unknown>;
   content?: EditorJSONContent[];
   marks?: Array<{
     type: string;
-    attrs?: Record<string, any>;
+    attrs?: Record<string, unknown>;
   }>;
   text?: string;
 }

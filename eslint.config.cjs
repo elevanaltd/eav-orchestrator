@@ -74,6 +74,8 @@ module.exports = [
         btoa: 'readonly',
         atob: 'readonly',
         // Node globals
+        global: 'readonly',
+        NodeJS: 'readonly',
         process: 'readonly',
         Buffer: 'readonly',
         __dirname: 'readonly',
@@ -87,6 +89,12 @@ module.exports = [
     rules: {
       ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_',
+        'caughtErrorsIgnorePattern': '^_'
+      }],
+      'no-empty-pattern': 'off',
     },
   },
   {

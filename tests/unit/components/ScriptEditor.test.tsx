@@ -7,9 +7,10 @@
 
 // Context7: consulted for vitest
 // Context7: consulted for @testing-library/react
+// CONTEXT7_BYPASS: CI-PIPELINE-FIX - Removing unused fireEvent import for TypeScript errors
 // Context7: consulted for yjs
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import * as Y from 'yjs';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
 
@@ -79,7 +80,7 @@ describe('ScriptEditor', () => {
 
     it('should render TipTap editor with basic rich text features', async () => {
       // GREEN STATE: Component should render with editor
-      const { container } = render(<ScriptEditor config={mockConfig} />);
+      render(<ScriptEditor config={mockConfig} />);
       
       // Editor content should be present
       expect(screen.getByTestId('editor-content')).toBeInTheDocument();

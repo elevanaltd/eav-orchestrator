@@ -9,10 +9,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Context7: consulted for @testing-library/react
 import { render, screen, waitFor } from '@testing-library/react';
-// Context7: consulted for react
-import React from 'react';
-// Context7: consulted for yjs
-import * as Y from 'yjs';
+// React and Y imports removed - not used directly in tests
 
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
 
@@ -58,17 +55,17 @@ describe('ScriptEditor Memory Leak Prevention', () => {
     const mockOnSave = vi.fn();
     const mockOnContentChange = vi.fn();
     
-    const { rerender } = render(
+    const { } = render(
       <ScriptEditor
-        documentId="test-doc"
-        projectId="test-project"
         config={{
+          documentId: "test-doc",
+          userId: "test-user",
+          userName: "Test User",
           autoSave: true,
           autoSaveDelay: 1000
         }}
         onSave={mockOnSave}
         onContentChange={mockOnContentChange}
-        testMode={true}
       />
     );
 
@@ -103,14 +100,14 @@ describe('ScriptEditor Memory Leak Prevention', () => {
     
     const { unmount } = render(
       <ScriptEditor
-        documentId="test-doc"
-        projectId="test-project"
         config={{
+          documentId: "test-doc",
+          userId: "test-user",
+          userName: "Test User",
           autoSave: true,
           autoSaveDelay: 1000
         }}
         onSave={mockOnSave}
-        testMode={true}
       />
     );
 
@@ -143,14 +140,14 @@ describe('ScriptEditor Memory Leak Prevention', () => {
     
     render(
       <ScriptEditor
-        documentId="test-doc"
-        projectId="test-project"
         config={{
+          documentId: "test-doc",
+          userId: "test-user",
+          userName: "Test User",
           autoSave: true,
           autoSaveDelay: 500
         }}
         onSave={mockOnSave}
-        testMode={true}
       />
     );
 
@@ -187,13 +184,13 @@ describe('ScriptEditor Memory Leak Prevention', () => {
     
     render(
       <ScriptEditor
-        documentId="test-doc"
-        projectId="test-project"
         config={{
+          documentId: "test-doc",
+          userId: "test-user",
+          userName: "Test User",
           autoSave: false // Auto-save disabled
         }}
         onSave={mockOnSave}
-        testMode={true}
       />
     );
 

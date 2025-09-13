@@ -8,6 +8,7 @@
 // Context7: consulted for react
 // CONTEXT7_BYPASS: MEMORY-LEAK-FIX - Adding useRef to fix auto-save memory leak
 // Context7: consulted for @tiptap/react
+// CONTEXT7_BYPASS: CI-PIPELINE-FIX - Adding Editor type import for ESLint type fix
 // Context7: consulted for @tiptap/starter-kit
 // Context7: consulted for @tiptap/extension-collaboration
 // Context7: consulted for @tiptap/extension-collaboration-cursor
@@ -19,7 +20,7 @@ import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
 
-import { ScriptEditorProps, EditorState, FormattingOptions, SaveStatus, UserPresence } from '../../types/editor';
+import { ScriptEditorProps, EditorState, SaveStatus } from '../../types/editor';
 import { YjsSupabaseProvider } from '../../lib/collaboration/YjsSupabaseProvider';
 import { processTipTapContent } from '../../lib/content/content-processor';
 
@@ -31,10 +32,6 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   initialContent,
   activeUsers = [],
   onContentChange,
-  onComponentAdd,
-  onComponentUpdate,
-  onComponentDelete,
-  onComponentReorder,
   onSave,
   onError,
   className = ''
@@ -70,14 +67,13 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     retryCount: 0
   });
 
-  const [collaborationProvider, setCollaborationProvider] = useState<YjsSupabaseProvider | null>(null);
+  const [collaborationProvider] = useState<YjsSupabaseProvider | null>(null);
 
   // Auto-save timer ref to prevent memory leak
-  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Create or use existing Y.js document
   const yDoc = useMemo(() => ydoc || new Y.Doc(), [ydoc]);
-  const yText = useMemo(() => yDoc.getText('content'), [yDoc]);
 
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
@@ -116,13 +112,38 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
   }, [yDoc, provider, collaborationProvider, config.userName, config.userColor]);
 
+  // Auto-save handler
+  const handleAutoSave = useCallback(async (content: Record<string, unknown>) => {
+    if (!onSave || saveStatus.isSaving) return;
+
+    try {
+      setSaveStatus(prev => ({ ...prev, isSaving: true }));
+      await onSave(content);
+      setSaveStatus(prev => ({
+        ...prev,
+        isSaving: false,
+        hasUnsavedChanges: false,
+        lastSaved: new Date().toISOString(),
+        saveError: undefined,
+        retryCount: 0
+      }));
+    } catch (error) {
+      setSaveStatus(prev => ({
+        ...prev,
+        isSaving: false,
+        saveError: (error as Error).message,
+        retryCount: prev.retryCount + 1
+      }));
+      onError?.(error as Error);
+    }
+  }, [onSave, saveStatus.isSaving, onError]);
+
   // Content change handler
-  const handleContentChange = useCallback(async (editor: any) => {
+  const handleContentChange = useCallback(async (editor: ReturnType<typeof useEditor>) => {
     if (!editor) return;
 
     try {
       const json = editor.getJSON();
-      const html = editor.getHTML();
       
       // Process content using the existing content processor
       const processed = await processTipTapContent(json);
@@ -154,36 +175,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     } catch (error) {
       onError?.(error as Error);
     }
-  }, [onContentChange, onSave, config.autoSave, config.autoSaveDelay, onError]);
-
-  // Auto-save handler
-  const handleAutoSave = useCallback(async (content: any) => {
-    if (!onSave || saveStatus.isSaving) return;
-
-    try {
-      setSaveStatus(prev => ({ ...prev, isSaving: true }));
-      await onSave(content);
-      setSaveStatus(prev => ({
-        ...prev,
-        isSaving: false,
-        hasUnsavedChanges: false,
-        lastSaved: new Date().toISOString(),
-        saveError: undefined,
-        retryCount: 0
-      }));
-    } catch (error) {
-      setSaveStatus(prev => ({
-        ...prev,
-        isSaving: false,
-        saveError: (error as Error).message,
-        retryCount: prev.retryCount + 1
-      }));
-      onError?.(error as Error);
-    }
-  }, [onSave, saveStatus.isSaving, onError]);
+  }, [onContentChange, onSave, config.autoSave, config.autoSaveDelay, onError, handleAutoSave]);
 
   // Update editor state based on current selection and formatting
-  const updateEditorState = useCallback((editor: any) => {
+  const updateEditorState = useCallback((editor: ReturnType<typeof useEditor>) => {
     if (!editor) return;
 
     const { from, to } = editor.state.selection;
@@ -242,7 +237,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     bold: () => editor?.chain().focus().toggleBold().run(),
     italic: () => editor?.chain().focus().toggleItalic().run(),
     bulletList: () => editor?.chain().focus().toggleBulletList().run(),
-    heading: (level: number) => editor?.chain().focus().toggleHeading({ level }).run()
+    heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => editor?.chain().focus().toggleHeading({ level }).run()
   };
 
   return (
@@ -279,7 +274,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             if (level === 0) {
               editor?.chain().focus().setParagraph().run();
             } else {
-              formatHandlers.heading(level);
+              formatHandlers.heading(level as 1 | 2 | 3 | 4 | 5 | 6);
             }
           }}
           value={editorState.formatting.heading || 0}
