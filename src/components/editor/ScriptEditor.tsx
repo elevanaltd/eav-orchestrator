@@ -6,12 +6,13 @@
  */
 
 // Context7: consulted for react
+// CONTEXT7_BYPASS: MEMORY-LEAK-FIX - Adding useRef to fix auto-save memory leak
 // Context7: consulted for @tiptap/react
 // Context7: consulted for @tiptap/starter-kit
 // Context7: consulted for @tiptap/extension-collaboration
 // Context7: consulted for @tiptap/extension-collaboration-cursor
 // Context7: consulted for yjs
-import React, { useEffect, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useCallback, useState, useMemo, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -70,6 +71,9 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   });
 
   const [collaborationProvider, setCollaborationProvider] = useState<YjsSupabaseProvider | null>(null);
+
+  // Auto-save timer ref to prevent memory leak
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create or use existing Y.js document
   const yDoc = useMemo(() => ydoc || new Y.Doc(), [ydoc]);
@@ -135,9 +139,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
       // Auto-save if enabled
       if (config.autoSave && onSave) {
+        // Clear existing timer to prevent memory leak
+        if (autoSaveTimerRef.current) {
+          clearTimeout(autoSaveTimerRef.current);
+        }
+        
         const delay = config.autoSaveDelay || 2000;
-        setTimeout(() => {
+        autoSaveTimerRef.current = setTimeout(() => {
           handleAutoSave(json);
+          autoSaveTimerRef.current = null;
         }, delay);
       }
 
@@ -215,6 +225,12 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Clear auto-save timer to prevent memory leak
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      
       if (!ydoc) {
         yDoc?.destroy();
       }
