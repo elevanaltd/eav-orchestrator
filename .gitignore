@@ -5,6 +5,10 @@ worktrees/
 .coord
 coordination
 
+# Claude session files (user-specific)
+.claude/
+*.claude
+
 # Dependencies
 node_modules/
 .pnp
