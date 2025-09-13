@@ -7,7 +7,7 @@
 
 // Context7: consulted for yjs
 import * as Y from 'yjs';
-import { YjsSupabaseProvider } from '../lib/collaboration/YjsSupabaseProvider';
+import { CustomSupabaseProvider } from '../lib/collaboration/custom-supabase-provider';
 
 // TipTap JSON Content Type (matches TipTap's JSONContent)
 export interface EditorJSONContent {
@@ -67,7 +67,8 @@ export interface CollaborationStatus {
 
 // Editor configuration
 export interface ScriptEditorConfig {
-  documentId: string;
+  projectId?: string; // Required for authenticated provider initialization
+  documentId?: string; // Required for authenticated provider initialization
   scriptId?: string;
   userId: string;
   userName: string;
@@ -84,7 +85,7 @@ export interface ScriptEditorConfig {
 export interface ScriptEditorProps {
   config: ScriptEditorConfig;
   ydoc?: Y.Doc;
-  provider?: YjsSupabaseProvider;
+  provider?: CustomSupabaseProvider;
   components?: ScriptComponent[];
   initialContent?: EditorJSONContent;
   activeUsers?: UserPresence[];

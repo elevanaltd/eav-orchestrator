@@ -21,7 +21,8 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
 
 import { ScriptEditorProps, EditorState, SaveStatus } from '../../types/editor';
-import { YjsSupabaseProvider } from '../../lib/collaboration/YjsSupabaseProvider';
+import { AuthenticatedProviderFactory } from '../../lib/collaboration/AuthenticatedProviderFactory';
+import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-provider';
 import { processTipTapContent } from '../../lib/content/content-processor';
 
 export const ScriptEditor: React.FC<ScriptEditorProps> = ({
@@ -67,7 +68,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     retryCount: 0
   });
 
-  const [collaborationProvider] = useState<YjsSupabaseProvider | null>(null);
+  const [collaborationProvider, setCollaborationProvider] = useState<CustomSupabaseProvider | null>(null);
 
   // Auto-save timer ref to prevent memory leak
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -213,12 +214,36 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Initialize collaboration provider if not provided
   useEffect(() => {
-    if (!provider && !collaborationProvider) {
-      // Create provider would normally happen here
-      // For now, we'll use the mock in tests
-      console.log('ScriptEditor: Collaboration provider would be initialized here');
+    if (!provider && !collaborationProvider && config.projectId && config.documentId) {
+      const initializeProvider = async () => {
+        try {
+          const authenticatedProvider = await AuthenticatedProviderFactory.create({
+            projectId: config.projectId!,
+            documentId: config.documentId!,
+            ydoc: yDoc,
+            onSync: () => {
+              console.log('ScriptEditor: Provider synced');
+            },
+            onError: (error) => {
+              console.error('ScriptEditor: Provider error:', error);
+              onError?.(error);
+            },
+            onStatusChange: (status) => {
+              console.log('ScriptEditor: Provider status:', status);
+            }
+          });
+
+          await authenticatedProvider.connect();
+          setCollaborationProvider(authenticatedProvider);
+        } catch (error) {
+          console.error('ScriptEditor: Failed to initialize collaboration provider:', error);
+          onError?.(error as Error);
+        }
+      };
+
+      initializeProvider();
     }
-  }, [provider, collaborationProvider]);
+  }, [provider, collaborationProvider, config.projectId, config.documentId, yDoc, onError]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -228,12 +253,17 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         clearTimeout(autoSaveTimerRef.current);
         autoSaveTimerRef.current = null;
       }
-      
+
+      // Cleanup collaboration provider
+      if (collaborationProvider && !provider) {
+        collaborationProvider.destroy().catch(console.error);
+      }
+
       if (!ydoc) {
         yDoc?.destroy();
       }
     };
-  }, [yDoc, ydoc]);
+  }, [yDoc, ydoc, collaborationProvider, provider]);
 
   // Formatting button handlers
   const formatHandlers = {

@@ -188,6 +188,16 @@ export const roles = {
 export type UserRole = typeof roles[keyof typeof roles];
 
 /**
+ * Get authenticated user
+ *
+ * Standalone function wrapper for auth.getUser() method
+ * Used by AuthenticatedProviderFactory for provider initialization
+ */
+export async function getUser() {
+  return auth.getUser();
+}
+
+/**
  * Get user role from database with FAIL-CLOSED error handling
  *
  * CRITICAL SECURITY NOTE:
