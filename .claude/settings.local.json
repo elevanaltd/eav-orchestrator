@@ -11,5 +11,12 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "mcp__repomix__attach_packed_output"
+    ],
+    "deny": [],
+    "ask": []
   }
 }

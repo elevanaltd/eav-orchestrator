@@ -83,13 +83,16 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         document: yDoc,
         field: 'content'
       }),
-      CollaborationCursor.configure({
-        provider: provider || collaborationProvider,
-        user: {
-          name: config.userName,
-          color: config.userColor || '#007acc'
-        }
-      })
+      // Only add CollaborationCursor if we have a provider
+      ...(provider || collaborationProvider ? [
+        CollaborationCursor.configure({
+          provider: provider || collaborationProvider,
+          user: {
+            name: config.userName,
+            color: config.userColor || '#007acc'
+          }
+        })
+      ] : [])
     ],
     content: initialContent || { type: 'doc', content: [] },
     editorProps: {

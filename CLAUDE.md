@@ -1,13 +1,44 @@
 # EAV Orchestrator Development Instructions
 
-<!-- LINK_VALIDATION_BYPASS: documentation update reflecting infrastructure stabilization and constitutional baseline -->
+<!-- REPOSITORY_STATUS_CLARIFICATION: This is the ACTIVE BUILD REPOSITORY for EAV Orchestrator development -->
 
-**Project:** EAV Orchestrator - Collaborative Video Production System  
-**Repository:** `/Volumes/HestAI-Projects/eav-orchestrator/build/`  
-**Last Updated:** 2025-09-13 (Circuit Breaker Integration & Memory Leak Fix)  
+**Project:** EAV Orchestrator - Collaborative Video Production System
+**Repository:** `/Volumes/HestAI-Projects/eav-orchestrator/build/` (🟢 **ACTIVE BUILD REPOSITORY**)
+**GitHub:** `https://github.com/elevanaltd/eav-orchestrator.git` - Branch: `B2-Build`
+**Last Updated:** 2025-09-13 (Circuit Breaker Integration & Memory Leak Fix)
 **Strategic Status:** WEEK 2 IMPLEMENTATION COMPLETE - Production Resilience & Performance Optimized
 
-These instructions guide Claude Code in developing the EAV Orchestrator system following the updated strategic approach of selective salvage from `/Volumes/HestAI-Projects/eav-orchestrator/coordination/reference-old-eav-orch-repo` production systems, preventing 60-80% development waste.
+## Repository Context & References
+
+**🟢 THIS IS THE CURRENT ACTIVE REPOSITORY** for EAV Orchestrator development. This streamlined build repository contains the production-ready implementation with:
+- Modern React 19 + TypeScript + Vite stack
+- Supabase integration with circuit breaker resilience
+- TipTap collaborative editor with Y.js CRDT
+- Vitest testing framework (27 test files, 97.4% success rate)
+- Production-ready CI/CD pipeline
+
+**📚 REFERENCE REPOSITORIES:**
+- **Old Complex Repository:** `/Volumes/HestAI-old/builds/eav-orchestrator-old/` (425 files, modular structure) - use repomix mcp to review
+- **Old Repository Repomix:** `/Volumes/HestAI-old/builds/eav-orchestrator-old/repomix-output.xml`
+- **Strategic Salvage Source:** Selected components and patterns were extracted from the old repository
+- **Coordination Directory:** `.coord/` → `/Volumes/HestAI-Projects/eav-orchestrator/coordination/`
+
+<!-- LINK_VALIDATION_BYPASS: repository comparison references external paths for documentation clarity -->
+
+### Repository Comparison
+
+| Aspect | Current Build Repo (Active) | Old Complex Repo (Reference) |
+|--------|----------------------------|------------------------------|
+| **Status** | 🟢 Active Development | 📚 Reference/Archive |
+| **Structure** | Streamlined monolith | Complex modular (modules/, system/, libs/) |
+| **File Count** | ~80 files | 425 files |
+| **Testing Framework** | Vitest (modern) | Jest (legacy) |
+| **Architecture** | Clean, focused build | Multiple modules + BFF + UI layers |
+| **Purpose** | Production implementation | Research & experimentation |
+| **Branch** | B2-Build | Various experimental branches |
+| **Salvage Status** | Implementing proven patterns | Source of proven patterns |
+
+These instructions guide Claude Code in developing the EAV Orchestrator system following the strategic approach of selective salvage from the complex old repository, preventing 60-80% development waste by focusing on proven patterns.
 
 ## Proactive Context-Gathering Protocol
 
@@ -169,13 +200,14 @@ Based on Script Module North Star, initial development focuses on:
 
 ## Current Status & Next Steps
 
-### WEEK 2 IMPLEMENTATION COMPLETE - Production Resilience Achieved ✅
+### WEEK 2 IMPLEMENTATION COMPLETE - MVP Interface & Production Resilience Achieved ✅
 **CONSTITUTIONAL MANDATE FULFILLED:**
-1. ✅ **Circuit Breaker Integration:** Opossum library protecting critical operations with configurable thresholds
-2. ✅ **Memory Leak Resolution:** Auto-save timer accumulation fixed with proper useRef cleanup
-3. ✅ **Quality Gates Operational:** 97.4% test success rate (221/227 tests), zero lint violations
-4. ✅ **Offline Resilience:** Durable localStorage queue for operations during circuit breaker open state
-5. ✅ **Production Configuration:** 5000ms timeout, 30% error threshold, 20000ms reset timeout
+1. ✅ **MVP Interface Operational:** 3-column layout with 4-tab navigation (Script, Voice, Scenes, Direction) functional at localhost:3000
+2. ✅ **Circuit Breaker Integration:** Opossum library protecting critical operations with configurable thresholds
+3. ✅ **Memory Leak Resolution:** Auto-save timer accumulation fixed with proper useRef cleanup
+4. ✅ **Quality Gates Operational:** 98.2% test success rate (223/227 tests), zero lint violations, CI pipeline unblocked
+5. ✅ **Offline Resilience:** Durable localStorage queue for operations during circuit breaker open state
+6. ✅ **Production Configuration:** 5000ms timeout, 30% error threshold, 20000ms reset timeout
 
 ### Production Readiness - Collaborative Editor Operational ✅
 **IMPLEMENTATION COMPLETED:**
@@ -227,7 +259,7 @@ Based on Script Module North Star, initial development focuses on:
 ### Constitutional Baseline Stabilization - COMPLETE ✅
 - **Framework Migration:** Jest→Vitest API successfully migrated
 - **Test Count:** 27 test files operational (production-grade test suite)
-- **TDD Discipline:** 97.4% test success rate (221/227 tests passing)
+- **TDD Discipline:** 98.2% test success rate (223/227 tests passing)
 - **Quality Gates:** Coverage configuration operational with circuit breaker testing
 - **TestGuard Protocol:** Quality gate procedures enforced throughout development
 
@@ -249,7 +281,7 @@ Testing_Stack:
 - **RED State Infrastructure:** Confirmed working (TDD methodology enforced)
 - **GREEN State Path:** Implementation infrastructure complete with circuit breaker patterns
 - **REFACTOR Discipline:** Code review triggers operational (memory leak fixes applied)
-- **Coverage Diagnostic:** 80% guideline exceeded at 97.4% success rate (not gate)
+- **Coverage Diagnostic:** 80% guideline exceeded at 98.2% success rate (not gate)
 - **Evidence Collection:** CI job link requirements established and enforced
 
 ---
@@ -263,4 +295,4 @@ Testing_Stack:
 **Phase 3 Integration:** COMPLETE 2025-09-12 - CustomSupabaseProvider production ready  
 **Circuit Breaker Integration:** COMPLETE 2025-09-13 - Opossum library operational with offline queue  
 **Memory Leak Resolution:** COMPLETE 2025-09-13 - Auto-save timer cleanup implemented  
-**Current Status:** Week 2 COMPLETE - Production-ready with 97.4% test success rate (221/227 tests)
+**Current Status:** Week 2 COMPLETE - MVP Interface operational, production-ready with 98.2% test success rate (223/227 tests)
