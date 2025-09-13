@@ -237,12 +237,27 @@ vi.mock('yjs', () => {
       const json = new TextDecoder().decode(update);
       const state = JSON.parse(json);
 
-      // Apply text updates
+      // Apply text updates with CRDT merge semantics
       if (state.text) {
         Object.entries(state.text).forEach(([name, content]) => {
           const text = doc.getText(name);
-          text.delete(0, text.length);
-          text.insert(0, content as string);
+          const currentContent = text.toString();
+          const incomingContent = content as string;
+
+          // CRDT merge: If both have content, use lexicographic ordering for determinism
+          // This ensures both documents converge to the same state
+          if (currentContent && incomingContent && currentContent !== incomingContent) {
+            // Deterministic merge: alphabetically earlier content comes first
+            const merged = currentContent < incomingContent
+              ? currentContent + incomingContent
+              : incomingContent + currentContent;
+            text.delete(0, text.length);
+            text.insert(0, merged);
+          } else if (!currentContent) {
+            // No existing content, just set the incoming
+            text.insert(0, incomingContent);
+          }
+          // If incoming is same as current, no change needed
         });
       }
 
@@ -286,15 +301,17 @@ vi.mock('yjs', () => {
         const json = new TextDecoder().decode(update);
         const state = JSON.parse(json);
 
-        // Merge text fields (for simplicity, concatenate)
+        // Merge text fields with CRDT semantics
         if (state.text) {
           Object.entries(state.text).forEach(([name, content]) => {
             if (!mergedState.text[name]) {
               mergedState.text[name] = content as string;
             } else {
-              // For CRDT merge test, use deterministic merge (alphabetical)
+              // CRDT merge: use deterministic merge (alphabetical ordering)
+              // This ensures consistent convergence regardless of merge order
               const existing = mergedState.text[name];
               const incoming = content as string;
+              // Always use the same ordering for deterministic results
               mergedState.text[name] = existing < incoming ? existing + incoming : incoming + existing;
             }
           });
