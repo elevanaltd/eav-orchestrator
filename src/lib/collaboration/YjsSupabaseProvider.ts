@@ -207,6 +207,10 @@ export class YjsSupabaseProvider {
   }
 
   public getStatus(): ProviderStatus {
+    // Update circuit breaker state from CustomSupabaseProvider if available
+    if (this.supabaseProvider && this.supabaseProvider.getCircuitBreakerState) {
+      this.status.circuitBreakerState = this.supabaseProvider.getCircuitBreakerState() as 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    }
     return { ...this.status }
   }
 
