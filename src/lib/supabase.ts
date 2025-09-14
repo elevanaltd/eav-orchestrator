@@ -7,6 +7,7 @@
  * Critical-Engineer: consulted for Authentication strategy (JWT, session management)
  * Critical-Engineer: consulted for DB trigger and RLS security model
  * Critical-Engineer: consulted for RLS policy testing and implementation
+ * Critical-Engineer: consulted for Environment configuration strategy
  *
  * SECURITY ARCHITECTURE:
  * - Server-side RLS policies are the single source of truth for authorization
@@ -80,6 +81,9 @@ export const getSupabase = (): SupabaseClient | null => {
 
   return supabaseClient;
 };
+
+// Export alias for compatibility
+export const getSupabaseClient = getSupabase;
 
 // Authentication functions following test contract with fail-closed error handling
 export const auth = {

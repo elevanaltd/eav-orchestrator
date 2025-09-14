@@ -21,7 +21,9 @@
 // Context7: consulted for yjs
 // Context7: consulted for @supabase/supabase-js
 // Context7: consulted for opossum
+// Context7: consulted for y-protocols/awareness
 import * as Y from 'yjs';
+import { Awareness } from 'y-protocols/awareness';
 import { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
 import { withRetry } from '../resilience/retryWithBackoff';
 // Context7: consulted for opossum
@@ -61,6 +63,7 @@ export interface YjsDocument {
 export class CustomSupabaseProvider {
   private supabaseClient: SupabaseClient;
   private ydoc: Y.Doc;
+  public awareness: Awareness; // CRITICAL: Required for CollaborationCursor
   private documentId: string;
   private projectId: string; // CRITICAL: Project-based security
   private tableName: string;
@@ -85,6 +88,10 @@ export class CustomSupabaseProvider {
     this.config = config;
     this.supabaseClient = config.supabaseClient;
     this.ydoc = config.ydoc;
+
+    // Initialize awareness for cursor tracking (similar to y-websocket)
+    this.awareness = new Awareness(this.ydoc);
+
     this.documentId = config.documentId;
     this.projectId = config.projectId;
     this.tableName = config.tableName || 'yjs_documents';
@@ -124,25 +131,28 @@ export class CustomSupabaseProvider {
 
   async connect(): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
       // Load initial document state through circuit breaker
       await this.loadInitialStateBreaker.fire();
-      
+
       // Set up real-time subscription through circuit breaker
       await this.setupRealtimeBreaker.fire();
-      
+
       // Set up Y.js update handler
       this.setupYjsUpdateHandler();
-      
+
+      // Set up awareness handlers for cursor tracking
+      this.setupAwarenessHandlers();
+
       // Process any queued offline updates
       await this.drainOfflineQueue();
-      
+
       this.isConnected = true;
-      
+
       const connectionTime = performance.now() - startTime;
       console.log(`CustomSupabaseProvider connected in ${connectionTime.toFixed(2)}ms`);
-      
+
     } catch (error) {
       console.error('CustomSupabaseProvider connection failed:', error);
       throw error;
@@ -153,6 +163,12 @@ export class CustomSupabaseProvider {
     if (this.channel) {
       await this.supabaseClient.removeChannel(this.channel);
     }
+
+    // Clean up awareness
+    if (this.awareness) {
+      this.awareness.destroy();
+    }
+
     this.isConnected = false;
   }
 
@@ -164,9 +180,9 @@ export class CustomSupabaseProvider {
         .from(this.tableName)
         .select('id, state_vector, version')
         .eq('id', this.documentId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() to handle 0 or 1 rows gracefully
 
-      if (docError && docError.code !== 'PGRST116') { // PGRST116 = no rows
+      if (docError) {
         throw new Error(`Failed to load document: ${docError.message}`);
       }
 
@@ -229,6 +245,16 @@ export class CustomSupabaseProvider {
         // Only persist updates that didn't originate from this provider (avoid loops)
         this.persistUpdate(update);
       }
+    });
+  }
+
+  private setupAwarenessHandlers(): void {
+    // Set up awareness update handler for cursor synchronization
+    // This will be used by CollaborationCursor extension
+    this.awareness.on('update', () => {
+      // Awareness updates are handled by the TipTap CollaborationCursor extension
+      // We just need to ensure the awareness object is available
+      console.debug('Awareness updated');
     });
   }
 

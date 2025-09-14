@@ -31,11 +31,11 @@ const tabs: Tab[] = [
   { id: 'direction', label: 'Edit Direction', icon: '🎯', implemented: false }
 ];
 
-// Mock data for script list
+// Mock data for script list - using valid UUIDs for database compatibility
 const mockScripts = [
-  { id: '1', title: 'MVHR System', wordCount: 2100, duration: '14:00', status: 'In editing', lastEdited: '2h ago' },
-  { id: '2', title: 'Dishwasher - Bosch SMS25AW00G', wordCount: 1850, duration: '12:20', status: 'Client review', lastEdited: '5h ago' },
-  { id: '3', title: 'Washing Machine - Samsung WW90T534', wordCount: 2300, duration: '15:20', status: 'Draft', lastEdited: '1d ago' }
+  { id: 'a1b2c3d4-e5f6-4789-0123-456789abcdef', title: 'MVHR System', wordCount: 2100, duration: '14:00', status: 'In editing', lastEdited: '2h ago' },
+  { id: 'b2c3d4e5-f678-9012-3456-789abcdef012', title: 'Dishwasher - Bosch SMS25AW00G', wordCount: 1850, duration: '12:20', status: 'Client review', lastEdited: '5h ago' },
+  { id: 'c3d4e5f6-7890-1234-5678-9abcdef01234', title: 'Washing Machine - Samsung WW90T534', wordCount: 2300, duration: '15:20', status: 'Draft', lastEdited: '1d ago' }
 ];
 
 function App() {

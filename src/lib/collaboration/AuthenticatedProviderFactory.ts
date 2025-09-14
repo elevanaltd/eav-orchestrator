@@ -13,10 +13,10 @@
 
 // Context7: consulted for yjs
 // Context7: consulted for @supabase/supabase-js
+// Context7: consulted for yjs
 import * as Y from 'yjs';
-import { createClient } from '@supabase/supabase-js';
 import { CustomSupabaseProvider, CustomSupabaseProviderConfig } from './custom-supabase-provider';
-import { getUser } from '../supabase';
+import { getUser, getSupabaseClient } from '../supabase';
 
 export interface AuthenticatedProviderFactoryConfig {
   projectId: string;
@@ -42,11 +42,11 @@ export class AuthenticatedProviderFactory {
       // Attempt to get authenticated user
       const user = await getUser().catch(() => null);
 
-      // Create Supabase client with environment configuration
-      const supabaseClient = createClient(
-        import.meta.env.VITE_SUPABASE_URL!,
-        import.meta.env.VITE_SUPABASE_ANON_KEY!
-      );
+      // Use singleton Supabase client to avoid multiple instances
+      const supabaseClient = getSupabaseClient();
+      if (!supabaseClient) {
+        throw new Error('Supabase client not available');
+      }
 
       // Build provider configuration with authentication context
       const providerConfig: CustomSupabaseProviderConfig = {

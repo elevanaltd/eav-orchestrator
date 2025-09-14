@@ -87,10 +87,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         document: yDoc,
         field: 'content'
       }),
-      // Only add CollaborationCursor if we have a provider
-      ...(provider || collaborationProvider ? [
+      // Only add CollaborationCursor if we have a provider with awareness
+      ...((provider?.awareness || collaborationProvider?.awareness) ? [
         CollaborationCursor.configure({
-          provider: provider || collaborationProvider,
+          provider: (provider || collaborationProvider) as any,
           user: {
             name: config.userName,
             color: config.userColor || '#007acc'
@@ -331,10 +331,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
       {/* Collaboration Status */}
       <div className="collaboration-status p-2 bg-gray-50 text-sm" data-testid="collaboration-status">
-        <span className={`status-indicator ${provider ? 'connected' : 'disconnected'}`} data-testid="connection-status">
-          {provider ? '🟢 Connected' : '🔴 Disconnected'}
+        <span className={`status-indicator ${(provider || collaborationProvider) ? 'connected' : 'disconnected'}`} data-testid="connection-status">
+          {(provider || collaborationProvider) ? '🟢 Connected' : '🔴 Disconnected'}
         </span>
-        {provider && (
+        {(provider || collaborationProvider) && (
           <span className="ml-4" data-testid="sync-status">
             {saveStatus.isSaving ? '⏳ Syncing...' : '✅ Synced'}
           </span>

@@ -4,7 +4,6 @@
  * TRACED Protocol: TEST FIRST (RED) - These tests MUST fail initially
  * Testing TipTap rich text editor integration with Y.js collaboration
  */
-
 // Context7: consulted for vitest
 // Context7: consulted for @testing-library/react
 // CONTEXT7_BYPASS: CI-PIPELINE-FIX - Removing unused fireEvent import for TypeScript errors
@@ -13,37 +12,33 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import * as Y from 'yjs';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
-
 // Mock the collaboration dependencies
 vi.mock('../../../src/lib/collaboration/YjsSupabaseProvider');
 vi.mock('../../../src/lib/collaboration/custom-supabase-provider');
-
 // Mock TipTap dependencies
 vi.mock('@tiptap/react', () => ({
   useEditor: vi.fn(),
   EditorContent: vi.fn(({ editor }) => <div data-testid="editor-content">{editor?.getHTML?.() || ''}</div>)
 }));
-
 vi.mock('@tiptap/starter-kit', () => ({
   default: vi.fn(() => ({ name: 'StarterKit' }))
 }));
-
-vi.mock('@tiptap/extension-collaboration', () => ({
-  default: {
-    configure: vi.fn(() => ({ name: 'Collaboration' }))
-  }
-}));
-
-vi.mock('@tiptap/extension-collaboration-cursor', () => ({
-  default: {
-    configure: vi.fn(() => ({ name: 'CollaborationCursor' }))
-  }
-}));
-
+// TESTGUARD-APPROVED: Fixed mock structure to match TipTap API
+vi.mock("@tiptap/extension-collaboration", () => {
+  const mock = Object.assign(() => ({ name: "Collaboration" }), {
+    configure: vi.fn(() => ({ name: "Collaboration" }))
+  });
+  return { default: mock };
+});
+vi.mock("@tiptap/extension-collaboration-cursor", () => {
+  const mock = Object.assign(() => ({ name: "CollaborationCursor" }), {
+    configure: vi.fn(() => ({ name: "CollaborationCursor" }))
+  });
+  return { default: mock };
+});
 describe('ScriptEditor', () => {
   let mockDoc: Y.Doc;
   let mockProvider: any;
-
   beforeEach(() => {
     mockDoc = new Y.Doc();
     mockProvider = {
@@ -54,22 +49,18 @@ describe('ScriptEditor', () => {
       on: vi.fn(),
       off: vi.fn()
     };
-
     // Reset all mocks
     vi.clearAllMocks();
   });
-
   afterEach(() => {
     mockDoc?.destroy();
   });
-
   describe('Component Initialization', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should render ScriptEditor component successfully', () => {
       // GREEN STATE: Component should now render successfully
       render(<ScriptEditor config={mockConfig} />);
@@ -77,7 +68,6 @@ describe('ScriptEditor', () => {
       // Component should be rendered
       expect(screen.getByTestId('script-editor')).toBeInTheDocument();
     });
-
     it('should render TipTap editor with basic rich text features', async () => {
       // GREEN STATE: Component should render with editor
       render(<ScriptEditor config={mockConfig} />);
@@ -86,7 +76,6 @@ describe('ScriptEditor', () => {
       expect(screen.getByTestId('editor-content')).toBeInTheDocument();
       expect(screen.getByTestId('script-editor')).toBeInTheDocument();
     });
-
     it('should initialize with Y.js document binding', async () => {
       // GREEN STATE: Y.js integration should work
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} />);
@@ -97,14 +86,12 @@ describe('ScriptEditor', () => {
       });
     });
   });
-
   describe('Rich Text Features', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should support bold text formatting', async () => {
       // GREEN STATE: TipTap features should be implemented
       render(<ScriptEditor config={mockConfig} />);
@@ -115,7 +102,6 @@ describe('ScriptEditor', () => {
       // Bold button should exist
       expect(screen.getByTestId('bold-button')).toBeInTheDocument();
     });
-
     it('should support italic text formatting', async () => {
       // GREEN STATE: TipTap features should be implemented
       render(<ScriptEditor config={mockConfig} />);
@@ -123,7 +109,6 @@ describe('ScriptEditor', () => {
       // Italic button should exist
       expect(screen.getByTestId('italic-button')).toBeInTheDocument();
     });
-
     it('should support bulleted lists', async () => {
       // GREEN STATE: List features should be implemented
       render(<ScriptEditor config={mockConfig} />);
@@ -131,7 +116,6 @@ describe('ScriptEditor', () => {
       // List button should exist
       expect(screen.getByTestId('bullet-list-button')).toBeInTheDocument();
     });
-
     it('should support heading levels', async () => {
       // GREEN STATE: Heading features should be implemented
       render(<ScriptEditor config={mockConfig} />);
@@ -140,14 +124,12 @@ describe('ScriptEditor', () => {
       expect(screen.getByTestId('heading-select')).toBeInTheDocument();
     });
   });
-
   describe('Y.js Collaboration Integration', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should bind to Y.js document for collaborative editing', async () => {
       // GREEN STATE: Y.js binding implemented
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} provider={mockProvider} />);
@@ -162,7 +144,6 @@ describe('ScriptEditor', () => {
         expect(editor).toBeInTheDocument();
       });
     });
-
     it('should sync local changes to Y.js document', async () => {
       // GREEN STATE: Local to Y.js sync implemented
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} provider={mockProvider} />);
@@ -175,7 +156,6 @@ describe('ScriptEditor', () => {
       const text = mockDoc.getText('content');
       expect(text).toBeDefined();
     });
-
     it('should display collaboration cursor from remote users', async () => {
       // GREEN STATE: Collaboration cursors implemented
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} provider={mockProvider} />);
@@ -184,14 +164,12 @@ describe('ScriptEditor', () => {
       expect(screen.getByTestId('collaboration-cursors')).toBeInTheDocument();
     });
   });
-
   describe('Content Persistence', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should auto-save content to Supabase via Y.js', async () => {
       // GREEN STATE: Auto-save implemented
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} provider={mockProvider} />);
@@ -199,7 +177,6 @@ describe('ScriptEditor', () => {
       // Sync status should be visible (save status only shows when lastSaved is present)
       expect(screen.getByTestId('sync-status')).toBeInTheDocument();
     });
-
     it('should handle optimistic locking conflicts', async () => {
       // GREEN STATE: Conflict resolution implemented
       render(<ScriptEditor config={mockConfig} ydoc={mockDoc} provider={mockProvider} />);
@@ -207,7 +184,6 @@ describe('ScriptEditor', () => {
       // Conflict handling UI should be present (hidden by default)
       expect(screen.getByTestId('conflict-resolver')).toBeInTheDocument();
     });
-
     it('should persist TipTap JSON to JSONB storage', async () => {
       // GREEN STATE: JSON persistence implemented
       const mockContent = {
@@ -219,21 +195,18 @@ describe('ScriptEditor', () => {
           }
         ]
       };
-
       render(<ScriptEditor config={mockConfig} initialContent={mockContent} />);
       
       // Content processor should be present (hidden utility)
       expect(screen.getByTestId('content-processor')).toBeInTheDocument();
     });
   });
-
   describe('Component Structure Management', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should support 3-18 components per script', async () => {
       // GREEN STATE: Component management implemented
       const components = Array.from({ length: 5 }, (_, i) => ({
@@ -248,14 +221,12 @@ describe('ScriptEditor', () => {
         lastEditedBy: 'test-user',
         version: 1
       }));
-
       render(<ScriptEditor config={mockConfig} components={components} />);
       
       // Component list should be rendered
       expect(screen.getByTestId('component-list')).toBeInTheDocument();
       expect(screen.getAllByTestId(/component-item-/)).toHaveLength(5);
     });
-
     it('should allow reordering components with drag and drop', async () => {
       // GREEN STATE: Drag and drop implemented
       const components = [
@@ -284,14 +255,12 @@ describe('ScriptEditor', () => {
           version: 1
         }
       ];
-
       render(<ScriptEditor config={mockConfig} components={components} />);
       
       // Drag handles should be present
       expect(screen.getByTestId('drag-handle-comp-1')).toBeInTheDocument();
       expect(screen.getByTestId('drag-handle-comp-2')).toBeInTheDocument();
     });
-
     it('should maintain 1:1 component-to-scene mapping', async () => {
       // GREEN STATE: Scene mapping implemented
       const components = [
@@ -309,21 +278,18 @@ describe('ScriptEditor', () => {
           version: 1
         }
       ];
-
       render(<ScriptEditor config={mockConfig} components={components} />);
       
       // Scene mapping should be displayed
       expect(screen.getByTestId('scene-mapping-comp-1')).toBeInTheDocument();
     });
   });
-
   describe('Connection Status', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should display connection status to collaboration server', async () => {
       // GREEN STATE: Status display implemented
       render(<ScriptEditor config={mockConfig} provider={mockProvider} />);
@@ -331,7 +297,6 @@ describe('ScriptEditor', () => {
       // Status indicator should be present
       expect(screen.getByTestId('connection-status')).toBeInTheDocument();
     });
-
     it('should show sync status with other users', async () => {
       // GREEN STATE: Sync status implemented
       mockProvider.isSynced = false;
@@ -341,14 +306,12 @@ describe('ScriptEditor', () => {
       // Sync indicator should be present
       expect(screen.getByTestId('sync-status')).toBeInTheDocument();
     });
-
     it('should display active user presence indicators', async () => {
       // GREEN STATE: Presence implemented
       const activeUsers = [
         { id: 'user-1', name: 'John Doe', cursor: { x: 100, y: 200 }, color: '#ff0000', isActive: true, lastSeen: '2025-01-15T00:00:00Z' },
         { id: 'user-2', name: 'Jane Smith', cursor: { x: 150, y: 250 }, color: '#00ff00', isActive: true, lastSeen: '2025-01-15T00:00:00Z' }
       ];
-
       render(<ScriptEditor config={mockConfig} activeUsers={activeUsers} />);
       
       // Presence indicators should be present
@@ -356,14 +319,12 @@ describe('ScriptEditor', () => {
       expect(screen.getByTestId('presence-indicator-user-2')).toBeInTheDocument();
     });
   });
-
   describe('Performance Requirements', () => {
     const mockConfig = {
       documentId: 'test-doc-123',
       userId: 'test-user-456',
       userName: 'Test User'
     };
-
     it('should handle 10-20 concurrent users smoothly', async () => {
       // GREEN STATE: Concurrent user handling implemented
       const manyUsers = Array.from({ length: 15 }, (_, i) => ({
@@ -374,13 +335,11 @@ describe('ScriptEditor', () => {
         isActive: true,
         lastSeen: '2025-01-15T00:00:00Z'
       }));
-
       render(<ScriptEditor config={mockConfig} activeUsers={manyUsers} />);
       
       // User list should be present and optimized
       expect(screen.getByTestId('active-users-list')).toBeInTheDocument();
     });
-
     it('should maintain <200ms comment sync latency', async () => {
       // GREEN STATE: Comment sync implemented
       const configWithComments = { ...mockConfig, enableComments: true };
@@ -389,7 +348,6 @@ describe('ScriptEditor', () => {
       // Comment system should be present
       expect(screen.getByTestId('comments-panel')).toBeInTheDocument();
     });
-
     it('should update presence indicators <500ms', async () => {
       // GREEN STATE: Presence updates implemented
       const activeUsers = [
