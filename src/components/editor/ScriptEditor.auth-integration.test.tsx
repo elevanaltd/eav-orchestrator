@@ -15,8 +15,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 // Context7: consulted for yjs
 import * as Y from 'yjs';
 import { ScriptEditor } from './ScriptEditor';
-import { auth } from '../../lib/supabase';
+// auth import removed - using getUser directly from lib/supabase
 import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-provider';
+import { createMockCustomSupabaseProvider } from '../../../tests/helpers/mockCustomSupabaseProvider';
 
 // Mock dependencies - TipTap mocks handled by tests/setup.ts
 // TestGuard approved: Mock infrastructure maintenance - adding missing getUser export
@@ -37,31 +38,17 @@ vi.mock('../../lib/collaboration/YjsSupabaseProvider');
 
 describe('ScriptEditor Authentication Integration', () => {
   let mockDoc: Y.Doc;
-  let mockSupabaseClient: any;
   const mockAuthUser = {
     id: 'auth-user-123',
-    email: 'authenticated@example.com'
-  };
+    email: 'authenticated@example.com',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()
+  } as any; // Mock User type for testing
 
   beforeEach(() => {
     mockDoc = new Y.Doc();
-
-    mockSupabaseClient = {
-      auth: {
-        getUser: vi.fn()
-      },
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
-              data: null,
-              error: null
-            })
-          })
-        })
-      })
-    };
-
     // Reset mocks
     vi.clearAllMocks();
   });
@@ -160,11 +147,11 @@ describe('ScriptEditor Authentication Integration', () => {
 
   describe('Provider Integration Contracts', () => {
     it('should connect provider after initialization with authentication context', async () => {
-      const mockProvider = {
+      const mockProvider = createMockCustomSupabaseProvider({
         connect: vi.fn().mockResolvedValue(undefined),
         disconnect: vi.fn().mockResolvedValue(undefined),
         destroy: vi.fn().mockResolvedValue(undefined)
-      };
+      });
 
       vi.mocked(CustomSupabaseProvider).mockImplementation(() => mockProvider);
 

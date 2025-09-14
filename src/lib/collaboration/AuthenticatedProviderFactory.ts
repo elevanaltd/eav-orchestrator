@@ -64,7 +64,16 @@ export class AuthenticatedProviderFactory {
       const provider = new CustomSupabaseProvider(providerConfig);
 
       // Attach authentication metadata for debugging/logging
-      (provider as any)._authContext = {
+      // Using type assertion to attach metadata to provider instance
+      const providerWithAuth = provider as CustomSupabaseProvider & {
+        _authContext: {
+          userId: string;
+          isAuthenticated: boolean;
+          email: string | null;
+        };
+      };
+
+      providerWithAuth._authContext = {
         userId: user?.id || 'anonymous',
         isAuthenticated: !!user,
         email: user?.email || null
@@ -87,6 +96,13 @@ export class AuthenticatedProviderFactory {
     isAuthenticated: boolean;
     email: string | null;
   } | null {
-    return (provider as any)._authContext || null;
+    const providerWithAuth = provider as CustomSupabaseProvider & {
+      _authContext?: {
+        userId: string;
+        isAuthenticated: boolean;
+        email: string | null;
+      };
+    };
+    return providerWithAuth._authContext || null;
   }
 }

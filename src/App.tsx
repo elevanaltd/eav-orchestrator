@@ -209,6 +209,7 @@ function App() {
               }}>
                 <ScriptEditor
                   config={{
+                    projectId: 'eav-orchestrator-main', // Required for collaboration
                     documentId: selectedScript.id,
                     userId: 'demo-user',
                     userName: 'Demo User',

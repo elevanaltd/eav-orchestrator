@@ -79,7 +79,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Disable History extension - Y.js Collaboration provides its own history
+        history: false,
+      }),
       Collaboration.configure({
         document: yDoc,
         field: 'content'

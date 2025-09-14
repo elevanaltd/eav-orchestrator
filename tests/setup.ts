@@ -37,6 +37,17 @@ vi.mock('@tiptap/extension-collaboration-cursor', () => ({
   }
 }));
 
+// CONSTITUTIONAL FIX: Mock TipTap StarterKit for test environment
+// Context7: consulted for @tiptap/starter-kit
+vi.mock('@tiptap/starter-kit', () => ({
+  default: {
+    configure: vi.fn(() => ({
+      name: 'starterKit',
+      addProseMirrorPlugins: () => []
+    }))
+  }
+}));
+
 // ARCHITECTURAL FIX: Comprehensive Y.js Mock Facade (Strangler Fig Pattern)
 // This unified mock replaces fragmented Y.js mocking with a complete facade
 // that satisfies all test requirements and prevents cascading failures.

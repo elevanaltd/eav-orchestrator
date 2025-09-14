@@ -165,7 +165,7 @@ export const auth = {
     return data.session;
   },
 
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: string, session: { user: { id: string } } | null) => void) {
     const client = getSupabase();
     if (!client) {
       throw new Error('Supabase client not available - system configuration error');

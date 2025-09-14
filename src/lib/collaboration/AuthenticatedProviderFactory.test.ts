@@ -89,9 +89,6 @@ describe('AuthenticatedProviderFactory', () => {
       // Act: Create authenticated provider
       const provider = await AuthenticatedProviderFactory.create(mockConfig);
 
-      // Import the mocked class for instanceof check
-      const { CustomSupabaseProvider: MockedProvider } = await import('./custom-supabase-provider');
-
       // Assert: Provider should be created with auth context - check against constructor name
       expect(provider.constructor.name).toBe('CustomSupabaseProvider');
 
@@ -125,7 +122,7 @@ describe('AuthenticatedProviderFactory', () => {
     it('should fallback to anonymous mode when getUser returns null', async () => {
       // Arrange: Mock null user response
       const { getUser } = await import('../supabase');
-      vi.mocked(getUser).mockResolvedValue(null);
+      vi.mocked(getUser).mockResolvedValue(null as any);
 
       // Act: Create provider with null user
       const provider = await AuthenticatedProviderFactory.create(mockConfig);

@@ -27,6 +27,10 @@ export default defineConfig({
       '**/node_modules/**',
       '**/.git/**'
     ],
+    env: {
+      VITE_SUPABASE_URL: 'https://test.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key-for-integration-tests'
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
