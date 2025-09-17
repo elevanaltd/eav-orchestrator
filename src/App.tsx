@@ -2,6 +2,9 @@
 import { useState } from 'react';
 import { ScriptEditor } from './components/editor/ScriptEditor';
 import type { EditorJSONContent } from './types/editor';
+import { ScriptComponentManager } from './lib/database/scriptComponentManager';
+import { supabase } from './lib/supabase';
+import type { ScriptComponent } from './types/scriptComponent';
 
 // EAV Brand Colors
 const theme = {
@@ -41,6 +44,41 @@ const mockScripts = [
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('script');
   const [selectedScript, setSelectedScript] = useState(mockScripts[0]);
+
+  // Initialize component manager
+  const componentManager = new ScriptComponentManager(supabase);
+
+  // Component management handlers
+  const handleComponentAdd = async (component: Partial<ScriptComponent>): Promise<ScriptComponent> => {
+    try {
+      const result = await componentManager.createComponent(
+        component.scriptId || selectedScript.id,
+        component.content || { type: 'doc', content: [] },
+        component.plainText || '',
+        component.position,
+        component.status || 'created',
+        'demo-user' // In production, this would come from auth context
+      );
+
+      // Transform the result to match ScriptComponent interface
+      return {
+        id: result.component_id,
+        scriptId: result.script_id,
+        content: result.content_tiptap,
+        plainText: result.content_plain,
+        position: result.position_index,
+        status: result.component_status as 'created' | 'in_edit' | 'approved',
+        sceneId: undefined, // Not used in this implementation
+        createdAt: result.created_at,
+        updatedAt: result.updated_at,
+        lastEditedBy: result.last_edited_by,
+        version: result.version
+      } as ScriptComponent;
+    } catch (error) {
+      console.error('Failed to create component:', error);
+      throw error;
+    }
+  };
 
   return (
     <div className="app-container" style={{ minHeight: '100vh', background: theme.light }}>
@@ -211,6 +249,7 @@ function App() {
                   config={{
                     projectId: 'eav-orchestrator-main', // Required for collaboration
                     documentId: selectedScript.id,
+                    scriptId: selectedScript.id, // Add scriptId for component creation
                     userId: 'demo-user',
                     userName: 'Demo User',
                     autoSave: true,
@@ -219,6 +258,7 @@ function App() {
                   onContentChange={(content: EditorJSONContent) => {
                     console.log('Content changed:', content);
                   }}
+                  onComponentAdd={handleComponentAdd}
                   onSave={async (content: EditorJSONContent) => {
                     console.log('Saving content:', content);
                   }}

@@ -243,11 +243,95 @@ export class ScriptComponentManager {
    */
   private calculateP95Latency(): number {
     if (this.operationTimes.length === 0) return 0;
-    
+
     const sorted = [...this.operationTimes].sort((a, b) => a - b);
     const p95Index = Math.floor(sorted.length * 0.95);
-    
+
     return sorted[p95Index] || 0;
+  }
+
+  /**
+   * Create a new script component
+   */
+  async createComponent(
+    scriptId: string,
+    content: object = { type: 'doc', content: [] },
+    plainText: string = '',
+    position?: number,
+    status: string = 'created',
+    userId: string
+  ): Promise<{
+    component_id: string;
+    script_id: string;
+    content_tiptap: object;
+    content_plain: string;
+    position_index: number;
+    component_status: string;
+    version: number;
+    created_at: string;
+    updated_at: string;
+    last_edited_by: string;
+    last_edited_at: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      // Get the next position if not provided
+      let finalPosition = position;
+      if (finalPosition === undefined) {
+        const { data: positionData } = await this.supabase.rpc('get_next_position', {
+          p_script_id: scriptId
+        });
+        finalPosition = positionData || 1000.0;
+      }
+
+      // Insert the new component
+      const { data, error } = await this.supabase
+        .from('script_components')
+        .insert({
+          script_id: scriptId,
+          content_tiptap: content,
+          content_plain: plainText,
+          position: finalPosition,
+          component_status: status,
+          last_edited_by: userId,
+          last_edited_at: new Date().toISOString()
+        })
+        .select('component_id, script_id, content_tiptap, content_plain, position, component_status, version, created_at, updated_at, last_edited_by, last_edited_at')
+        .single();
+
+      if (error) {
+        console.error('Database error creating component:', error);
+        throw new Error(`Failed to create component: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No data returned from component creation');
+      }
+
+      // Success
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        component_id: data.component_id,
+        script_id: data.script_id,
+        content_tiptap: data.content_tiptap,
+        content_plain: data.content_plain,
+        position_index: data.position,
+        component_status: data.component_status,
+        version: data.version,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        last_edited_by: data.last_edited_by,
+        last_edited_at: data.last_edited_at
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      throw error;
+    }
   }
 }
 

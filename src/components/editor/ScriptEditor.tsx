@@ -33,6 +33,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   initialContent,
   activeUsers = [],
   onContentChange,
+  onComponentAdd,
   onSave,
   onError,
   className = ''
@@ -281,6 +282,26 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => editor?.chain().focus().toggleHeading({ level }).run()
   };
 
+  // Component management handlers
+  const handleAddComponent = async () => {
+    if (!onComponentAdd) return;
+
+    try {
+      const newComponent = {
+        scriptId: config.scriptId || 'default',
+        content: { type: 'doc', content: [] },
+        plainText: '',
+        position: components.length,
+        status: 'created' as const
+      };
+
+      await onComponentAdd(newComponent);
+    } catch (error) {
+      console.error('Failed to add component:', error);
+      onError?.(error as Error);
+    }
+  };
+
   return (
     <div className={`script-editor ${className}`} data-testid="script-editor">
       {/* Toolbar */}
@@ -366,6 +387,33 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
           </div>
         </div>
       )}
+
+      {/* Add Component Section */}
+      <div className="add-component-section border-b p-3">
+        <button
+          type="button"
+          onClick={handleAddComponent}
+          disabled={!onComponentAdd || components.length >= 18}
+          className={`px-4 py-2 rounded text-sm font-medium ${
+            !onComponentAdd || components.length >= 18
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+          aria-label="Add Component"
+        >
+          + Add Component
+        </button>
+        {components.length >= 18 && (
+          <div className="text-xs text-orange-600 mt-1">
+            18 of 18 components (maximum reached)
+          </div>
+        )}
+        {components.length > 0 && components.length < 18 && (
+          <div className="text-xs text-gray-500 mt-1">
+            {components.length} of 18 components
+          </div>
+        )}
+      </div>
 
       {/* Component List */}
       {components.length > 0 && (
