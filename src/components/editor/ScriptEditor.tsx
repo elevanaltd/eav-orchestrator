@@ -74,8 +74,23 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   // Auto-save timer ref to prevent memory leak
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Create or use existing Y.js document
-  const yDoc = useMemo(() => ydoc || new Y.Doc(), [ydoc]);
+  // Provider initialization ref to prevent double-initialization in StrictMode
+  const providerInitRef = useRef<boolean>(false);
+  const providerCleanupRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Stable Y.js document reference
+  const yDocRef = useRef<Y.Doc | null>(null);
+
+  // Create or use existing Y.js document - stable reference
+  const yDoc = useMemo(() => {
+    if (ydoc) return ydoc;
+    
+    // Create stable Y.Doc instance only once using ref
+    if (!yDocRef.current) {
+      yDocRef.current = new Y.Doc();
+    }
+    return yDocRef.current;
+  }, [ydoc]);
 
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
@@ -91,12 +106,12 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       // Only add CollaborationCursor if we have a provider with awareness
       ...((provider?.awareness || collaborationProvider?.awareness) ? [
         CollaborationCursor.configure({
-          provider: (provider || collaborationProvider) as any,
+          provider: provider || collaborationProvider,
           user: {
             name: config.userName,
             color: config.userColor || '#007acc'
           }
-        })
+        } as Parameters<typeof CollaborationCursor.configure>[0])
       ] : [])
     ],
     content: initialContent || { type: 'doc', content: [] },
@@ -218,36 +233,81 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Initialize collaboration provider if not provided
   useEffect(() => {
-    if (!provider && !collaborationProvider && config.projectId && config.documentId) {
-      const initializeProvider = async () => {
-        try {
-          const authenticatedProvider = await AuthenticatedProviderFactory.create({
-            projectId: config.projectId!,
-            documentId: config.documentId!,
-            ydoc: yDoc,
-            onSync: () => {
-              console.log('ScriptEditor: Provider synced');
-            },
-            onError: (error) => {
-              console.error('ScriptEditor: Provider error:', error);
-              onError?.(error);
-            },
-            onStatusChange: (status) => {
-              console.log('ScriptEditor: Provider status:', status);
-            }
-          });
+    console.log('ScriptEditor: useEffect mount - provider exists:', !!provider, 'initializing:', providerInitRef.current);
 
-          await authenticatedProvider.connect();
-          setCollaborationProvider(authenticatedProvider);
-        } catch (error) {
-          console.error('ScriptEditor: Failed to initialize collaboration provider:', error);
-          onError?.(error as Error);
-        }
-      };
-
-      initializeProvider();
+    // Skip if provider is already provided or already initializing
+    if (provider || providerInitRef.current) {
+      console.log('ScriptEditor: Skipping initialization - provider exists or already initializing');
+      return;
     }
-  }, [provider, collaborationProvider, config.projectId, config.documentId, yDoc, onError]);
+
+    // Skip if required config is missing
+    if (!config.projectId || !config.documentId) {
+      console.log('ScriptEditor: Skipping initialization - missing config');
+      return;
+    }
+
+    // Mark as initializing to prevent double-initialization in StrictMode
+    console.log('ScriptEditor: Starting provider initialization');
+    providerInitRef.current = true;
+
+    const initializeProvider = async () => {
+      try {
+        console.log('ScriptEditor: Initializing provider for document:', config.documentId);
+
+        const authenticatedProvider = await AuthenticatedProviderFactory.create({
+          projectId: config.projectId!,
+          documentId: config.documentId!,
+          ydoc: yDoc,
+          onSync: () => {
+            console.log('ScriptEditor: Provider synced');
+          },
+          onError: (error) => {
+            console.error('ScriptEditor: Provider error:', error);
+            onError?.(error);
+          },
+          onStatusChange: (status) => {
+            console.log('ScriptEditor: Provider status:', status);
+          }
+        });
+
+        await authenticatedProvider.connect();
+        setCollaborationProvider(authenticatedProvider);
+
+        // Store cleanup function
+        providerCleanupRef.current = async () => {
+          console.log('ScriptEditor: Cleaning up provider');
+          if (typeof authenticatedProvider.destroy === 'function') {
+            try {
+              await authenticatedProvider.destroy();
+            } catch (error) {
+              console.error('ScriptEditor: Error destroying provider:', error);
+            }
+          }
+        };
+
+      } catch (error) {
+        console.error('ScriptEditor: Failed to initialize collaboration provider:', error);
+        onError?.(error as Error);
+        // Reset initialization flag on error to allow retry
+        providerInitRef.current = false;
+      }
+    };
+
+    initializeProvider();
+
+    // Cleanup function
+    return () => {
+      // Execute stored cleanup if available
+      if (providerCleanupRef.current) {
+        providerCleanupRef.current().then(() => {
+          providerCleanupRef.current = null;
+          providerInitRef.current = false;
+          setCollaborationProvider(null);
+        });
+      }
+    };
+  }, [provider, config.projectId, config.documentId, onError, yDoc]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -268,11 +328,13 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         }
       }
 
-      if (!ydoc) {
-        yDoc?.destroy();
+      // Cleanup Y.Doc only if we created it (not provided via props)
+      if (!ydoc && yDocRef.current) {
+        yDocRef.current.destroy();
+        yDocRef.current = null;
       }
     };
-  }, [yDoc, ydoc, collaborationProvider, provider]);
+  }, [ydoc, collaborationProvider, provider]);
 
   // Formatting button handlers
   const formatHandlers = {

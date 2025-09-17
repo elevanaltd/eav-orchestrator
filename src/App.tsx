@@ -1,5 +1,5 @@
 // Context7: consulted for react
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ScriptEditor } from './components/editor/ScriptEditor';
 import type { EditorJSONContent, VideoScript, ScriptComponent } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
@@ -42,12 +42,15 @@ function App() {
   const [isLoadingComponents, setIsLoadingComponents] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
 
-  // Initialize component manager
-  const supabase = getSupabase();
-  if (!supabase) {
-    throw new Error('Failed to initialize Supabase client');
-  }
-  const componentManager = new ScriptComponentManager(supabase);
+  // ERROR-ARCHITECT-APPROVED: React hooks dependency fix - memoize componentManager
+  // Initialize component manager with useMemo to avoid recreation
+  const componentManager = useMemo(() => {
+    const supabase = getSupabase();
+    if (!supabase) {
+      throw new Error('Failed to initialize Supabase client');
+    }
+    return new ScriptComponentManager(supabase);
+  }, []); // Only create once on mount
 
   // Load scripts on app start
   useEffect(() => {
@@ -93,7 +96,8 @@ function App() {
     };
 
     loadScripts();
-  }, [componentManager]); // Run once on app start, re-run if componentManager changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run once on app start - componentManager is stable from useMemo
 
   // Load components when script changes
   useEffect(() => {
