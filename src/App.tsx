@@ -1,10 +1,9 @@
 // Context7: consulted for react
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ScriptEditor } from './components/editor/ScriptEditor';
-import type { EditorJSONContent } from './types/editor';
+import type { EditorJSONContent, VideoScript, ScriptComponent } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
-import { supabase } from './lib/supabase';
-import type { ScriptComponent } from './types/scriptComponent';
+import { getSupabase } from './lib/supabase';
 
 // EAV Brand Colors
 const theme = {
@@ -34,34 +33,123 @@ const tabs: Tab[] = [
   { id: 'direction', label: 'Edit Direction', icon: '🎯', implemented: false }
 ];
 
-// Mock data for script list - using valid UUIDs for database compatibility
-const mockScripts = [
-  { id: 'a1b2c3d4-e5f6-4789-0123-456789abcdef', title: 'MVHR System', wordCount: 2100, duration: '14:00', status: 'In editing', lastEdited: '2h ago' },
-  { id: 'b2c3d4e5-f678-9012-3456-789abcdef012', title: 'Dishwasher - Bosch SMS25AW00G', wordCount: 1850, duration: '12:20', status: 'Client review', lastEdited: '5h ago' },
-  { id: 'c3d4e5f6-7890-1234-5678-9abcdef01234', title: 'Washing Machine - Samsung WW90T534', wordCount: 2300, duration: '15:20', status: 'Draft', lastEdited: '1d ago' }
-];
-
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('script');
-  const [selectedScript, setSelectedScript] = useState(mockScripts[0]);
+  const [scripts, setScripts] = useState<VideoScript[]>([]);
+  const [selectedScript, setSelectedScript] = useState<VideoScript | null>(null);
+  const [components, setComponents] = useState<ScriptComponent[]>([]);
+  const [isLoadingScripts, setIsLoadingScripts] = useState(true);
+  const [isLoadingComponents, setIsLoadingComponents] = useState(false);
+  const [scriptError, setScriptError] = useState<string | null>(null);
 
   // Initialize component manager
+  const supabase = getSupabase();
+  if (!supabase) {
+    throw new Error('Failed to initialize Supabase client');
+  }
   const componentManager = new ScriptComponentManager(supabase);
+
+  // Load scripts on app start
+  useEffect(() => {
+    const loadScripts = async () => {
+      setIsLoadingScripts(true);
+      setScriptError(null);
+
+      try {
+        const result = await componentManager.getAllScripts();
+
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        // Transform database scripts to VideoScript interface
+        const transformedScripts: VideoScript[] = result.scripts.map(script => ({
+          id: script.script_id,
+          videoId: script.video_id,
+          title: script.title,
+          description: script.description,
+          wordCount: script.word_count,
+          duration: script.estimated_duration,
+          status: script.script_status as VideoScript['status'],
+          lastEdited: script.last_edited_at || script.updated_at,
+          createdAt: script.created_at,
+          updatedAt: script.updated_at,
+          lastEditedBy: script.last_edited_by
+        }));
+
+        setScripts(transformedScripts);
+
+        // Auto-select first script if available and none selected
+        if (transformedScripts.length > 0 && !selectedScript) {
+          setSelectedScript(transformedScripts[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load scripts:', error);
+        setScriptError(error instanceof Error ? error.message : 'Failed to load scripts');
+        setScripts([]);
+      } finally {
+        setIsLoadingScripts(false);
+      }
+    };
+
+    loadScripts();
+  }, [componentManager]); // Run once on app start, re-run if componentManager changes
+
+  // Load components when script changes
+  useEffect(() => {
+    if (!selectedScript) {
+      setComponents([]);
+      return;
+    }
+    const loadComponents = async () => {
+      setIsLoadingComponents(true);
+      try {
+        const result = await componentManager.getComponentsByScriptId(selectedScript.id);
+        // Transform database result to ScriptComponent interface
+        const transformedComponents: ScriptComponent[] = result.components.map(comp => ({
+          id: comp.component_id,
+          scriptId: comp.script_id,
+          content: comp.content_tiptap,
+          plainText: comp.content_plain,
+          position: comp.position,
+          status: comp.component_status as 'created' | 'in_edit' | 'approved',
+          sceneId: undefined, // Not used in this implementation
+          createdAt: comp.created_at,
+          updatedAt: comp.updated_at,
+          lastEditedBy: comp.last_edited_by,
+          version: comp.version
+        }));
+        setComponents(transformedComponents);
+      } catch (error) {
+        console.error('Failed to load components:', error);
+        // Set empty array on error to prevent UI issues
+        setComponents([]);
+      } finally {
+        setIsLoadingComponents(false);
+      }
+    };
+
+    loadComponents();
+  }, [selectedScript, componentManager]);
 
   // Component management handlers
   const handleComponentAdd = async (component: Partial<ScriptComponent>): Promise<ScriptComponent> => {
+    if (!selectedScript) {
+      throw new Error('No script selected');
+    }
+
     try {
       const result = await componentManager.createComponent(
         component.scriptId || selectedScript.id,
         component.content || { type: 'doc', content: [] },
         component.plainText || '',
+        'demo-user', // In production, this would come from auth context
         component.position,
-        component.status || 'created',
-        'demo-user' // In production, this would come from auth context
+        component.status || 'created'
       );
 
       // Transform the result to match ScriptComponent interface
-      return {
+      const newComponent: ScriptComponent = {
         id: result.component_id,
         scriptId: result.script_id,
         content: result.content_tiptap,
@@ -73,7 +161,12 @@ function App() {
         updatedAt: result.updated_at,
         lastEditedBy: result.last_edited_by,
         version: result.version
-      } as ScriptComponent;
+      };
+
+      // Update local state with optimistic update
+      setComponents(prev => [...prev, newComponent]);
+
+      return newComponent;
     } catch (error) {
       console.error('Failed to create component:', error);
       throw error;
@@ -159,32 +252,103 @@ function App() {
               Project Scripts
             </h3>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {mockScripts.map(script => (
-                <div
-                  key={script.id}
-                  onClick={() => setSelectedScript(script)}
-                  style={{
-                    padding: '12px',
-                    background: selectedScript.id === script.id ? '#f0f9ff' : '#f8fafc',
-                    border: selectedScript.id === script.id ? `2px solid ${theme.blue}` : '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <div style={{ fontWeight: '500', marginBottom: '4px', color: theme.dark }}>
-                    {script.title}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#64748b' }}>
-                    {script.wordCount} words • {script.duration} • {script.status}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
-                    Last edited: {script.lastEdited}
-                  </div>
+            {/* Loading State */}
+            {isLoadingScripts && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px',
+                fontSize: '16px',
+                color: '#64748b'
+              }}>
+                ⏳ Loading scripts...
+              </div>
+            )}
+
+            {/* Error State */}
+            {scriptError && (
+              <div style={{
+                padding: '16px',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '8px',
+                color: '#dc2626',
+                fontSize: '14px'
+              }}>
+                <div style={{ fontWeight: '500', marginBottom: '4px' }}>
+                  Failed to load scripts
                 </div>
-              ))}
-            </div>
+                <div>{scriptError}</div>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoadingScripts && !scriptError && scripts.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                background: '#f8fafc',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0'
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+                <h4 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: theme.dark,
+                  marginBottom: '8px'
+                }}>
+                  No Scripts Yet
+                </h4>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
+                  Create your first script to get started with collaborative video production.
+                </p>
+                <button style={{
+                  padding: '12px 24px',
+                  background: theme.midDark,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}>
+                  Create First Script
+                </button>
+              </div>
+            )}
+
+            {/* Script List */}
+            {!isLoadingScripts && !scriptError && scripts.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {scripts.map(script => (
+                  <div
+                    key={script.id}
+                    onClick={() => setSelectedScript(script)}
+                    style={{
+                      padding: '12px',
+                      background: selectedScript?.id === script.id ? '#f0f9ff' : '#f8fafc',
+                      border: selectedScript?.id === script.id ? `2px solid ${theme.blue}` : '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ fontWeight: '500', marginBottom: '4px', color: theme.dark }}>
+                      {script.title}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                      {script.wordCount ? `${script.wordCount} words` : 'No content'} •
+                      {script.duration || 'No duration'} • {script.status}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                      Last edited: {new Date(script.lastEdited).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Center - Script Editor */}
@@ -198,72 +362,114 @@ function App() {
               maxWidth: '800px',
               margin: '0 auto'
             }}>
-              {/* Script Status Bar */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '12px 16px',
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
-                borderRadius: '8px',
-                marginBottom: '24px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <span style={{ fontWeight: '600', color: '#166534' }}>Script Status:</span>
-                  <span style={{
-                    background: theme.green,
-                    color: 'white',
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    fontSize: '14px',
-                    fontWeight: '500'
+              {selectedScript ? (
+                <>
+                  {/* Script Status Bar */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 16px',
+                    background: '#f0fdf4',
+                    border: '1px solid #86efac',
+                    borderRadius: '8px',
+                    marginBottom: '24px'
                   }}>
-                    {selectedScript.status}
-                  </span>
-                </div>
-                <div style={{ fontSize: '14px', color: '#64748b' }}>
-                  Word count: {selectedScript.wordCount} • Est. runtime: {selectedScript.duration}
-                </div>
-              </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                      <span style={{ fontWeight: '600', color: '#166534' }}>Script Status:</span>
+                      <span style={{
+                        background: theme.green,
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}>
+                        {selectedScript.status}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#64748b' }}>
+                      Word count: {selectedScript.wordCount || 0} • Est. runtime: {selectedScript.duration || 'N/A'}
+                    </div>
+                  </div>
 
-              {/* Script Title */}
-              <h1 style={{ 
-                fontSize: '28px', 
-                fontWeight: '600', 
-                marginBottom: '24px',
-                color: theme.dark 
-              }}>
-                {selectedScript.title}
-              </h1>
+                  {/* Script Title */}
+                  <h1 style={{
+                    fontSize: '28px',
+                    fontWeight: '600',
+                    marginBottom: '24px',
+                    color: theme.dark
+                  }}>
+                    {selectedScript.title}
+                  </h1>
 
-              {/* TipTap Editor Integration */}
-              <div style={{
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                padding: '20px',
-                minHeight: '400px',
-                background: '#ffffff'
-              }}>
-                <ScriptEditor
-                  config={{
-                    projectId: 'eav-orchestrator-main', // Required for collaboration
-                    documentId: selectedScript.id,
-                    scriptId: selectedScript.id, // Add scriptId for component creation
-                    userId: 'demo-user',
-                    userName: 'Demo User',
-                    autoSave: true,
-                    autoSaveDelay: 1000
-                  }}
-                  onContentChange={(content: EditorJSONContent) => {
-                    console.log('Content changed:', content);
-                  }}
-                  onComponentAdd={handleComponentAdd}
-                  onSave={async (content: EditorJSONContent) => {
-                    console.log('Saving content:', content);
-                  }}
-                />
-              </div>
+                  {/* TipTap Editor Integration */}
+                  <div style={{
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    minHeight: '400px',
+                    background: '#ffffff'
+                  }}>
+                    {isLoadingComponents ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '200px',
+                        fontSize: '16px',
+                        color: '#64748b'
+                      }}>
+                        ⏳ Loading components...
+                      </div>
+                    ) : (
+                      <ScriptEditor
+                        config={{
+                          projectId: 'eav-orchestrator-main', // Required for collaboration
+                          documentId: selectedScript.id,
+                          scriptId: selectedScript.id, // Add scriptId for component creation
+                          userId: 'demo-user',
+                          userName: 'Demo User',
+                          autoSave: true,
+                          autoSaveDelay: 1000
+                        }}
+                        components={components}
+                        onContentChange={(content: EditorJSONContent) => {
+                          console.log('Content changed:', content);
+                        }}
+                        onComponentAdd={handleComponentAdd}
+                        onSave={async (content: EditorJSONContent) => {
+                          console.log('Saving content:', content);
+                        }}
+                      />
+                    )}
+                  </div>
+                </>
+              ) : (
+                /* No Script Selected State */
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '400px',
+                  textAlign: 'center'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+                    <h2 style={{
+                      fontSize: '24px',
+                      fontWeight: '600',
+                      color: theme.dark,
+                      marginBottom: '8px'
+                    }}>
+                      Select a Script
+                    </h2>
+                    <p style={{ fontSize: '16px', color: '#64748b' }}>
+                      Choose a script from the sidebar to start editing
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

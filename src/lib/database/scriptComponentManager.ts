@@ -257,9 +257,9 @@ export class ScriptComponentManager {
     scriptId: string,
     content: object = { type: 'doc', content: [] },
     plainText: string = '',
+    userId: string,
     position?: number,
-    status: string = 'created',
-    userId: string
+    status: string = 'created'
   ): Promise<{
     component_id: string;
     script_id: string;
@@ -331,6 +331,591 @@ export class ScriptComponentManager {
     } catch (error) {
       this.recordOperationTime(Date.now() - startTime);
       throw error;
+    }
+  }
+
+  /**
+   * Soft delete a script component (marks as deleted)
+   */
+  async deleteComponent(
+    componentId: string,
+    userId: string,
+    reason?: string
+  ): Promise<{
+    success: boolean;
+    deletedAt?: string;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      // Validate inputs
+      if (!componentId) {
+        throw new Error('Component ID is required');
+      }
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+
+      // Perform soft delete by updating deleted_at and deleted_by
+      const { data, error } = await this.supabase
+        .from('script_components')
+        .update({
+          deleted_at: new Date().toISOString(),
+          deleted_by: userId,
+          deletion_reason: reason
+        })
+        .eq('component_id', componentId)
+        .is('deleted_at', null) // Only delete if not already deleted
+        .select('component_id, deleted_at')
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Component not found or already deleted');
+        }
+        throw new Error(`Failed to delete component: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Component not found or already deleted');
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        success: true,
+        deletedAt: data.deleted_at
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Restore a soft-deleted component
+   */
+  async restoreComponent(
+    componentId: string,
+    userId: string
+  ): Promise<{
+    success: boolean;
+    restoredAt?: string;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('script_components')
+        .update({
+          deleted_at: null,
+          deleted_by: null,
+          deletion_reason: null,
+          last_edited_by: userId,
+          last_edited_at: new Date().toISOString()
+        })
+        .eq('component_id', componentId)
+        .not('deleted_at', 'is', null) // Only restore if deleted
+        .select('component_id, updated_at')
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Component not found or not deleted');
+        }
+        throw new Error(`Failed to restore component: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Component not found or not deleted');
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        success: true,
+        restoredAt: data.updated_at
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get all components for a script (excludes soft-deleted)
+   */
+  async getComponentsByScriptId(
+    scriptId: string,
+    includeDeleted: boolean = false
+  ): Promise<{
+    components: Array<{
+      component_id: string;
+      script_id: string;
+      position: number;
+      content_tiptap: object;
+      content_plain: string;
+      component_type: string;
+      component_status: string;
+      version: number;
+      created_at: string;
+      updated_at: string;
+      last_edited_by: string;
+      last_edited_at: string;
+    }>;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      let query = this.supabase
+        .from('script_components')
+        .select('*')
+        .eq('script_id', scriptId)
+        .order('position', { ascending: true });
+
+      // Filter out soft-deleted unless explicitly requested
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to fetch components: ${error.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        components: data || []
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        components: [],
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get a single component by ID
+   */
+  async getComponentById(
+    componentId: string,
+    includeDeleted: boolean = false
+  ): Promise<{
+    component?: {
+      component_id: string;
+      script_id: string;
+      position: number;
+      content_tiptap: object;
+      content_plain: string;
+      component_type: string;
+      component_status: string;
+      version: number;
+      created_at: string;
+      updated_at: string;
+      last_edited_by: string;
+      last_edited_at: string;
+      deleted_at?: string;
+    };
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      let query = this.supabase
+        .from('script_components')
+        .select('*')
+        .eq('component_id', componentId);
+
+      // Filter out soft-deleted unless explicitly requested
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null);
+      }
+
+      const { data, error } = await query.single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Component not found');
+        }
+        throw new Error(`Failed to fetch component: ${error.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        component: data || undefined
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Bulk soft delete multiple components
+   */
+  async bulkDeleteComponents(
+    componentIds: string[],
+    userId: string,
+    reason?: string
+  ): Promise<{
+    success: boolean;
+    deletedCount: number;
+    failedIds: string[];
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      if (!componentIds || componentIds.length === 0) {
+        throw new Error('Component IDs are required');
+      }
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+
+      // Perform bulk soft delete
+      const { data, error } = await this.supabase
+        .from('script_components')
+        .update({
+          deleted_at: new Date().toISOString(),
+          deleted_by: userId,
+          deletion_reason: reason
+        })
+        .in('component_id', componentIds)
+        .is('deleted_at', null)
+        .select('component_id');
+
+      if (error) {
+        throw new Error(`Bulk delete failed: ${error.message}`);
+      }
+
+      const deletedIds = data?.map(d => d.component_id) || [];
+      const failedIds = componentIds.filter(id => !deletedIds.includes(id));
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        success: true,
+        deletedCount: deletedIds.length,
+        failedIds
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        success: false,
+        deletedCount: 0,
+        failedIds: componentIds,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Update positions for multiple components (for reordering)
+   */
+  async updateComponentPositions(
+    updates: Array<{ componentId: string; position: number }>
+  ): Promise<{
+    success: boolean;
+    updatedCount: number;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      // Use transaction for atomic updates
+      const promises = updates.map(({ componentId, position }) =>
+        this.supabase
+          .from('script_components')
+          .update({ position })
+          .eq('component_id', componentId)
+          .is('deleted_at', null)
+      );
+
+      const results = await Promise.all(promises);
+
+      // Check for errors
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        throw new Error(`Position update failed: ${errors[0].error?.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        success: true,
+        updatedCount: updates.length
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        success: false,
+        updatedCount: 0,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get components count for a script (for pagination)
+   */
+  async getComponentsCount(
+    scriptId: string,
+    includeDeleted: boolean = false
+  ): Promise<{
+    count: number;
+    error?: string;
+  }> {
+    try {
+      let query = this.supabase
+        .from('script_components')
+        .select('component_id', { count: 'exact', head: true })
+        .eq('script_id', scriptId);
+
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null);
+      }
+
+      const { count, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to count components: ${error.message}`);
+      }
+
+      return {
+        count: count || 0
+      };
+
+    } catch (error) {
+      return {
+        count: 0,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  // ============================================================================
+  // SCRIPT MANAGEMENT METHODS
+  // ============================================================================
+
+  /**
+   * Get all video scripts accessible to the current user
+   */
+  async getAllScripts(): Promise<{
+    scripts: Array<{
+      script_id: string;
+      video_id: string;
+      title: string;
+      description?: string;
+      script_status: string;
+      word_count?: number;
+      estimated_duration?: string;
+      created_at: string;
+      updated_at: string;
+      last_edited_by?: string;
+      last_edited_at?: string;
+    }>;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('video_scripts')
+        .select(`
+          script_id,
+          video_id,
+          title,
+          description,
+          script_status,
+          word_count,
+          estimated_duration,
+          created_at,
+          updated_at,
+          last_edited_by,
+          last_edited_at
+        `)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        throw new Error(`Failed to fetch scripts: ${error.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        scripts: data || []
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        scripts: [],
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Create a new video script
+   */
+  async createScript(
+    videoId: string,
+    title: string,
+    description?: string,
+    userId?: string
+  ): Promise<{
+    script?: {
+      script_id: string;
+      video_id: string;
+      title: string;
+      description?: string;
+      script_status: string;
+      created_at: string;
+      updated_at: string;
+      last_edited_by?: string;
+    };
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      if (!videoId || !title) {
+        throw new Error('Video ID and title are required');
+      }
+
+      const scriptData = {
+        video_id: videoId,
+        title: title.trim(),
+        description: description?.trim(),
+        script_status: 'draft',
+        last_edited_by: userId
+      };
+
+      const { data, error } = await this.supabase
+        .from('video_scripts')
+        .insert(scriptData)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Failed to create script: ${error.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        script: data
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get script by ID
+   */
+  async getScriptById(
+    scriptId: string
+  ): Promise<{
+    script?: {
+      script_id: string;
+      video_id: string;
+      title: string;
+      description?: string;
+      script_status: string;
+      word_count?: number;
+      estimated_duration?: string;
+      created_at: string;
+      updated_at: string;
+      last_edited_by?: string;
+      last_edited_at?: string;
+    };
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('video_scripts')
+        .select(`
+          script_id,
+          video_id,
+          title,
+          description,
+          script_status,
+          word_count,
+          estimated_duration,
+          created_at,
+          updated_at,
+          last_edited_by,
+          last_edited_at
+        `)
+        .eq('script_id', scriptId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('Script not found');
+        }
+        throw new Error(`Failed to fetch script: ${error.message}`);
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        script: data
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
     }
   }
 }

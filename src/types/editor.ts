@@ -21,6 +21,21 @@ export interface EditorJSONContent {
   text?: string;
 }
 
+// Video Script representing a script project
+export interface VideoScript {
+  id: string;
+  videoId: string;
+  title: string;
+  description?: string;
+  wordCount?: number;
+  duration?: string;
+  status: 'draft' | 'in_editing' | 'client_review' | 'approved' | 'published';
+  lastEdited: string;
+  createdAt: string;
+  updatedAt: string;
+  lastEditedBy?: string;
+}
+
 // Script Component representing a single component in the script
 export interface ScriptComponent {
   id: string;
