@@ -490,6 +490,52 @@ vi.mock('@tiptap/react', () => ({
   })
 }));
 
+// Mock DataTransfer for drag and drop tests
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'DataTransfer', {
+    value: class DataTransfer {
+      private data: Record<string, string> = {};
+
+      setData(format: string, data: string): void {
+        this.data[format] = data;
+      }
+
+      getData(format: string): string {
+        return this.data[format] || '';
+      }
+
+      clearData(): void {
+        this.data = {};
+      }
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
+// Mock for fireEvent drag and drop in global scope
+if (typeof global !== 'undefined') {
+  Object.defineProperty(global, 'DataTransfer', {
+    value: class DataTransfer {
+      private data: Record<string, string> = {};
+
+      setData(format: string, data: string): void {
+        this.data[format] = data;
+      }
+
+      getData(format: string): string {
+        return this.data[format] || '';
+      }
+
+      clearData(): void {
+        this.data = {};
+      }
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
 afterEach(() => {
   cleanup();
 });

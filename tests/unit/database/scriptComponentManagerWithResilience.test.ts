@@ -55,7 +55,9 @@ describe('ResilientScriptComponentManager', () => {
       mockSupabase.from.mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            order: vi.fn().mockRejectedValue(failureError)
+            order: vi.fn().mockReturnValue({
+              is: vi.fn().mockRejectedValue(failureError)
+            })
           })
         })
       });
