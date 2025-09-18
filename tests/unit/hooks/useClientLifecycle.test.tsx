@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useClientLifecycle } from '../../../src/hooks/useClientLifecycle';
-import { ClientLifecycleManager, type ClientLifecycleState } from '../../../src/lib/lifecycle/clientLifecycleManager';
+import { ClientLifecycleManager } from '../../../src/lib/lifecycle/clientLifecycleManager';
 
 // Mock the ClientLifecycleManager
 vi.mock('../../../src/lib/lifecycle/clientLifecycleManager', () => {

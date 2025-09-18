@@ -6,6 +6,7 @@ import { ScriptEditor } from './components/editor/ScriptEditor';
 import type { EditorJSONContent, VideoScript, ScriptComponent } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
 import { getSupabase } from './lib/supabase';
+import { useClientLifecycle } from './hooks/useClientLifecycle';
 
 // EAV Brand Colors
 const theme = {
@@ -43,6 +44,12 @@ function App() {
   const [isLoadingScripts, setIsLoadingScripts] = useState(true);
   const [isLoadingComponents, setIsLoadingComponents] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
+
+  // Client lifecycle management for version coordination and resilience
+  const { state: lifecycleState, checkConnection, forceRefresh } = useClientLifecycle({
+    currentVersion: '1.0.0', // This should come from package.json in production
+    versionEndpoint: '/api/version'
+  });
 
   // ERROR-ARCHITECT-APPROVED: React hooks dependency fix - memoize componentManager
   // Initialize component manager with useMemo to avoid recreation
@@ -154,6 +161,110 @@ function App() {
     }
   };
 
+  // Status banner helper function
+  const renderStatusBanner = () => {
+    if (lifecycleState === 'HEALTHY' || lifecycleState === 'INITIALIZING') {
+      return null; // Don't show banner for normal states
+    }
+
+    const getBannerConfig = () => {
+      switch (lifecycleState) {
+        case 'OFFLINE':
+          return {
+            background: '#fef3c7',
+            border: '#fbbf24',
+            textColor: '#92400e',
+            icon: '⚠️',
+            title: 'Connection Lost',
+            message: 'Unable to connect to server. Changes are being saved locally.',
+            action: (
+              <button
+                onClick={checkConnection}
+                style={{
+                  padding: '6px 12px',
+                  background: '#f59e0b',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Retry Connection
+              </button>
+            )
+          };
+        case 'SYNCING':
+          return {
+            background: '#dbeafe',
+            border: '#3b82f6',
+            textColor: '#1e40af',
+            icon: '🔄',
+            title: 'Syncing',
+            message: 'Reconnecting and syncing your changes...',
+            action: null
+          };
+        case 'UPDATE_REQUIRED':
+          return {
+            background: '#fecaca',
+            border: '#ef4444',
+            textColor: '#dc2626',
+            icon: '⚡',
+            title: 'Update Required',
+            message: 'A new version is available. Please refresh to continue.',
+            action: (
+              <button
+                onClick={forceRefresh}
+                style={{
+                  padding: '6px 12px',
+                  background: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Refresh Now
+              </button>
+            )
+          };
+        default:
+          return null;
+      }
+    };
+
+    const config = getBannerConfig();
+    if (!config) return null;
+
+    return (
+      <div style={{
+        background: config.background,
+        border: `1px solid ${config.border}`,
+        borderLeft: `4px solid ${config.border}`,
+        padding: '12px 30px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '16px' }}>{config.icon}</span>
+          <div>
+            <span style={{ fontWeight: '500', color: config.textColor, marginRight: '8px' }}>
+              {config.title}:
+            </span>
+            <span style={{ color: config.textColor, fontSize: '14px' }}>
+              {config.message}
+            </span>
+          </div>
+        </div>
+        {config.action}
+      </div>
+    );
+  };
+
   return (
     <div className="app-container" style={{ minHeight: '100vh', background: theme.light }}>
       {/* Header */}
@@ -170,6 +281,9 @@ function App() {
           Collaborative Video Production System - V2-V8 Workflows
         </p>
       </header>
+
+      {/* Client Lifecycle Status Banner */}
+      {renderStatusBanner()}
 
       {/* Tab Navigation */}
       <div style={{

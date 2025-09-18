@@ -9,8 +9,9 @@ import { describe, it, expect, beforeEach, vi, type MockedFunction } from 'vites
 import { ClientLifecycleManager, type ClientLifecycleState, type VersionInfo } from '../../../src/lib/lifecycle/clientLifecycleManager';
 
 // Mock fetch for version endpoint
-global.fetch = vi.fn();
-const mockFetch = fetch as MockedFunction<typeof fetch>;
+// TESTGUARD-20250918-17582376
+globalThis.fetch = vi.fn();
+const mockFetch = globalThis.fetch as MockedFunction<typeof globalThis.fetch>;
 
 describe('ClientLifecycleManager', () => {
   let manager: ClientLifecycleManager;

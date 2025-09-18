@@ -30,7 +30,8 @@ export function useClientLifecycle(config: ClientLifecycleConfig): UseClientLife
 
   // Initialize manager only once
   useEffect(() => {
-    const manager = new ClientLifecycleManager(config);
+    const currentConfig = config;
+    const manager = new ClientLifecycleManager(currentConfig);
     managerRef.current = manager;
 
     // Set initial state
@@ -62,7 +63,7 @@ export function useClientLifecycle(config: ClientLifecycleConfig): UseClientLife
 
       managerRef.current = null;
     };
-  }, []); // Empty dependency array - manager is created once
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- Manager intentionally created once
 
   // Stable function references using useCallback
   const checkConnection = useCallback(async (): Promise<void> => {

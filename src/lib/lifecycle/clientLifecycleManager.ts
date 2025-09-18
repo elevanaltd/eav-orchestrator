@@ -178,7 +178,7 @@ export class ClientLifecycleManager {
   // Private methods
 
   private async fetchServerVersion(): Promise<VersionInfo> {
-    const response = await fetch(this.config.versionEndpoint, {
+    const response = await globalThis.fetch(this.config.versionEndpoint, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
