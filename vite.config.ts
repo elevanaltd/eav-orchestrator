@@ -7,9 +7,29 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 
+// Custom plugin to serve /api/version endpoint
+const apiVersionPlugin = () => ({
+  name: 'api-version',
+  configureServer(server: { middlewares: { use: (path: string, handler: (req: unknown, res: { setHeader: (name: string, value: string) => void; end: (data: string) => void }) => void) => void } }) {
+    server.middlewares.use('/api/version', (_req: unknown, res: { setHeader: (name: string, value: string) => void; end: (data: string) => void }) => {
+      const versionData = {
+        version: '1.0.0',
+        schemaVersion: 1,
+        timestamp: new Date().toISOString(),
+        build: 'B2-Build'
+      };
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.end(JSON.stringify(versionData, null, 2));
+    });
+  }
+});
+
 export default defineConfig({
   plugins: [
     react(),
+    apiVersionPlugin(),
     // Sentry plugin for source maps and release management
     sentryVitePlugin({
       org: process.env.SENTRY_ORG,
