@@ -48,6 +48,11 @@ jobs:
         env:
           # Test environment configuration
           NODE_ENV: test
+
+      # Critical-Engineer: Security vulnerability scanning - MUST PASS
+      - name: Security Audit
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: false
           
       # Upload test artifacts on failure for debugging
       - name: Upload test results on failure

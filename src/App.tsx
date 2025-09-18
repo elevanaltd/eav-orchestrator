@@ -573,9 +573,8 @@ function App() {
   );
 }
 
-// Wrap App with Sentry Error Boundary for production error monitoring
-export default Sentry.withErrorBoundary(App, {
-  fallback: ({ error, resetError }) => (
+// Error fallback component for Sentry error boundary
+const ErrorFallback = ({ error, resetError }: { error: unknown; resetError: () => void }) => (
     <div style={{
       minHeight: '100vh',
       display: 'flex',
@@ -651,7 +650,11 @@ export default Sentry.withErrorBoundary(App, {
         </button>
       </div>
     </div>
-  ),
+);
+
+// Wrap App with Sentry Error Boundary for production error monitoring
+const AppWithErrorBoundary = Sentry.withErrorBoundary(App, {
+  fallback: ErrorFallback,
   beforeCapture: (scope, error) => {
     scope.setTag('component', 'App');
     scope.setTag('errorBoundary', true);
@@ -663,3 +666,5 @@ export default Sentry.withErrorBoundary(App, {
     });
   },
 });
+
+export default AppWithErrorBoundary;

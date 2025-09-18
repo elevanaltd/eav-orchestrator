@@ -150,9 +150,21 @@ describe('ClientLifecycleManager', () => {
       expect(subscriber2).toHaveBeenCalledWith('HEALTHY');
     });
 
-    it('should allow unsubscribing', () => {
+    it('should immediately notify a new subscriber with current state', () => {
+      const subscriber = vi.fn();
+
+      manager.subscribe(subscriber);
+
+      expect(subscriber).toHaveBeenCalledTimes(1);
+      expect(subscriber).toHaveBeenCalledWith('INITIALIZING');
+    });
+
+    it('should not notify a subscriber of future updates after unsubscribing', () => {
       const subscriber = vi.fn();
       const unsubscribe = manager.subscribe(subscriber);
+
+      // Clear the initial subscription call - we test immediate notification separately
+      subscriber.mockClear();
 
       unsubscribe();
       manager.setState('HEALTHY');

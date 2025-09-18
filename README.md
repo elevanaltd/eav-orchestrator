@@ -38,13 +38,35 @@ Backend: Supabase 2.57.4 + PostgreSQL + real-time
 State: Zustand 4.5.7 + fractional-indexing 3.2.0
 ```
 
-### Development Dependencies  
+### Development Dependencies
 ```yaml
 Testing: Vitest 3.2.4 + @testing-library/react 16.3.0
 Linting: ESLint 9.35.0 + TypeScript rules
 Coverage: @vitest/coverage-v8 3.2.4
 Formatting: Prettier 3.6.2
 ```
+
+### Dependency Management Strategy
+
+**Production Stability Approach:**
+- **Lock File Commitment:** `package-lock.json` is committed and provides reproducible builds
+- **CI/CD Safety:** `npm ci` used in all automated environments for exact dependency matching
+- **Security Scanning:** Automated `npm audit` in CI pipeline blocks builds with high/critical vulnerabilities
+- **Automated Updates:** Dependabot configured for weekly security and dependency updates
+- **Semantic Versioning:** Use `^` ranges in `package.json` to receive non-breaking security patches
+
+**Critical Engineer Guidance:**
+This project follows modern dependency management best practices instead of manual version pinning:
+1. **Reproducible Builds:** Achieved through committed `package-lock.json` and `npm ci`
+2. **Security First:** Automated scanning prevents vulnerable dependencies from being deployed
+3. **Controlled Updates:** Dependabot creates isolated PRs for testing individual updates
+4. **No Manual Pinning:** Avoid manual dependency pinning which creates security vulnerabilities
+
+**Update Process:**
+- **Weekly Schedule:** Dependabot runs Monday 09:00 UTC for npm dependencies
+- **Grouped Updates:** Minor/patch updates grouped together to reduce PR noise
+- **Manual Review:** Major version updates require explicit approval
+- **Security Priority:** High/critical vulnerabilities fail CI and block deployments
 
 ## Quick Start
 

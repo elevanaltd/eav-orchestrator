@@ -138,7 +138,7 @@ export function captureSentryException(error: Error, context?: Record<string, un
   Sentry.withScope((scope) => {
     if (context) {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setContext(key, value);
+        scope.setContext(key, value as Record<string, unknown> | null);
       });
     }
     Sentry.captureException(error);
