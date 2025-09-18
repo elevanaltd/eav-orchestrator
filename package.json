@@ -32,6 +32,8 @@
   },
   "homepage": "https://github.com/elevanaltd/eav-orchestrator#readme",
   "dependencies": {
+    "@sentry/react": "^10.12.0",
+    "@sentry/vite-plugin": "^4.3.0",
     "@supabase/supabase-js": "^2.57.4",
     "@tiptap/extension-collaboration": "^2.26.1",
     "@tiptap/extension-collaboration-cursor": "^2.26.1",

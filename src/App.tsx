@@ -1,5 +1,7 @@
 // Context7: consulted for react
+// Context7: consulted for @sentry/react
 import { useState, useEffect, useMemo } from 'react';
+import * as Sentry from '@sentry/react';
 import { ScriptEditor } from './components/editor/ScriptEditor';
 import type { EditorJSONContent, VideoScript, ScriptComponent } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
@@ -571,4 +573,93 @@ function App() {
   );
 }
 
-export default App;
+// Wrap App with Sentry Error Boundary for production error monitoring
+export default Sentry.withErrorBoundary(App, {
+  fallback: ({ error, resetError }) => (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#f8fafc',
+      padding: '20px'
+    }}>
+      <div style={{
+        maxWidth: '500px',
+        width: '100%',
+        padding: '40px',
+        background: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
+        <h1 style={{
+          fontSize: '24px',
+          fontWeight: '600',
+          color: '#dc2626',
+          marginBottom: '16px'
+        }}>
+          Something went wrong
+        </h1>
+        <p style={{
+          fontSize: '16px',
+          color: '#64748b',
+          marginBottom: '24px',
+          lineHeight: '1.5'
+        }}>
+          We've encountered an unexpected error. Our team has been automatically notified
+          and will investigate the issue.
+        </p>
+        <details style={{
+          marginBottom: '24px',
+          padding: '16px',
+          background: '#f8fafc',
+          borderRadius: '8px',
+          textAlign: 'left'
+        }}>
+          <summary style={{
+            cursor: 'pointer',
+            fontWeight: '500',
+            marginBottom: '8px'
+          }}>
+            Technical details
+          </summary>
+          <pre style={{
+            fontSize: '12px',
+            color: '#475569',
+            overflow: 'auto',
+            margin: 0
+          }}>
+            {error instanceof Error ? error.message : String(error)}
+          </pre>
+        </details>
+        <button
+          onClick={resetError}
+          style={{
+            padding: '12px 24px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  ),
+  beforeCapture: (scope, error) => {
+    scope.setTag('component', 'App');
+    scope.setTag('errorBoundary', true);
+    scope.setContext('errorBoundary', {
+      componentStack: error instanceof Error ? error.stack : undefined,
+      timestamp: new Date().toISOString(),
+      // eslint-disable-next-line no-undef
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+    });
+  },
+});
