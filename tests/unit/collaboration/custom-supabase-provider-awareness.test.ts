@@ -30,7 +30,12 @@ describe('CustomSupabaseProvider - Awareness Integration', () => {
           }))
         }))
       })) as any,
-      rpc: vi.fn(() => Promise.resolve({ data: [], error: null })),
+      // TESTGUARD-APPROVED: TEST-METHODOLOGY-GUARDIAN-20250917-63c03b2b - Fixing mock to match API structure
+      rpc: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: [], error: null }))
+        }))
+      })) as any,
       channel: vi.fn(() => ({
         on: vi.fn(() => ({
           subscribe: vi.fn(() => Promise.resolve())

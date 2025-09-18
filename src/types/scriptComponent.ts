@@ -190,3 +190,72 @@ export interface OptimisticLockConfig {
   conflictResolutionTimeout: number;
   performanceTargetP95: number; // Target: ≤ 500ms
 }
+
+/**
+ * Delete operation result
+ */
+export interface DeleteResult {
+  success: boolean;
+  deletedAt?: string;
+  error?: string;
+}
+
+/**
+ * Restore operation result
+ */
+export interface RestoreResult {
+  success: boolean;
+  restoredAt?: string;
+  error?: string;
+}
+
+/**
+ * Bulk delete operation result
+ */
+export interface BulkDeleteResult {
+  success: boolean;
+  deletedCount: number;
+  failedIds: string[];
+  error?: string;
+}
+
+/**
+ * Component read result
+ */
+export interface ComponentReadResult {
+  component?: ScriptComponent;
+  error?: string;
+}
+
+/**
+ * Components list result
+ */
+export interface ComponentsListResult {
+  components: ScriptComponent[];
+  error?: string;
+}
+
+/**
+ * Component count result
+ */
+export interface ComponentCountResult {
+  count: number;
+  error?: string;
+}
+
+/**
+ * Position update entry for reordering
+ */
+export interface PositionUpdate {
+  componentId: string;
+  position: number;
+}
+
+/**
+ * Position update result
+ */
+export interface PositionUpdateResult {
+  success: boolean;
+  updatedCount: number;
+  error?: string;
+}

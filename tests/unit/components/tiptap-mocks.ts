@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 
 // Proper mock structure for TipTap extensions
 export const createExtensionMock = (name: string) => {
-  const mockExtension = vi.fn(() => ({ name }));
+  const mockExtension = vi.fn(() => ({ name })) as any;
   mockExtension.configure = vi.fn(() => ({ name }));
   return mockExtension;
 };
