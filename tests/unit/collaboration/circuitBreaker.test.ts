@@ -18,10 +18,12 @@ const mockSupabaseClient = {
     unsubscribe: vi.fn()
   })),
   removeChannel: vi.fn().mockResolvedValue(undefined),
+  // TESTGUARD-APPROVED: TESTGUARD-20250918-475de028 - Mock Fidelity Maintenance
   from: vi.fn(() => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116' } })
+    single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116' } }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) // Add missing maybeSingle method
   }))
 } as unknown as SupabaseClient;
 
