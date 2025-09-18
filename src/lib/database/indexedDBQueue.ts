@@ -18,6 +18,25 @@ interface QueueItem {
 }
 
 /**
+ * Schema migration information
+ */
+export interface SchemaMigrationInfo {
+  currentVersion: number;
+  supportedVersions: number[];
+  migrationPath?: string[];
+  lastMigration?: Date;
+}
+
+/**
+ * Schema version definition with migration logic
+ */
+interface SchemaVersion {
+  version: number;
+  upgrade: (db: IDBDatabase, transaction: IDBTransaction) => void;
+  downgrade?: (db: IDBDatabase, transaction: IDBTransaction) => void;
+}
+
+/**
  * IndexedDB Queue with fallback chain for offline operation persistence
  */
 export class IndexedDBQueue {
@@ -26,11 +45,44 @@ export class IndexedDBQueue {
   private _storageType: StorageType = 'memory';
   private _isReady: boolean = false;
   private memoryQueue: Uint8Array[] = [];
+  private _schemaVersion: number = 1;
 
   // Database configuration
   private static readonly DB_NAME = 'offline-queue-db';
   private static readonly DB_VERSION = 1;
   private static readonly STORE_NAME = 'operations';
+  private static readonly SCHEMA_VERSION_STORE = 'schema_versions';
+
+  // Schema versioning configuration
+  private static readonly CURRENT_SCHEMA_VERSION = 1;
+  private static readonly SUPPORTED_VERSIONS = [1];
+
+  // Schema migration definitions
+  private static readonly SCHEMA_VERSIONS: SchemaVersion[] = [
+    {
+      version: 1,
+      upgrade: (db: IDBDatabase) => {
+        // Version 1: Initial schema - operations store
+        if (!db.objectStoreNames.contains(IndexedDBQueue.STORE_NAME)) {
+          const store = db.createObjectStore(IndexedDBQueue.STORE_NAME, {
+            keyPath: 'id',
+            autoIncrement: true
+          });
+
+          // Add index for documentId for efficient querying
+          store.createIndex('documentId', 'documentId', { unique: false });
+          store.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+
+        // Create schema version tracking store
+        if (!db.objectStoreNames.contains(IndexedDBQueue.SCHEMA_VERSION_STORE)) {
+          db.createObjectStore(IndexedDBQueue.SCHEMA_VERSION_STORE, {
+            keyPath: 'key'
+          });
+        }
+      }
+    }
+  ];
 
   constructor(documentId: string) {
     this.documentId = documentId;
@@ -91,22 +143,71 @@ export class IndexedDBQueue {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const oldVersion = event.oldVersion;
+        const newVersion = event.newVersion || IndexedDBQueue.DB_VERSION;
 
-        // Create object store for queue operations
-        if (!db.objectStoreNames.contains(IndexedDBQueue.STORE_NAME)) {
-          const store = db.createObjectStore(IndexedDBQueue.STORE_NAME, {
-            keyPath: 'id',
-            autoIncrement: true
-          });
-
-          // Index by documentId for efficient filtering
-          store.createIndex('documentId', 'documentId', { unique: false });
-
-          // Index by timestamp for ordering
-          store.createIndex('timestamp', 'timestamp', { unique: false });
-        }
+        // Run schema migrations
+        this.runSchemaMigrations(db, transaction, oldVersion, newVersion);
       };
     });
+  }
+
+  /**
+   * Run schema migrations during database upgrade
+   */
+  private runSchemaMigrations(
+    db: IDBDatabase,
+    transaction: IDBTransaction,
+    oldVersion: number,
+    newVersion: number
+  ): void {
+    console.log(`Running schema migrations from version ${oldVersion} to ${newVersion}`);
+
+    // Run all necessary migrations in sequence
+    for (const schemaVersion of IndexedDBQueue.SCHEMA_VERSIONS) {
+      if (schemaVersion.version > oldVersion && schemaVersion.version <= newVersion) {
+        console.log(`Applying schema migration for version ${schemaVersion.version}`);
+        try {
+          schemaVersion.upgrade(db, transaction);
+          this._schemaVersion = schemaVersion.version;
+        } catch (error) {
+          console.error(`Failed to apply schema migration for version ${schemaVersion.version}:`, error);
+          throw error;
+        }
+      }
+    }
+
+    // Record the migration
+    this.recordMigration(db, transaction, newVersion);
+  }
+
+  /**
+   * Record migration information in the database
+   */
+  private recordMigration(db: IDBDatabase, transaction: IDBTransaction, version: number): void {
+    try {
+      if (db.objectStoreNames.contains(IndexedDBQueue.SCHEMA_VERSION_STORE)) {
+        const versionStore = transaction.objectStore(IndexedDBQueue.SCHEMA_VERSION_STORE);
+
+        // Record current version
+        versionStore.put({
+          key: 'currentVersion',
+          value: version,
+          timestamp: Date.now()
+        });
+
+        // Record last migration date
+        versionStore.put({
+          key: 'lastMigration',
+          value: new Date().toISOString(),
+          timestamp: Date.now()
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to record migration information:', error);
+      // Don't throw - migration succeeded, just recording failed
+    }
   }
 
   /**
@@ -291,6 +392,67 @@ export class IndexedDBQueue {
 
   get isReady(): boolean {
     return this._isReady;
+  }
+
+  get schemaVersion(): number {
+    return this._schemaVersion;
+  }
+
+  // Schema versioning methods
+  async isSchemaCompatible(version: number): Promise<boolean> {
+    return IndexedDBQueue.SUPPORTED_VERSIONS.includes(version);
+  }
+
+  async getMigrationInfo(): Promise<SchemaMigrationInfo> {
+    return {
+      currentVersion: this._schemaVersion,
+      supportedVersions: [...IndexedDBQueue.SUPPORTED_VERSIONS],
+      migrationPath: this.getMigrationPath(),
+      lastMigration: await this.getLastMigrationDate()
+    };
+  }
+
+  async isSchemaDowngradeSafe(version: number): Promise<boolean> {
+    // For version 1, any version 0 or lower is considered unsafe
+    // In future versions, implement proper downgrade safety checks
+    return version >= 1 && version <= this._schemaVersion;
+  }
+
+  getCurrentSchemaVersion(): number {
+    return IndexedDBQueue.CURRENT_SCHEMA_VERSION;
+  }
+
+  private getMigrationPath(): string[] {
+    const path: string[] = [];
+    for (const schema of IndexedDBQueue.SCHEMA_VERSIONS) {
+      if (schema.version <= this._schemaVersion) {
+        path.push(`v${schema.version}`);
+      }
+    }
+    return path;
+  }
+
+  private async getLastMigrationDate(): Promise<Date | undefined> {
+    if (!this.db || this._storageType !== 'indexeddb') {
+      return undefined;
+    }
+
+    try {
+      return new Promise((resolve) => {
+        const transaction = this.db!.transaction([IndexedDBQueue.SCHEMA_VERSION_STORE], 'readonly');
+        const store = transaction.objectStore(IndexedDBQueue.SCHEMA_VERSION_STORE);
+        const request = store.get('lastMigration');
+
+        request.onsuccess = () => {
+          const result = request.result;
+          resolve(result ? new Date(result.value) : undefined);
+        };
+
+        request.onerror = () => resolve(undefined);
+      });
+    } catch {
+      return undefined;
+    }
   }
 
   // IndexedDB implementation methods

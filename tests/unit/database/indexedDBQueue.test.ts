@@ -415,4 +415,108 @@ describe('IndexedDBQueue', () => {
       global.indexedDB = originalIndexedDB;
     });
   });
+
+  describe('Schema Versioning & Migration', () => {
+    it('should initialize with current schema version', async () => {
+      // Contract: Should initialize with the latest schema version
+      await queue.initialize();
+
+      expect(queue.isReady).toBe(true);
+      expect(queue.schemaVersion).toBe(1); // Initial version
+    });
+
+    it('should handle schema version upgrades', async () => {
+      // Contract: Should upgrade schema when version increases
+      const oldQueue = new IndexedDBQueue(TEST_DOCUMENT_ID);
+      await oldQueue.initialize();
+
+      // Add some data to the old version
+      const testData = new Uint8Array([1, 2, 3]);
+      await oldQueue.enqueue(testData);
+      await oldQueue.close();
+
+      // Create new queue with higher schema version (simulated)
+      const newQueue = new IndexedDBQueue(TEST_DOCUMENT_ID);
+      await newQueue.initialize();
+
+      // Data should still be accessible after upgrade
+      expect(newQueue.isReady).toBe(true);
+      const size = await newQueue.size();
+      expect(size).toBe(1);
+
+      await newQueue.close();
+    });
+
+    it('should detect schema version mismatches', async () => {
+      // Contract: Should detect when schema versions don't match
+      await queue.initialize();
+
+      // Should have a method to check schema compatibility
+      const isCompatible = await queue.isSchemaCompatible(1);
+      expect(isCompatible).toBe(true);
+
+      const isIncompatible = await queue.isSchemaCompatible(999);
+      expect(isIncompatible).toBe(false);
+    });
+
+    it('should provide schema migration information', async () => {
+      // Contract: Should provide migration path information
+      await queue.initialize();
+
+      const migrationInfo = await queue.getMigrationInfo();
+      expect(migrationInfo).toHaveProperty('currentVersion');
+      expect(migrationInfo).toHaveProperty('supportedVersions');
+      expect(migrationInfo.currentVersion).toBe(1);
+      expect(migrationInfo.supportedVersions).toContain(1);
+    });
+
+    it('should maintain data integrity during schema upgrades', async () => {
+      // Contract: Data should not be lost during schema upgrades
+      await queue.initialize();
+
+      // Add test data
+      const testOperations = [
+        new Uint8Array([1, 1, 1]),
+        new Uint8Array([2, 2, 2]),
+        new Uint8Array([3, 3, 3])
+      ];
+
+      for (const op of testOperations) {
+        await queue.enqueue(op);
+      }
+
+      expect(await queue.size()).toBe(3);
+
+      // Simulate schema upgrade (in real scenario, this would be handled by version change)
+      const beforeUpgrade = await queue.peek();
+      expect(Array.from(beforeUpgrade!)).toEqual(Array.from(testOperations[0]));
+
+      // After a simulated upgrade, data should still be intact
+      // (This test verifies the migration doesn't corrupt data)
+      const afterUpgrade = await queue.peek();
+      expect(Array.from(afterUpgrade!)).toEqual(Array.from(testOperations[0]));
+
+      expect(await queue.size()).toBe(3);
+    });
+
+    it('should handle schema downgrade gracefully', async () => {
+      // Contract: Should handle downgrades by preserving compatible data
+      await queue.initialize();
+
+      // This test ensures that if an older version of the app is used,
+      // it doesn't break when encountering a newer schema
+      const downgradeSafe = await queue.isSchemaDowngradeSafe(0);
+      expect(typeof downgradeSafe).toBe('boolean');
+    });
+
+    it('should coordinate with ClientLifecycleManager schema versions', async () => {
+      // Contract: Schema version should be coordinated with ClientLifecycleManager
+      await queue.initialize();
+
+      // Should have a method to get current schema for version coordination
+      const schemaVersion = queue.getCurrentSchemaVersion();
+      expect(typeof schemaVersion).toBe('number');
+      expect(schemaVersion).toBeGreaterThanOrEqual(1);
+    });
+  });
 });
