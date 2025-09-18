@@ -26,7 +26,8 @@ describe('CustomSupabaseProvider Integration', () => {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: null, error: null })
+            single: vi.fn().mockResolvedValue({ data: null, error: null }),
+            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
           })
         }),
         upsert: vi.fn().mockResolvedValue({ error: null })

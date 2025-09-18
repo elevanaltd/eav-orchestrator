@@ -491,7 +491,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
               </div>
               <div className="flex-1">
                 <div className="text-sm text-gray-500">Component {index + 1}</div>
-                <div className="text-xs text-gray-400">{component.plainText.substring(0, 50)}...</div>
+                <div className="text-xs text-gray-400">{component.plainText?.substring(0, 50) || ''}...</div>
               </div>
               {component.sceneId && (
                 <div className="scene-mapping text-xs text-blue-600" data-testid={`scene-mapping-${component.id}`}>
