@@ -104,7 +104,8 @@ describe('ScriptComponent Types', () => {
         script_id: 'script-456',
         content_tiptap: { type: 'doc', content: [] },
         content_plain: 'Plain text content',
-        position_index: 1.5,
+        position: 1.5,
+        component_type: 'main',
         component_status: 'in_edit',
         version: 3, // Critical for optimistic locking
         created_at: '2023-01-01T00:00:00Z',
@@ -123,7 +124,8 @@ describe('ScriptComponent Types', () => {
         script_id: 'script-456',
         content_tiptap: { type: 'doc', content: [] },
         content_plain: 'Deleted content',
-        position_index: 1.5,
+        position: 1.5,
+        component_type: 'main',
         component_status: 'created',
         version: 2,
         created_at: '2023-01-01T00:00:00Z',
@@ -160,13 +162,13 @@ describe('ScriptComponent Types', () => {
       const batchOp: BatchUpdateOperation = {
         component_id: 'comp-123',
         version: 2,
-        position_index: 3.7,
+        position: 3.7,
         content: { type: 'doc', content: [{ type: 'text', text: 'Updated' }] }
       };
 
       expect(batchOp.component_id).toBe('comp-123');
       expect(batchOp.version).toBe(2);
-      expect(batchOp.position_index).toBe(3.7);
+      expect(batchOp.position).toBe(3.7);
     });
 
     it('should define BatchUpdateResult interface', () => {

@@ -10,8 +10,9 @@ export interface ScriptComponent {
   script_id: string;
   content_tiptap: object; // TipTap JSON document
   content_plain: string;
-  position_index: number;
-  component_status: ComponentStatus;
+  position: number; // DOUBLE PRECISION in database for O(1) insertions
+  component_type: string; // component_type_enum in database
+  component_status: string; // Database returns string, not enum
   version: number; // CRITICAL: Optimistic locking version
   created_at: string;
   updated_at: string;
@@ -92,7 +93,7 @@ export interface UpdateResult {
 export interface BatchUpdateOperation {
   component_id: string;
   version: number;
-  position_index?: number;
+  position?: number; // Align with database field name
   content?: object;
 }
 

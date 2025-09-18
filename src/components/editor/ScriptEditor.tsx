@@ -21,6 +21,7 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
 
 import { ScriptEditorProps, EditorState, SaveStatus } from '../../types/editor';
+import type { ScriptComponent } from '../../types/scriptComponent';
 import { AuthenticatedProviderFactory } from '../../lib/collaboration/AuthenticatedProviderFactory';
 import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-provider';
 import { processTipTapContent } from '../../lib/content/content-processor';
@@ -34,6 +35,9 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   activeUsers = [],
   onContentChange,
   onComponentAdd,
+  onComponentUpdate,
+  onComponentDelete,
+  onComponentReorder,
   onSave,
   onError,
   className = ''
@@ -70,6 +74,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   });
 
   const [collaborationProvider, setCollaborationProvider] = useState<CustomSupabaseProvider | null>(null);
+  const [editingComponentId, setEditingComponentId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState<string>('');
+  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
 
   // Auto-save timer ref to prevent memory leak
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -346,22 +354,119 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Component management handlers
   const handleAddComponent = async () => {
-    if (!onComponentAdd) return;
+    if (!onComponentAdd || components.length >= 18) return;
 
     try {
       const newComponent = {
-        scriptId: config.scriptId || 'default',
-        content: { type: 'doc', content: [] },
-        plainText: '',
-        position: components.length,
-        status: 'created' as const
+        script_id: config.scriptId || 'default',
+        content_tiptap: { type: 'doc', content: [] },
+        content_plain: '',
+        position_index: components.length + 1,
+        component_status: 'created' as const
       };
 
       await onComponentAdd(newComponent);
+      // Component list will be updated via props when parent updates
     } catch (error) {
       console.error('Failed to add component:', error);
       onError?.(error as Error);
     }
+  };
+
+  const handleComponentClick = (component: ScriptComponent) => {
+    setEditingComponentId(component.component_id);
+    setEditingContent(component.content_plain || '');
+  };
+
+  const handleComponentEdit = (newContent: string) => {
+    setEditingContent(newContent);
+
+    // Auto-save after 1 second
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (editingComponentId && onComponentUpdate) {
+        try {
+          await onComponentUpdate(editingComponentId, {
+            content_plain: newContent,
+            content_tiptap: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: newContent }] }] }
+          });
+        } catch (error) {
+          console.error('Failed to update component:', error);
+          onError?.(error as Error);
+        }
+      }
+      autoSaveTimerRef.current = null;
+    }, 1000);
+  };
+
+  const handleDeleteComponent = async (componentId: string) => {
+    if (!onComponentDelete) return;
+
+    try {
+      await onComponentDelete(componentId);
+      setDeleteConfirmId(null);
+    } catch (error) {
+      console.error('Failed to delete component:', error);
+      onError?.(error as Error);
+    }
+  };
+
+  const handleComponentReorder = async (draggedIds: string[]) => {
+    if (!onComponentReorder) return;
+
+    try {
+      await onComponentReorder(draggedIds);
+    } catch (error) {
+      console.error('Failed to reorder components:', error);
+      onError?.(error as Error);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, componentId: string) => {
+    // Store in both dataTransfer and local state for test environment compatibility
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('text/plain', componentId);
+    }
+    setDraggedComponentId(componentId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetComponentId: string) => {
+    e.preventDefault();
+
+    // Try to get dragged ID from dataTransfer first, then fallback to local state
+    let draggedComponentIdValue = '';
+    if (e.dataTransfer) {
+      draggedComponentIdValue = e.dataTransfer.getData('text/plain');
+    }
+
+    // Fallback to local state for test environments
+    if (!draggedComponentIdValue && draggedComponentId) {
+      draggedComponentIdValue = draggedComponentId;
+    }
+
+    if (draggedComponentIdValue && draggedComponentIdValue !== targetComponentId) {
+      const draggedIndex = components.findIndex(c => c.component_id === draggedComponentIdValue);
+      const targetIndex = components.findIndex(c => c.component_id === targetComponentId);
+
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        const newOrder = [...components];
+        const [draggedComponent] = newOrder.splice(draggedIndex, 1);
+        newOrder.splice(targetIndex, 0, draggedComponent);
+
+        const reorderedIds = newOrder.map(c => c.component_id);
+        handleComponentReorder(reorderedIds);
+      }
+    }
+
+    // Clear the dragged component state
+    setDraggedComponentId(null);
   };
 
   return (
@@ -470,7 +575,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             18 of 18 components (maximum reached)
           </div>
         )}
-        {components.length > 0 && components.length < 18 && (
+        {components.length > 0 && (
           <div className="text-xs text-gray-500 mt-1">
             {components.length} of 18 components
           </div>
@@ -482,24 +587,89 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <div className="component-list border-b" data-testid="component-list">
           {components.map((component, index) => (
             <div
-              key={component.id}
-              className="component-item flex items-center p-2 border-b last:border-b-0"
-              data-testid={`component-item-${component.id}`}
+              key={component.component_id}
+              className="component-item flex items-center p-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
+              data-testid={`component-${component.component_id}`}
+              onClick={() => handleComponentClick(component)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, component.component_id)}
             >
-              <div className="drag-handle mr-2 cursor-move" data-testid={`drag-handle-${component.id}`}>
+              <div
+                className="drag-handle mr-2 cursor-move"
+                data-testid={`drag-handle-${component.component_id}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, component.component_id)}
+                onClick={(e) => e.stopPropagation()}
+              >
                 ⋮⋮
               </div>
               <div className="flex-1">
                 <div className="text-sm text-gray-500">Component {index + 1}</div>
-                <div className="text-xs text-gray-400">{component.plainText?.substring(0, 50) || ''}...</div>
+                <div className="text-xs text-gray-400">{component.content_plain?.substring(0, 50) || ''}...</div>
               </div>
-              {component.sceneId && (
-                <div className="scene-mapping text-xs text-blue-600" data-testid={`scene-mapping-${component.id}`}>
-                  Scene: {component.sceneId}
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirmId(component.component_id);
+                }}
+                className="delete-btn ml-2 px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
+                data-testid={`delete-component-${component.component_id}`}
+              >
+                Delete
+              </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Component Editor */}
+      {editingComponentId && (
+        <div className="component-editor border-b p-4" data-testid={`component-editor-${editingComponentId}`}>
+          <div className="mb-2 text-sm font-medium text-gray-700">
+            Editing Component
+          </div>
+          <textarea
+            value={editingContent}
+            onChange={(e) => handleComponentEdit(e.target.value)}
+            className="w-full h-32 p-2 border rounded text-sm"
+            placeholder="Component content..."
+          />
+          <button
+            type="button"
+            onClick={() => setEditingComponentId(null)}
+            className="mt-2 px-3 py-1 bg-gray-500 text-white rounded text-xs"
+          >
+            Close Editor
+          </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmId && (
+        <div className="delete-confirmation-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <div className="mb-4 text-lg font-medium">Confirm Delete</div>
+            <div className="mb-4 text-sm text-gray-600">
+              Are you sure you want to delete this component? This action cannot be undone.
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleDeleteComponent(deleteConfirmId)}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm"
+              >
+                Confirm Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

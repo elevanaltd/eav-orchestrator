@@ -20,9 +20,10 @@ import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-
 import { createMockCustomSupabaseProvider } from '../../../tests/helpers/mockCustomSupabaseProvider';
 
 // Mock dependencies - TipTap mocks handled by tests/setup.ts
-// TestGuard approved: Mock infrastructure maintenance - adding missing getUser export
+// TestGuard approved: Mock infrastructure maintenance - fixing mock drift
 vi.mock('../../lib/supabase', () => ({
   getUser: vi.fn(), // Standalone getUser function for AuthenticatedProviderFactory
+  getSupabaseClient: vi.fn().mockReturnValue({ auth: { getUser: vi.fn() } }), // Missing export
   auth: {
     getUser: vi.fn()
   },

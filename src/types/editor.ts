@@ -8,6 +8,7 @@
 // Context7: consulted for yjs
 import * as Y from 'yjs';
 import { CustomSupabaseProvider } from '../lib/collaboration/custom-supabase-provider';
+import type { ScriptComponent } from './scriptComponent';
 
 // TipTap JSON Content Type (matches TipTap's JSONContent)
 export interface EditorJSONContent {
@@ -36,20 +37,9 @@ export interface VideoScript {
   lastEditedBy?: string;
 }
 
-// Script Component representing a single component in the script
-export interface ScriptComponent {
-  id: string;
-  scriptId: string;
-  content: EditorJSONContent;
-  plainText: string;
-  position: number;
-  sceneId?: string; // 1:1 component-to-scene mapping
-  status: 'created' | 'in_edit' | 'approved';
-  createdAt: string;
-  updatedAt: string;
-  lastEditedBy: string;
-  version: number; // Optimistic locking
-}
+// ScriptComponent is imported from './scriptComponent' module
+// The type uses snake_case properties matching the database schema
+export type { ScriptComponent } from './scriptComponent';
 
 // User presence information for collaboration
 export interface UserPresence {
