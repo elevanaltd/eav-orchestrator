@@ -49,7 +49,6 @@ describe('Security Boundary Tests', () => {
   let mockSupabase: SupabaseClient
   let mockFrom: ReturnType<typeof vi.fn>
   let mockRpc: ReturnType<typeof vi.fn>
-  let _mockChannel: ReturnType<typeof vi.fn>
   let currentUserId: string
 
   beforeEach(() => {
@@ -93,7 +92,6 @@ describe('Security Boundary Tests', () => {
 
     mockFrom = vi.fn()
     mockRpc = vi.fn()
-    _mockChannel = vi.fn()
 
     mockSupabase = {
       from: mockFrom,

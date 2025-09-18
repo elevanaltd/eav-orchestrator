@@ -289,7 +289,7 @@ describe('IndexedDBQueue', () => {
           });
           return request;
         }
-        return originalOpen.apply(window.indexedDB, args);
+        return originalOpen.apply(window.indexedDB, args as [name: string, version?: number]);
       });
 
       const newQueue = new IndexedDBQueue(TEST_DOCUMENT_ID);

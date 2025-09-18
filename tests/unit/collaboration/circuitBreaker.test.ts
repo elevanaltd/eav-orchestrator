@@ -116,9 +116,12 @@ describe('Circuit Breaker Integration', () => {
         onError: vi.fn()
       });
 
+      // First connect to initialize the IndexedDB queue
+      await provider.connect();
+
       // Force circuit to open
       provider.circuitBreaker.open();
-      
+
       // Try to persist update - it will throw but should queue
       const update = new Uint8Array([1, 2, 3]);
       try {
@@ -126,11 +129,12 @@ describe('Circuit Breaker Integration', () => {
       } catch (_error) {
         // Expected to throw when circuit is open
       }
-      
+
       // Update should be queued
-      expect(provider.offlineQueue).toBeDefined();
-      expect(provider.offlineQueue.length).toBe(1);
-      expect(provider.offlineQueue[0]).toEqual(update);
+      const queuedOperations = await provider.getOfflineQueue();
+      expect(queuedOperations).toBeDefined();
+      expect(queuedOperations.length).toBe(1);
+      expect(queuedOperations[0]).toEqual(update);
     });
 
     it('should drain offline queue when circuit closes', async () => {
@@ -150,19 +154,22 @@ describe('Circuit Breaker Integration', () => {
         onError: vi.fn()
       });
 
-      // Directly set the offline queue for testing
-      provider.offlineQueue = [
-        new Uint8Array([1, 2, 3]),
-        new Uint8Array([4, 5, 6])
-      ];
-      
-      expect(provider.offlineQueue.length).toBe(2);
+      // Connect to initialize the IndexedDB queue
+      await provider.connect();
+
+      // Queue some operations for testing
+      await provider.queueUpdate(new Uint8Array([1, 2, 3]));
+      await provider.queueUpdate(new Uint8Array([4, 5, 6]));
+
+      const queuedBefore = await provider.getOfflineQueue();
+      expect(queuedBefore.length).toBe(2);
 
       // Drain the queue
       await provider.drainOfflineQueue();
-      
+
       // Queue should be empty
-      expect(provider.offlineQueue.length).toBe(0);
+      const queuedAfter = await provider.getOfflineQueue();
+      expect(queuedAfter.length).toBe(0);
       
       // RPC should have been called for each queued item
       expect(mockSupabaseClient.rpc).toHaveBeenCalledTimes(2);
