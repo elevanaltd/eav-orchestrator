@@ -109,21 +109,8 @@ function App() {
       setIsLoadingComponents(true);
       try {
         const result = await componentManager.getComponentsByScriptId(selectedScript.id);
-        // Transform database result to ScriptComponent interface
-        const transformedComponents: ScriptComponent[] = result.components.map(comp => ({
-          id: comp.component_id,
-          scriptId: comp.script_id,
-          content: comp.content_tiptap,
-          plainText: comp.content_plain,
-          position: comp.position,
-          status: comp.component_status as 'created' | 'in_edit' | 'approved',
-          sceneId: undefined, // Not used in this implementation
-          createdAt: comp.created_at,
-          updatedAt: comp.updated_at,
-          lastEditedBy: comp.last_edited_by,
-          version: comp.version
-        }));
-        setComponents(transformedComponents);
+        // Use database result directly - already matches ScriptComponent interface
+        setComponents(result.components);
       } catch (error) {
         console.error('Failed to load components:', error);
         // Set empty array on error to prevent UI issues
@@ -144,28 +131,16 @@ function App() {
 
     try {
       const result = await componentManager.createComponent(
-        component.scriptId || selectedScript.id,
-        component.content || { type: 'doc', content: [] },
-        component.plainText || '',
+        component.script_id || selectedScript.id,
+        component.content_tiptap || { type: 'doc', content: [] },
+        component.content_plain || '',
         'demo-user', // In production, this would come from auth context
         component.position,
-        component.status || 'created'
+        component.component_status || 'created'
       );
 
-      // Transform the result to match ScriptComponent interface
-      const newComponent: ScriptComponent = {
-        id: result.component_id,
-        scriptId: result.script_id,
-        content: result.content_tiptap,
-        plainText: result.content_plain,
-        position: result.position_index,
-        status: result.component_status as 'created' | 'in_edit' | 'approved',
-        sceneId: undefined, // Not used in this implementation
-        createdAt: result.created_at,
-        updatedAt: result.updated_at,
-        lastEditedBy: result.last_edited_by,
-        version: result.version
-      };
+      // Use the result directly - already matches ScriptComponent interface
+      const newComponent = result;
 
       // Update local state with optimistic update
       setComponents(prev => [...prev, newComponent]);

@@ -265,7 +265,8 @@ export class ScriptComponentManager {
     script_id: string;
     content_tiptap: object;
     content_plain: string;
-    position_index: number;
+    position: number;
+    component_type: string;
     component_status: string;
     version: number;
     created_at: string;
@@ -298,7 +299,7 @@ export class ScriptComponentManager {
           last_edited_by: userId,
           last_edited_at: new Date().toISOString()
         })
-        .select('component_id, script_id, content_tiptap, content_plain, position, component_status, version, created_at, updated_at, last_edited_by, last_edited_at')
+        .select('component_id, script_id, content_tiptap, content_plain, position, component_type, component_status, version, created_at, updated_at, last_edited_by, last_edited_at')
         .single();
 
       if (error) {
@@ -319,7 +320,8 @@ export class ScriptComponentManager {
         script_id: data.script_id,
         content_tiptap: data.content_tiptap,
         content_plain: data.content_plain,
-        position_index: data.position,
+        position: data.position,
+        component_type: data.component_type || 'main',
         component_status: data.component_status,
         version: data.version,
         created_at: data.created_at,
