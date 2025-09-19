@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import * as Sentry from '@sentry/react';
 import { ScriptEditor } from './components/editor/ScriptEditor';
 import type { EditorJSONContent, VideoScript, ScriptComponent } from './types/editor';
+import { toUIModel } from './types/editor';
+import type { ScriptComponentUI } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
 import { getSupabase } from './lib/supabase';
 import { useClientLifecycle } from './hooks/useClientLifecycle';
@@ -133,28 +135,35 @@ function App() {
   }, [selectedScript, componentManager]);
 
   // Component management handlers
-  const handleComponentAdd = async (component: Partial<ScriptComponent>): Promise<ScriptComponent> => {
+  const handleComponentAdd = async (component: Partial<ScriptComponentUI>): Promise<ScriptComponentUI> => {
     if (!selectedScript) {
       throw new Error('No script selected');
     }
 
     try {
+      // Convert UI model to API model for database operations
+      const apiComponent: Partial<ScriptComponent> = {
+        script_id: component.scriptId || selectedScript.id,
+        content_tiptap: component.content || { type: 'doc', content: [] },
+        content_plain: component.plainText || '',
+        position: component.position,
+        component_status: component.status || 'created'
+      };
+
       const result = await componentManager.createComponent(
-        component.script_id || selectedScript.id,
-        component.content_tiptap || { type: 'doc', content: [] },
-        component.content_plain || '',
+        apiComponent.script_id!,
+        apiComponent.content_tiptap,
+        apiComponent.content_plain,
         'demo-user', // In production, this would come from auth context
-        component.position,
-        component.component_status || 'created'
+        apiComponent.position,
+        apiComponent.component_status
       );
 
-      // Use the result directly - already matches ScriptComponent interface
-      const newComponent = result;
+      // Update local state with optimistic update (database result is ScriptComponent)
+      setComponents(prev => [...prev, result]);
 
-      // Update local state with optimistic update
-      setComponents(prev => [...prev, newComponent]);
-
-      return newComponent;
+      // Return UI model
+      return toUIModel(result);
     } catch (error) {
       console.error('Failed to create component:', error);
       throw error;
@@ -528,7 +537,7 @@ function App() {
                           autoSave: true,
                           autoSaveDelay: 1000
                         }}
-                        components={components}
+                        components={components.map(toUIModel)}
                         onContentChange={(content: EditorJSONContent) => {
                           console.log('Content changed:', content);
                         }}

@@ -41,6 +41,59 @@ export interface VideoScript {
 // The type uses snake_case properties matching the database schema
 export type { ScriptComponent } from './scriptComponent';
 
+// UI Model Interface with camelCase properties for React components
+export interface ScriptComponentUI {
+  componentId: string;        // Maps from component_id (database)
+  scriptId: string;          // Maps from script_id (database)
+  content: object;           // Maps from content_tiptap (database)
+  plainText: string;         // Maps from content_plain (database)
+  position: number;          // Direct mapping (same in database)
+  status: string;            // Maps from component_status (database)
+  type: string;              // Maps from component_type (database)
+  version: number;           // Direct mapping (same in database)
+  createdAt: string;         // Maps from created_at (database)
+  updatedAt: string;         // Maps from updated_at (database)
+  lastEditedBy: string;      // Maps from last_edited_by (database)
+  lastEditedAt: string;      // Maps from last_edited_at (database)
+  deletedAt?: string;        // Maps from deleted_at (database)
+  deletedBy?: string;        // Maps from deleted_by (database)
+}
+
+// Transformation utilities for boundary layer
+export const toUIModel = (dbComponent: ScriptComponent): ScriptComponentUI => ({
+  componentId: dbComponent.component_id,
+  scriptId: dbComponent.script_id,
+  content: dbComponent.content_tiptap,
+  plainText: dbComponent.content_plain,
+  position: dbComponent.position,
+  status: dbComponent.component_status,
+  type: dbComponent.component_type,
+  version: dbComponent.version,
+  createdAt: dbComponent.created_at,
+  updatedAt: dbComponent.updated_at,
+  lastEditedBy: dbComponent.last_edited_by,
+  lastEditedAt: dbComponent.last_edited_at,
+  deletedAt: dbComponent.deleted_at,
+  deletedBy: dbComponent.deleted_by
+});
+
+export const toApiModel = (uiComponent: ScriptComponentUI): ScriptComponent => ({
+  component_id: uiComponent.componentId,
+  script_id: uiComponent.scriptId,
+  content_tiptap: uiComponent.content,
+  content_plain: uiComponent.plainText,
+  position: uiComponent.position,
+  component_type: uiComponent.type,
+  component_status: uiComponent.status,
+  version: uiComponent.version,
+  created_at: uiComponent.createdAt,
+  updated_at: uiComponent.updatedAt,
+  last_edited_by: uiComponent.lastEditedBy,
+  last_edited_at: uiComponent.lastEditedAt,
+  deleted_at: uiComponent.deletedAt,
+  deleted_by: uiComponent.deletedBy
+});
+
 // User presence information for collaboration
 export interface UserPresence {
   id: string;
@@ -91,12 +144,12 @@ export interface ScriptEditorProps {
   config: ScriptEditorConfig;
   ydoc?: Y.Doc;
   provider?: CustomSupabaseProvider;
-  components?: ScriptComponent[];
+  components?: ScriptComponentUI[];
   initialContent?: EditorJSONContent;
   activeUsers?: UserPresence[];
   onContentChange?: (content: EditorJSONContent, plainText: string) => void;
-  onComponentAdd?: (component: Partial<ScriptComponent>) => Promise<ScriptComponent>;
-  onComponentUpdate?: (componentId: string, updates: Partial<ScriptComponent>) => Promise<void>;
+  onComponentAdd?: (component: Partial<ScriptComponentUI>) => Promise<ScriptComponentUI>;
+  onComponentUpdate?: (componentId: string, updates: Partial<ScriptComponentUI>) => Promise<void>;
   onComponentDelete?: (componentId: string) => Promise<void>;
   onComponentReorder?: (componentIds: string[]) => Promise<void>;
   onSave?: (content: EditorJSONContent) => Promise<void>;

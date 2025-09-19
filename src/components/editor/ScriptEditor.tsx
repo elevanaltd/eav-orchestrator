@@ -21,7 +21,7 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
 
 import { ScriptEditorProps, EditorState, SaveStatus } from '../../types/editor';
-import type { ScriptComponent } from '../../types/scriptComponent';
+import type { ScriptComponentUI } from '../../types/editor';
 import { AuthenticatedProviderFactory } from '../../lib/collaboration/AuthenticatedProviderFactory';
 import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-provider';
 import { processTipTapContent } from '../../lib/content/content-processor';
@@ -358,11 +358,11 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
     try {
       const newComponent = {
-        script_id: config.scriptId || 'default',
-        content_tiptap: { type: 'doc', content: [] },
-        content_plain: '',
-        position_index: components.length + 1,
-        component_status: 'created' as const
+        scriptId: config.scriptId || 'default',
+        content: { type: 'doc', content: [] },
+        plainText: '',
+        position: components.length + 1,
+        status: 'created' as const
       };
 
       await onComponentAdd(newComponent);
@@ -373,9 +373,9 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
   };
 
-  const handleComponentClick = (component: ScriptComponent) => {
-    setEditingComponentId(component.component_id);
-    setEditingContent(component.content_plain || '');
+  const handleComponentClick = (component: ScriptComponentUI) => {
+    setEditingComponentId(component.componentId);
+    setEditingContent(component.plainText || '');
   };
 
   const handleComponentEdit = (newContent: string) => {
@@ -390,8 +390,8 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       if (editingComponentId && onComponentUpdate) {
         try {
           await onComponentUpdate(editingComponentId, {
-            content_plain: newContent,
-            content_tiptap: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: newContent }] }] }
+            plainText: newContent,
+            content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: newContent }] }] }
           });
         } catch (error) {
           console.error('Failed to update component:', error);
@@ -452,15 +452,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
 
     if (draggedComponentIdValue && draggedComponentIdValue !== targetComponentId) {
-      const draggedIndex = components.findIndex(c => c.component_id === draggedComponentIdValue);
-      const targetIndex = components.findIndex(c => c.component_id === targetComponentId);
+      const draggedIndex = components.findIndex(c => c.componentId === draggedComponentIdValue);
+      const targetIndex = components.findIndex(c => c.componentId === targetComponentId);
 
       if (draggedIndex !== -1 && targetIndex !== -1) {
         const newOrder = [...components];
         const [draggedComponent] = newOrder.splice(draggedIndex, 1);
         newOrder.splice(targetIndex, 0, draggedComponent);
 
-        const reorderedIds = newOrder.map(c => c.component_id);
+        const reorderedIds = newOrder.map(c => c.componentId);
         handleComponentReorder(reorderedIds);
       }
     }
@@ -587,34 +587,34 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <div className="component-list border-b" data-testid="component-list">
           {components.map((component, index) => (
             <div
-              key={component.component_id}
+              key={component.componentId}
               className="component-item flex items-center p-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
-              data-testid={`component-${component.component_id}`}
+              data-testid={`component-${component.componentId}`}
               onClick={() => handleComponentClick(component)}
               onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, component.component_id)}
+              onDrop={(e) => handleDrop(e, component.componentId)}
             >
               <div
                 className="drag-handle mr-2 cursor-move"
-                data-testid={`drag-handle-${component.component_id}`}
+                data-testid={`drag-handle-${component.componentId}`}
                 draggable
-                onDragStart={(e) => handleDragStart(e, component.component_id)}
+                onDragStart={(e) => handleDragStart(e, component.componentId)}
                 onClick={(e) => e.stopPropagation()}
               >
                 ⋮⋮
               </div>
               <div className="flex-1">
                 <div className="text-sm text-gray-500">Component {index + 1}</div>
-                <div className="text-xs text-gray-400">{component.content_plain?.substring(0, 50) || ''}...</div>
+                <div className="text-xs text-gray-400">{component.plainText?.substring(0, 50) || ''}...</div>
               </div>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setDeleteConfirmId(component.component_id);
+                  setDeleteConfirmId(component.componentId);
                 }}
                 className="delete-btn ml-2 px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
-                data-testid={`delete-component-${component.component_id}`}
+                data-testid={`delete-component-${component.componentId}`}
               >
                 Delete
               </button>
