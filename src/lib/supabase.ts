@@ -21,19 +21,31 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Environment configuration with validation
-// Testable environment access function
+// Testable environment access function with new key format support
 const getEnvironmentConfig = () => {
   // Allow test environment to override via process.env
   const supabaseUrl = process.env.NODE_ENV === 'test'
     ? (process.env.VITE_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL)
     : import.meta.env.VITE_SUPABASE_URL;
 
-  const supabaseAnonKey = process.env.NODE_ENV === 'test'
-    ? (process.env.VITE_SUPABASE_ANON_KEY || import.meta.env?.VITE_SUPABASE_ANON_KEY)
-    : import.meta.env.VITE_SUPABASE_ANON_KEY;
+  // Support new PUBLISHABLE_KEY format with fallback to legacy ANON_KEY
+  // Migration transition: Check for new key first, fallback to old for compatibility
+  let supabaseAnonKey: string | undefined;
+
+  if (process.env.NODE_ENV === 'test') {
+    supabaseAnonKey =
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      import.meta.env?.VITE_SUPABASE_ANON_KEY;
+  } else {
+    supabaseAnonKey =
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      import.meta.env.VITE_SUPABASE_ANON_KEY;
+  }
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY required');
+    throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY) required');
   }
 
   return { supabaseUrl, supabaseAnonKey };

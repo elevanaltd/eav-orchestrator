@@ -84,6 +84,9 @@ export default defineConfig({
     ],
     env: {
       VITE_SUPABASE_URL: 'https://test.supabase.co',
+      // New Supabase key format (preferred)
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key-for-integration-tests',
+      // Legacy key format (for backward compatibility testing)
       VITE_SUPABASE_ANON_KEY: 'test-anon-key-for-integration-tests'
     },
     coverage: {
