@@ -134,17 +134,17 @@ describe('Circuit Breaker Integration', () => {
       const queuedOperations = await provider.getOfflineQueue();
       expect(queuedOperations).toBeDefined();
       expect(queuedOperations.length).toBe(1);
-      expect(queuedOperations[0]).toEqual(update);
+      // Compare Uint8Array contents properly
+      expect(Array.from(queuedOperations[0])).toEqual(Array.from(update));
     });
 
     it('should drain offline queue when circuit closes', async () => {
       // Setup successful RPC responses - ensure it returns the expected format
-      (mockSupabaseClient.rpc as any).mockClear();
-      (mockSupabaseClient.rpc as any).mockResolvedValue({ 
+      (mockSupabaseClient.rpc as any).mockResolvedValue({
         data: [{ success: true, new_version: 2 }],
-        error: null 
+        error: null
       });
-      
+
       provider = new CustomSupabaseProvider({
         ydoc: ydoc,
         projectId: 'test-project',
@@ -154,8 +154,11 @@ describe('Circuit Breaker Integration', () => {
         onError: vi.fn()
       });
 
-      // Connect to initialize the IndexedDB queue
+      // Connect to initialize the IndexedDB queue (this will drain any existing queue)
       await provider.connect();
+
+      // Clear the mock calls AFTER connect, so we only count new operations
+      (mockSupabaseClient.rpc as any).mockClear();
 
       // Queue some operations for testing
       await provider.queueUpdate(new Uint8Array([1, 2, 3]));

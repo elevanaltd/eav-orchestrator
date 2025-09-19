@@ -536,6 +536,36 @@ if (typeof global !== 'undefined') {
   });
 }
 
+// CONSTITUTIONAL FIX: Mock fetch for API endpoint tests
+// Mock the global fetch to prevent network requests in tests
+// This is critical for API version endpoint tests
+vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+  // Mock /api/version endpoint
+  if (url.includes('/api/version')) {
+    return {
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        'content-type': 'application/json'
+      }),
+      json: async () => ({
+        version: '1.0.0',
+        schemaVersion: 1,
+        timestamp: new Date().toISOString(),
+        build: 'B2-Build'
+      })
+    } as Response;
+  }
+
+  // Default response for other endpoints
+  return {
+    ok: false,
+    status: 404,
+    headers: new Headers(),
+    json: async () => ({ error: 'Not found' })
+  } as Response;
+}));
+
 afterEach(() => {
   cleanup();
 });
