@@ -920,6 +920,46 @@ export class ScriptComponentManager {
       };
     }
   }
+
+  /**
+   * Get the system default video ID for creating new scripts
+   * This implements the System-Owned Default Hierarchy pattern
+   * approved by Technical Architect
+   */
+  async getDefaultVideoId(): Promise<{
+    videoId?: string;
+    error?: string;
+  }> {
+    const startTime = Date.now();
+    this.metrics.totalOperations++;
+
+    try {
+      // Call the RPC function to get default video ID
+      const { data, error } = await this.supabase
+        .rpc('rpc_get_default_video_id');
+
+      if (error) {
+        throw new Error(`Failed to get default video ID: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('No default video ID found. System defaults may not be initialized.');
+      }
+
+      this.metrics.successfulOperations++;
+      this.recordOperationTime(Date.now() - startTime);
+
+      return {
+        videoId: data
+      };
+
+    } catch (error) {
+      this.recordOperationTime(Date.now() - startTime);
+      return {
+        error: error instanceof Error ? error.message : 'Failed to get default video ID'
+      };
+    }
+  }
 }
 
 // Re-export OptimisticLockError for convenience

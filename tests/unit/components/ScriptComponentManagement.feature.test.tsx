@@ -14,16 +14,22 @@ import type { ScriptComponentUI } from '../../../src/types/editor';
 
 describe('Script Component Management - V2 Requirements', () => {
   // Test setup helper - not weakening tests, just providing required props
-  const setup = (props = {}) => {
-    const defaultProps = {
+  const setup = (props: any = {}) => {
+    const defaultProps: any = {
       config: { documentId: 'doc-123', userName: 'test-user', userId: 'user-123' },
-      components: [],
       onComponentAdd: vi.fn(),
       onComponentUpdate: vi.fn(),
       onComponentDelete: vi.fn(),
-      onComponentReorder: vi.fn(),
-      ...props
+      onComponentReorder: vi.fn()
     };
+
+    // Better prop merging - only include components if explicitly provided
+    Object.keys(props).forEach(key => {
+      if (key !== 'components' || props.components !== undefined) {
+        defaultProps[key] = props[key];
+      }
+    });
+
     return render(<ScriptEditor {...defaultProps} />);
   };
 

@@ -408,7 +408,57 @@ function App() {
                 <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
                   Create your first script to get started with collaborative video production.
                 </p>
-                <button style={{
+                <button
+                  onClick={async () => {
+                    setIsLoadingScripts(true);
+                    setScriptError(null);
+
+                    try {
+                      // ERROR-ARCHITECT-APPROVED: ERROR-ARCHITECT-20250919-ab85cf3d
+                      // Get the system default video ID (runtime discovery pattern)
+                      const defaultResult = await componentManager.getDefaultVideoId();
+
+                      if (defaultResult.error || !defaultResult.videoId) {
+                        throw new Error(defaultResult.error || 'No default video available');
+                      }
+
+                      // Create a new script in the database using the default video
+                      const result = await componentManager.createScript(
+                        defaultResult.videoId,
+                        'New Script',
+                        'A new video script (uncategorized)'
+                      );
+
+                      if (result.error || !result.script) {
+                        throw new Error(result.error || 'Failed to create script');
+                      }
+
+                      // Transform to UI model
+                      const newScript: VideoScript = {
+                        id: result.script.script_id,
+                        videoId: result.script.video_id,
+                        title: result.script.title,
+                        description: result.script.description,
+                        wordCount: 0,
+                        duration: '0',
+                        status: result.script.script_status as VideoScript['status'],
+                        lastEdited: result.script.updated_at,
+                        createdAt: result.script.created_at,
+                        updatedAt: result.script.updated_at,
+                        lastEditedBy: result.script.last_edited_by
+                      };
+
+                      // Add to local state and select it
+                      setScripts([newScript]);
+                      setSelectedScript(newScript);
+                    } catch (error) {
+                      console.error('Failed to create script:', error);
+                      setScriptError(error instanceof Error ? error.message : 'Failed to create script');
+                    } finally {
+                      setIsLoadingScripts(false);
+                    }
+                  }}
+                  style={{
                   padding: '12px 24px',
                   background: theme.midDark,
                   color: 'white',
