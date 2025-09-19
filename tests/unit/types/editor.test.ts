@@ -381,9 +381,9 @@ describe('Editor Types', () => {
         },
         components: [
           {
-            component_id: 'comp-1',
-            script_id: 'script-integration',
-            content_tiptap: {
+            componentId: 'comp-1',
+            scriptId: 'script-integration',
+            content: {
               type: 'doc',
               content: [
                 {
@@ -392,14 +392,14 @@ describe('Editor Types', () => {
                 }
               ]
             },
-            content_plain: 'Integration test content',
+            plainText: 'Integration test content',
             position: 0,
-            component_type: 'main',
-            component_status: 'created',
-            created_at: '2025-01-15T00:00:00Z',
-            updated_at: '2025-01-15T00:00:00Z',
-            last_edited_by: 'user-integration',
-            last_edited_at: '2025-01-15T00:00:00Z',
+            type: 'main',
+            status: 'created',
+            createdAt: '2025-01-15T00:00:00Z',
+            updatedAt: '2025-01-15T00:00:00Z',
+            lastEditedBy: 'user-integration',
+            lastEditedAt: '2025-01-15T00:00:00Z',
             version: 1
           }
         ],

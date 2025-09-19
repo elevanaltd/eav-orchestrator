@@ -12,6 +12,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import * as Y from 'yjs';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
+import { toUIModel } from '../../../src/lib/api/transformers';
+import type { ScriptComponent } from '../../../src/types/scriptComponent';
 // Mock the collaboration dependencies
 vi.mock('../../../src/lib/collaboration/YjsSupabaseProvider');
 vi.mock('../../../src/lib/collaboration/custom-supabase-provider');
@@ -197,20 +199,23 @@ describe('ScriptEditor', () => {
     it('should support 3-18 components per script', async () => {
       // GREEN STATE: Component management implemented
       // TESTGUARD-APPROVED: TESTGUARD-20250918-0fc339e2
-      const components = Array.from({ length: 5 }, (_, i) => ({
-        component_id: `comp-${i}`,
-        script_id: 'script-123',
-        content_tiptap: { type: 'doc', content: [] },
-        content_plain: `Component ${i} content`,
-        position: i,
-        component_type: 'main',
-        component_status: 'created' as const,
-        created_at: '2025-01-15T00:00:00Z',
-        updated_at: '2025-01-15T00:00:00Z',
-        last_edited_by: 'test-user',
-        last_edited_at: '2025-01-15T00:00:00Z',
-        version: 1
-      }));
+      const components = Array.from({ length: 5 }, (_, i) => {
+        const dbComponent: ScriptComponent = {
+          component_id: `comp-${i}`,
+          script_id: 'script-123',
+          content_tiptap: { type: 'doc', content: [] },
+          content_plain: `Component ${i} content`,
+          position: i,
+          component_type: 'main',
+          component_status: 'created' as const,
+          created_at: '2025-01-15T00:00:00Z',
+          updated_at: '2025-01-15T00:00:00Z',
+          last_edited_by: 'test-user',
+          last_edited_at: '2025-01-15T00:00:00Z',
+          version: 1
+        };
+        return toUIModel(dbComponent);
+      });
       render(<ScriptEditor config={mockConfig} components={components} />);
       
       // Component list should be rendered
@@ -220,7 +225,7 @@ describe('ScriptEditor', () => {
     it('should allow reordering components with drag and drop', async () => {
       // GREEN STATE: Drag and drop implemented
       const components = [
-        {
+        toUIModel({
           component_id: 'comp-1',
           script_id: 'script-123',
           content_tiptap: { type: 'doc', content: [] },
@@ -233,8 +238,8 @@ describe('ScriptEditor', () => {
           last_edited_by: 'test-user',
           last_edited_at: '2025-01-15T00:00:00Z',
           version: 1
-        },
-        {
+        }),
+        toUIModel({
           component_id: 'comp-2',
           script_id: 'script-123',
           content_tiptap: { type: 'doc', content: [] },
@@ -247,7 +252,7 @@ describe('ScriptEditor', () => {
           last_edited_by: 'test-user',
           last_edited_at: '2025-01-15T00:00:00Z',
           version: 1
-        }
+        })
       ];
       render(<ScriptEditor config={mockConfig} components={components} />);
       
@@ -258,7 +263,7 @@ describe('ScriptEditor', () => {
     it('should display component status correctly', async () => {
       // GREEN STATE: Component status display implemented
       const components = [
-        {
+        toUIModel({
           component_id: 'comp-1',
           script_id: 'script-123',
           content_tiptap: { type: 'doc', content: [] },
@@ -271,7 +276,7 @@ describe('ScriptEditor', () => {
           last_edited_by: 'test-user',
           last_edited_at: '2025-01-15T00:00:00Z',
           version: 1
-        }
+        })
       ];
       render(<ScriptEditor config={mockConfig} components={components} />);
 

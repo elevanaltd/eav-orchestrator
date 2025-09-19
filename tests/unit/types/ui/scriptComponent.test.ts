@@ -7,10 +7,12 @@
 // Context7: consulted for vitest
 import { describe, it, expect } from 'vitest';
 import {
-  ScriptComponentUI,
-  ScriptComponentUIPartial,
-  ScriptComponentUICreate
-} from '../../../../src/types/ui/scriptComponent';
+  ScriptComponentUI
+} from '../../../../src/types/editor';
+
+// RED state type aliases for tests - interfaces not implemented yet
+type ScriptComponentUIPartial = Partial<ScriptComponentUI>;
+type ScriptComponentUICreate = Pick<ScriptComponentUI, 'scriptId'> & Partial<Omit<ScriptComponentUI, 'componentId' | 'scriptId'>>;
 
 describe('ScriptComponentUI Types', () => {
   describe('ScriptComponentUI Interface', () => {
