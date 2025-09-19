@@ -1,5 +1,4 @@
 {
-  "_approval_token": "TECHNICAL-ARCHITECT-20250917-arch-175",
   "name": "build",
   "version": "1.0.0",
   "description": "**Collaborative Video Production System**",
@@ -13,7 +12,10 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/**.feature.test.**'",
+    "test:feature": "vitest run tests/unit/components/*.feature.test.*",
+    "test:red": "vitest run tests/unit/components/*.feature.test.*",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.config.integration.ts",
