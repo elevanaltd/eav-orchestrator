@@ -336,16 +336,17 @@ function App() {
       {activeTab === 'script' ? (
         <div style={{
           display: 'flex',
-          height: 'calc(100vh - 180px)',
+          height: 'calc(100vh - 156px)', // Reduced from 180px - header (72px) + tabs (52px) + padding
           background: theme.light
         }}>
           {/* Left Sidebar - Script List */}
           <div style={{
-            width: '300px',
+            width: '250px', // Reduced from 300px as requested
             background: 'white',
             borderRight: '1px solid #e2e8f0',
-            padding: '20px',
-            overflowY: 'auto'
+            padding: '24px',
+            overflowY: 'auto',
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)'
           }}>
             <h3 style={{ 
               fontSize: '16px', 
@@ -356,34 +357,77 @@ function App() {
               Project Scripts
             </h3>
             
-            {/* Loading State */}
+            {/* Loading State - Skeleton */}
             {isLoadingScripts && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '40px',
-                fontSize: '16px',
-                color: '#64748b'
-              }}>
-                ⏳ Loading scripts...
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[1, 2, 3].map(index => (
+                  <div key={index} style={{
+                    padding: '16px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+                  }}>
+                    {/* Title skeleton */}
+                    <div style={{
+                      height: '20px',
+                      background: '#f1f5f9',
+                      borderRadius: '6px',
+                      marginBottom: '12px',
+                      width: `${70 + (index * 10)}%`,
+                      animation: 'pulse 1.5s ease-in-out infinite alternate',
+                      backgroundImage: 'linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%)',
+                      backgroundSize: '200% 100%',
+                      backgroundPosition: '0% 0%'
+                    }} />
+                    {/* Meta info skeleton */}
+                    <div style={{
+                      height: '14px',
+                      background: '#f8fafc',
+                      borderRadius: '4px',
+                      marginBottom: '8px',
+                      width: '60%',
+                      animation: 'pulse 1.5s ease-in-out infinite alternate 0.3s'
+                    }} />
+                    {/* Date skeleton */}
+                    <div style={{
+                      height: '12px',
+                      background: '#f8fafc',
+                      borderRadius: '4px',
+                      width: '40%',
+                      animation: 'pulse 1.5s ease-in-out infinite alternate 0.6s'
+                    }} />
+                  </div>
+                ))}
               </div>
             )}
 
             {/* Error State */}
             {scriptError && (
               <div style={{
-                padding: '16px',
+                padding: '20px',
                 background: '#fef2f2',
                 border: '1px solid #fecaca',
-                borderRadius: '8px',
+                borderLeft: '4px solid #ef4444',
+                borderRadius: '12px',
                 color: '#dc2626',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.1)'
               }}>
-                <div style={{ fontWeight: '500', marginBottom: '4px' }}>
-                  Failed to load scripts
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: '16px' }}>⚠️</span>
+                  <div style={{ fontWeight: '600', fontSize: '15px' }}>
+                    Failed to load scripts
+                  </div>
                 </div>
-                <div>{scriptError}</div>
+                <div style={{ lineHeight: '1.4', color: '#991b1b' }}>
+                  {scriptError}
+                </div>
               </div>
             )}
 
@@ -475,28 +519,76 @@ function App() {
 
             {/* Script List */}
             {!isLoadingScripts && !scriptError && scripts.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {scripts.map(script => (
                   <div
                     key={script.id}
                     onClick={() => setSelectedScript(script)}
                     style={{
-                      padding: '12px',
-                      background: selectedScript?.id === script.id ? '#f0f9ff' : '#f8fafc',
+                      padding: '16px',
+                      background: selectedScript?.id === script.id ? '#f0f9ff' : 'white',
                       border: selectedScript?.id === script.id ? `2px solid ${theme.blue}` : '1px solid #e2e8f0',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.3s ease',
+                      boxShadow: selectedScript?.id === script.id
+                        ? '0 8px 25px rgba(59, 130, 246, 0.15)'
+                        : '0 2px 8px rgba(0, 0, 0, 0.04)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedScript?.id !== script.id) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedScript?.id !== script.id) {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.04)';
+                      }
                     }}
                   >
-                    <div style={{ fontWeight: '500', marginBottom: '4px', color: theme.dark }}>
+                    <div style={{
+                      fontWeight: '600',
+                      marginBottom: '8px',
+                      color: theme.dark,
+                      fontSize: '15px',
+                      lineHeight: '1.4'
+                    }}>
                       {script.title}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>
-                      {script.wordCount ? `${script.wordCount} words` : 'No content'} •
-                      {script.duration || 'No duration'} • {script.status}
+                    <div style={{
+                      fontSize: '13px',
+                      color: '#64748b',
+                      marginBottom: '8px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '8px'
+                    }}>
+                      <span>{script.wordCount ? `${script.wordCount} words` : 'No content'}</span>
+                      <span>•</span>
+                      <span>{script.duration || 'No duration'}</span>
+                      <span>•</span>
+                      <span style={{
+                        background: script.status === 'draft' ? '#dbeafe' :
+                                  script.status === 'in_editing' ? '#fef3c7' :
+                                  script.status === 'client_review' ? '#fdf2f8' : '#dcfce7',
+                        color: script.status === 'draft' ? '#1e40af' :
+                               script.status === 'in_editing' ? '#92400e' :
+                               script.status === 'client_review' ? '#be185d' : '#166534',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}>
+                        {script.status}
+                      </span>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#94a3b8',
+                      fontWeight: '400'
+                    }}>
                       Last edited: {new Date(script.lastEdited).toLocaleDateString()}
                     </div>
                   </div>
@@ -509,8 +601,9 @@ function App() {
           <div style={{
             flex: 1,
             background: 'white',
-            padding: '30px',
-            overflowY: 'auto'
+            padding: '32px',
+            overflowY: 'auto',
+            borderRight: '1px solid #e2e8f0'
           }}>
             <div style={{
               maxWidth: '800px',
@@ -566,15 +659,32 @@ function App() {
                     background: '#ffffff'
                   }}>
                     {isLoadingComponents ? (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: '200px',
-                        fontSize: '16px',
-                        color: '#64748b'
-                      }}>
-                        ⏳ Loading components...
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Editor skeleton */}
+                        <div style={{
+                          height: '40px',
+                          background: '#f8fafc',
+                          borderRadius: '8px',
+                          marginBottom: '12px',
+                          border: '1px solid #e2e8f0'
+                        }} />
+                        {/* Content skeleton */}
+                        {[1, 2, 3, 4].map(index => (
+                          <div key={index} style={{
+                            height: '16px',
+                            background: '#f8fafc',
+                            borderRadius: '4px',
+                            width: `${60 + (index % 3) * 15}%`,
+                            animation: `pulse 1.5s ease-in-out infinite alternate ${index * 0.2}s`
+                          }} />
+                        ))}
+                        <div style={{
+                          height: '100px',
+                          background: '#f8fafc',
+                          borderRadius: '8px',
+                          marginTop: '20px',
+                          border: '1px solid #e2e8f0'
+                        }} />
                       </div>
                     ) : (
                       <ScriptEditor
@@ -629,11 +739,11 @@ function App() {
 
           {/* Right Sidebar - Comments */}
           <div style={{
-            width: '350px',
+            width: '300px', // Reduced from 350px as requested
             background: 'white',
-            borderLeft: '1px solid #e2e8f0',
-            padding: '20px',
-            overflowY: 'auto'
+            padding: '24px',
+            overflowY: 'auto',
+            boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.05)'
           }}>
             <h3 style={{ 
               fontSize: '16px', 
@@ -645,79 +755,196 @@ function App() {
             </h3>
             
             <div style={{
-              padding: '16px',
-              background: '#f8fafc',
-              borderRadius: '8px',
-              marginBottom: '16px'
+              padding: '18px',
+              background: 'white',
+              borderRadius: '12px',
+              marginBottom: '16px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.2s ease'
             }}>
-              <div style={{ 
-                fontSize: '14px', 
-                fontWeight: '500', 
-                marginBottom: '8px',
-                color: theme.dark 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '12px'
               }}>
-                Sarah (Client)
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: theme.red,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}>
+                  S
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: theme.dark
+                }}>
+                  Sarah (Client)
+                </div>
               </div>
-              <div style={{ fontSize: '14px', color: '#475569', marginBottom: '8px' }}>
+              <div style={{
+                fontSize: '14px',
+                color: '#475569',
+                marginBottom: '12px',
+                lineHeight: '1.5'
+              }}>
                 Can we add more detail about the filter replacement schedule?
               </div>
-              <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                2 hours ago • Section 2
+              <div style={{
+                fontSize: '12px',
+                color: '#94a3b8',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>2 hours ago</span>
+                <span>•</span>
+                <span style={{
+                  background: '#fef3c7',
+                  color: '#92400e',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '500'
+                }}>
+                  Section 2
+                </span>
               </div>
             </div>
 
             <div style={{
-              padding: '16px',
-              background: '#f8fafc',
-              borderRadius: '8px',
-              marginBottom: '16px'
+              padding: '18px',
+              background: 'white',
+              borderRadius: '12px',
+              marginBottom: '16px',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+              transition: 'all 0.2s ease'
             }}>
-              <div style={{ 
-                fontSize: '14px', 
-                fontWeight: '500', 
-                marginBottom: '8px',
-                color: theme.dark 
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '12px'
               }}>
-                John (Editor)
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: theme.green,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}>
+                  J
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: theme.dark
+                }}>
+                  John (Editor)
+                </div>
               </div>
-              <div style={{ fontSize: '14px', color: '#475569', marginBottom: '8px' }}>
+              <div style={{
+                fontSize: '14px',
+                color: '#475569',
+                marginBottom: '12px',
+                lineHeight: '1.5'
+              }}>
                 Added the maintenance schedule as requested. Please review.
               </div>
-              <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                1 hour ago • Section 2
+              <div style={{
+                fontSize: '12px',
+                color: '#94a3b8',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>1 hour ago</span>
+                <span>•</span>
+                <span style={{
+                  background: '#fef3c7',
+                  color: '#92400e',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: '500'
+                }}>
+                  Section 2
+                </span>
               </div>
             </div>
 
             {/* Add Comment Box */}
             <div style={{
               marginTop: '24px',
-              padding: '16px',
+              padding: '20px',
               border: '1px solid #e2e8f0',
-              borderRadius: '8px'
+              borderRadius: '12px',
+              background: 'white',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <textarea
                 placeholder="Add a comment..."
                 style={{
                   width: '100%',
                   minHeight: '80px',
-                  padding: '8px',
+                  padding: '12px',
                   border: '1px solid #e2e8f0',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   fontSize: '14px',
-                  resize: 'vertical'
+                  resize: 'vertical',
+                  fontFamily: 'inherit',
+                  lineHeight: '1.5',
+                  transition: 'border-color 0.2s ease',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = theme.blue;
+                  e.target.style.boxShadow = `0 0 0 3px rgba(59, 130, 246, 0.1)`;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e2e8f0';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
               <button style={{
-                marginTop: '8px',
-                padding: '8px 16px',
+                marginTop: '12px',
+                padding: '10px 20px',
                 background: theme.blue,
                 color: 'white',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}>
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#2563eb';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = theme.blue;
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.2)';
+              }}
+              >
                 Post Comment
               </button>
             </div>
