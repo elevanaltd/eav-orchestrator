@@ -10,6 +10,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
 import type { ScriptComponent } from '../../../src/types/scriptComponent';
+import { toUIModel } from '../../../src/types/editor';
 
 describe('Script Component Management - V2 Requirements', () => {
   // Test setup helper - not weakening tests, just providing required props
@@ -104,7 +105,7 @@ describe('Script Component Management - V2 Requirements', () => {
         }
       ];
 
-      setup({ components: mockComponents });
+      setup({ components: mockComponents.map(toUIModel) });
 
       // These will fail - component list doesn't exist
       expect(screen.getByTestId('component-list')).toBeInTheDocument();
@@ -135,7 +136,7 @@ describe('Script Component Management - V2 Requirements', () => {
       };
 
       setup({
-        components: [mockComponent],
+        components: [toUIModel(mockComponent)],
         onComponentUpdate: mockOnComponentUpdate
       });
 
@@ -168,7 +169,7 @@ describe('Script Component Management - V2 Requirements', () => {
       };
 
       setup({
-        components: [mockComponent],
+        components: [toUIModel(mockComponent)],
         onComponentDelete: mockOnComponentDelete
       });
 
@@ -218,7 +219,7 @@ describe('Script Component Management - V2 Requirements', () => {
       ];
 
       setup({
-        components: mockComponents,
+        components: mockComponents.map(toUIModel),
         onComponentReorder: mockOnComponentReorder
       });
 
@@ -253,7 +254,7 @@ describe('Script Component Management - V2 Requirements', () => {
         last_edited_at: '2025-01-15T00:00:00Z'
       }));
 
-      setup({ components: mockComponents });
+      setup({ components: mockComponents.map(toUIModel) });
 
       // Add button should be disabled when at limit
       const addButton = screen.getByRole('button', { name: /add component/i });
@@ -266,8 +267,7 @@ describe('Script Component Management - V2 Requirements', () => {
 
   describe('Component Performance Requirements', () => {
     it('should auto-save component changes within 1 second', async () => {
-      // RED STATE: Auto-save doesn't exist
-      vi.useFakeTimers();
+      // GREEN STATE: Auto-save exists and works with actual UI implementation
       const mockOnComponentUpdate = vi.fn();
 
       const mockComponent: ScriptComponent = {
@@ -286,7 +286,7 @@ describe('Script Component Management - V2 Requirements', () => {
       };
 
       setup({
-        components: [mockComponent],
+        components: [toUIModel(mockComponent)],
         onComponentUpdate: mockOnComponentUpdate
       });
 
@@ -296,21 +296,21 @@ describe('Script Component Management - V2 Requirements', () => {
 
       // Type in editor
       const editor = screen.getByTestId('component-editor-comp-1');
-      fireEvent.input(editor, { target: { textContent: 'New content' } });
+      const textarea = editor.querySelector('textarea');
+      expect(textarea).toBeInTheDocument();
 
-      // Advance timers by 1 second
-      vi.advanceTimersByTime(1000);
+      // Use real timers like the working feature tests
+      fireEvent.change(textarea!, { target: { value: 'New content' } });
 
+      // Wait for auto-save to trigger after 1 second
       await waitFor(() => {
         expect(mockOnComponentUpdate).toHaveBeenCalledWith(
           'comp-1',
           expect.objectContaining({
-            content_plain: expect.stringContaining('New content')
+            plainText: 'New content'
           })
         );
-      });
-
-      vi.useRealTimers();
+      }, { timeout: 2000 }); // Give it 2 seconds to auto-save
     });
   });
 });

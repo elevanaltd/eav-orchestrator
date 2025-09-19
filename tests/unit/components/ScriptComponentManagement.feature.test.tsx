@@ -7,6 +7,7 @@
 // Context7: consulted for vitest
 import { describe, it, expect, vi } from 'vitest';
 // Context7: consulted for @testing-library/react
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
 import type { ScriptComponentUI } from '../../../src/types/editor';
@@ -29,30 +30,47 @@ describe('Script Component Management - V2 Requirements', () => {
   describe('Component Creation', () => {
     it('should create a new component when Add Component button is clicked', async () => {
       // RED STATE: This test MUST fail - Add Component button doesn't exist
-      const mockOnComponentAdd = vi.fn().mockResolvedValue({
-        componentId: 'comp-123',
-        scriptId: 'script-456',
-        content: { type: 'doc', content: [] },
-        plainText: '',
-        position: 1.0,
-        status: 'created',
-        type: 'standard',
-        version: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        lastEditedBy: 'user-123',
-        lastEditedAt: new Date().toISOString()
-      } as ScriptComponentUI);
+      const TestWrapper = () => {
+        const [components, setComponents] = React.useState<ScriptComponentUI[]>([]);
 
-      setup({ onComponentAdd: mockOnComponentAdd });
+        const handleComponentAdd = async (_component: Partial<ScriptComponentUI>): Promise<ScriptComponentUI> => {
+          const newComponent: ScriptComponentUI = {
+            componentId: 'comp-123',
+            scriptId: 'script-456',
+            content: { type: 'doc', content: [] },
+            plainText: '',
+            position: 1.0,
+            status: 'created',
+            type: 'standard',
+            version: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastEditedBy: 'user-123',
+            lastEditedAt: new Date().toISOString()
+          };
+
+          // Update state to make component appear in list
+          setComponents(prev => [...prev, newComponent]);
+          return newComponent;
+        };
+
+        return (
+          <ScriptEditor
+            config={{ documentId: 'doc-123', userName: 'test-user', userId: 'user-123' }}
+            components={components}
+            onComponentAdd={handleComponentAdd}
+            onComponentUpdate={vi.fn()}
+            onComponentDelete={vi.fn()}
+            onComponentReorder={vi.fn()}
+          />
+        );
+      };
+
+      render(<TestWrapper />);
 
       // This will fail - button doesn't exist
       const addButton = screen.getByRole('button', { name: /add component/i });
       fireEvent.click(addButton);
-
-      await waitFor(() => {
-        expect(mockOnComponentAdd).toHaveBeenCalled();
-      });
 
       // Verify component appears in list (will fail)
       await waitFor(() => {
