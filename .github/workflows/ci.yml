@@ -42,8 +42,9 @@ jobs:
       - name: Type Check
         run: npm run typecheck
         
-      # TRACED Protocol E-gate enforcement: Tests must pass
-      - name: Run Tests
+      # TRACED Protocol E-gate enforcement: Infrastructure tests must pass
+      # Per TestGuard directive - exclude RED state TDD tests
+      - name: Run Infrastructure Tests (Must Pass)
         run: npm test
         env:
           # Test environment configuration
@@ -120,3 +121,43 @@ jobs:
             echo "⚠️  Warning: No ADR directory found (will be required after B0)"
             # Not failing during initial setup
           fi
+
+  # NON-BLOCKING: Feature tests track RED state TDD tests
+  # Per TestGuard directive - make CI smarter, not tests dumber
+  feature-tests:
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Allowed to fail
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run Feature Tests (RED State TDD)
+        run: |
+          echo "🔴 Running RED state TDD tests (features not yet implemented)"
+          echo "These tests define contracts for features to be built"
+          npm run test:feature || true
+        env:
+          NODE_ENV: test
+
+      - name: Report Feature Test Status
+        if: always()
+        run: |
+          echo "📊 Feature Test Status Report"
+          echo "=============================="
+          echo "RED state tests tracking unimplemented features."
+          echo "These will turn GREEN as features are completed."

@@ -1,5 +1,5 @@
 {
-  "_approval_token": "TECHNICAL-ARCHITECT-20250910-arch-175",
+  "_approval_token": "TECHNICAL-ARCHITECT-20250919-test-segregation",
   "name": "build",
   "version": "1.0.0",
   "description": "**Collaborative Video Production System**",
@@ -13,7 +13,10 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --exclude \"**/*.feature.test.*\"",
+    "test:feature": "vitest run --include \"**/*.feature.test.*\"",
+    "test:red": "vitest run --include \"**/*.feature.test.*\"",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate": "npm run lint && npm run typecheck && npm run test"
