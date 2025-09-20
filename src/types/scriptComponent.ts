@@ -16,7 +16,7 @@ export interface ScriptComponent {
   version: number; // CRITICAL: Optimistic locking version
   created_at: string;
   updated_at: string;
-  last_edited_by: string;
+  last_edited_by: string | null;
   last_edited_at: string;
   deleted_at?: string; // Soft delete support
   deleted_by?: string;

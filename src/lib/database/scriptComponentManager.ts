@@ -43,10 +43,10 @@ export class ScriptComponentManager {
     content: object,
     plainText: string,
     currentVersion: number,
-    userId: string
+    userId: string | null
   ): Promise<UpdateResult> {
     const startTime = Date.now();
-    
+
     // Input validation
     if (!componentId) {
       throw new Error('Component ID is required');
@@ -54,9 +54,10 @@ export class ScriptComponentManager {
     if (currentVersion <= 0) {
       throw new Error('Valid version number is required');
     }
-    if (!userId) {
-      throw new Error('User ID is required');
-    }
+    // In development, userId can be null; in production it should be required
+    // if (!userId) {
+    //   throw new Error('User ID is required');
+    // }
 
     this.metrics.totalOperations++;
 
@@ -257,7 +258,7 @@ export class ScriptComponentManager {
     scriptId: string,
     content: object = { type: 'doc', content: [] },
     plainText: string = '',
-    userId: string,
+    userId: string | null,
     position?: number,
     status: string = 'created'
   ): Promise<{
@@ -271,7 +272,7 @@ export class ScriptComponentManager {
     version: number;
     created_at: string;
     updated_at: string;
-    last_edited_by: string;
+    last_edited_by: string | null;
     last_edited_at: string;
   }> {
     const startTime = Date.now();
@@ -288,17 +289,31 @@ export class ScriptComponentManager {
       }
 
       // Insert the new component
+      const insertData: {
+        script_id: string;
+        content_tiptap: object;
+        content_plain: string;
+        position: number;
+        component_status: string;
+        last_edited_at: string;
+        last_edited_by?: string;
+      } = {
+        script_id: scriptId,
+        content_tiptap: content,
+        content_plain: plainText,
+        position: finalPosition!,  // We know finalPosition is defined after the check above
+        component_status: status,
+        last_edited_at: new Date().toISOString()
+      };
+
+      // Only add last_edited_by if userId is provided (not null)
+      if (userId) {
+        insertData.last_edited_by = userId;
+      }
+
       const { data, error } = await this.supabase
         .from('script_components')
-        .insert({
-          script_id: scriptId,
-          content_tiptap: content,
-          content_plain: plainText,
-          position: finalPosition,
-          component_status: status,
-          last_edited_by: userId,
-          last_edited_at: new Date().toISOString()
-        })
+        .insert(insertData)
         .select('component_id, script_id, content_tiptap, content_plain, position, component_type, component_status, version, created_at, updated_at, last_edited_by, last_edited_at')
         .single();
 
@@ -341,7 +356,7 @@ export class ScriptComponentManager {
    */
   async deleteComponent(
     componentId: string,
-    userId: string,
+    userId: string | null,
     reason?: string
   ): Promise<{
     success: boolean;

@@ -53,7 +53,7 @@ export interface ScriptComponentUI {
   version: number;           // Direct mapping (same in database)
   createdAt: string;         // Maps from created_at (database)
   updatedAt: string;         // Maps from updated_at (database)
-  lastEditedBy: string;      // Maps from last_edited_by (database)
+  lastEditedBy: string | null;      // Maps from last_edited_by (database)
   lastEditedAt: string;      // Maps from last_edited_at (database)
   deletedAt?: string;        // Maps from deleted_at (database)
   deletedBy?: string;        // Maps from deleted_by (database)
