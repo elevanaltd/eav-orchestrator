@@ -571,7 +571,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.bold}
-          className={`px-3 py-1 mr-1 rounded text-sm font-bold ${editorState.formatting.bold ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm font-bold ${editorState.formatting.bold ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="bold-button"
         >
           B
@@ -579,7 +579,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.italic}
-          className={`px-3 py-1 mr-1 rounded text-sm italic ${editorState.formatting.italic ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm italic ${editorState.formatting.italic ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="italic-button"
         >
           I

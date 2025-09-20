@@ -53,9 +53,18 @@ describe('ScriptEditor Multi-Paragraph Paste', () => {
   it('should respect the 18 component limit when pasting multiple paragraphs', async () => {
     // Create 16 existing components to test limit
     const existingComponents = Array.from({ length: 16 }, (_, i) => ({
-      id: `comp-${i}`,
-      contentPlain: `Component ${i}`,
-      status: 'created' as const
+      componentId: `comp-${i}`,
+      scriptId: 'script-456',
+      content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: `Component ${i}` }] }] },
+      plainText: `Component ${i}`,
+      position: i,
+      status: 'created',
+      type: 'main',
+      version: 1,
+      createdAt: '2025-01-20T00:00:00Z',
+      updatedAt: '2025-01-20T00:00:00Z',
+      lastEditedBy: 'test-user',
+      lastEditedAt: '2025-01-20T00:00:00Z'
     }));
 
     const { container } = render(
