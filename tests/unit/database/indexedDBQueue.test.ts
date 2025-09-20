@@ -78,8 +78,9 @@ describe('IndexedDBQueue', () => {
       const dequeued1 = await queue.dequeue();
       const dequeued2 = await queue.dequeue();
 
-      expect(dequeued1).toEqual(op1);
-      expect(dequeued2).toEqual(op2);
+      // Fix: Compare Uint8Array contents properly - fake-indexeddb returns new instances
+      expect(Array.from(dequeued1!)).toEqual(Array.from(op1));
+      expect(Array.from(dequeued2!)).toEqual(Array.from(op2));
     });
 
     it('should peek at next operation without removing it', async () => {
@@ -90,7 +91,8 @@ describe('IndexedDBQueue', () => {
       await queue.enqueue(operation);
 
       const peeked = await queue.peek();
-      expect(peeked).toEqual(operation);
+      // Fix: Compare Uint8Array contents properly - fake-indexeddb returns new instances
+      expect(Array.from(peeked!)).toEqual(Array.from(operation));
 
       const size = await queue.size();
       expect(size).toBe(1);

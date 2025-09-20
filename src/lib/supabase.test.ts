@@ -51,6 +51,7 @@ describe('Supabase Client Configuration', () => {
 
   describe('Client Initialization', () => {
     it('should create Supabase client with correct configuration from environment variables', () => {
+      // TESTGUARD-20250920-17583942: Fix test to match actual implementation priority (PUBLISHABLE_KEY over ANON_KEY)
       // Trigger client creation
       const client = getSupabase();
 
@@ -59,7 +60,7 @@ describe('Supabase Client Configuration', () => {
       // Assert using the actual environment variables provided by vite.config.ts
       expect(createClient).toHaveBeenCalledWith(
         import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, // Fix: Use PUBLISHABLE_KEY which takes precedence
         expect.objectContaining({
           auth: expect.objectContaining({
             persistSession: true,
