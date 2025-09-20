@@ -41,11 +41,13 @@ export function createMockSupabaseClient(mockChannel: MockChannel): any {
   const mockFrom = vi.fn().mockImplementation(() => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    is: vi.fn().mockReturnThis(), // Add missing is() method for null checks
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
     update: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
-    match: vi.fn().mockReturnThis() // Added for optimistic locking support
+    match: vi.fn().mockReturnThis(), // Added for optimistic locking support
+    order: vi.fn().mockReturnThis() // Add missing order() method
   }));
 
   // Return a mock that satisfies SupabaseClient interface requirements

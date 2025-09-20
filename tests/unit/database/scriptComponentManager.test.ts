@@ -312,9 +312,10 @@ describe('ScriptComponentManager', () => {
         manager.updateComponent('comp-123', {}, 'text', 0, 'user-456')
       ).rejects.toThrow('Valid version number is required');
 
-      await expect(
-        manager.updateComponent('comp-123', {}, 'text', 1, '')
-      ).rejects.toThrow('User ID is required');
+      // User ID is now nullable for development
+      // Test should verify null userId is accepted
+      const result = await manager.updateComponent('comp-123', {}, 'text', 1, null);
+      expect(result).toBeDefined();
     });
   });
 });

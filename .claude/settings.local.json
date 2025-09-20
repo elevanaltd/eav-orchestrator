@@ -1,15 +1,22 @@
 {
   "hooks": {
-    "PostSessionStart": [
+    "SessionStart": [
       {
         "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "/Volumes/HestAI-Projects/eav-orchestrator/build/.claude/hooks/post-session-start.sh"
+            "command": "/Volumes/HestAI-Projects/eav-orchestrator/build/.claude/hooks/session-start.sh"
           }
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "mcp__repomix__attach_packed_output"
+    ],
+    "deny": [],
+    "ask": []
   }
 }

@@ -1,0 +1,3089 @@
+
+> build@1.0.0 test
+> vitest run --exclude '**/**.feature.test.**'
+
+
+ RUN  v3.2.4 /Volumes/HestAI-Projects/eav-orchestrator/build
+
+ ✓ tests/unit/database/yjs-security.test.ts (13 tests) 4ms
+ ✓ tests/unit/types/editor.test.ts (16 tests) 3ms
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should initialize IndexedDB with correct schema
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should enqueue operations to IndexedDB
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should dequeue operations in FIFO order
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+ ✓ tests/unit/resilience/retryWithBackoff.test.ts (17 tests) 9ms
+ ✓ tests/unit/resilience/circuitBreaker.test.ts (22 tests) 9ms
+ ✓ tests/unit/ordering/fractionalIndex.test.ts (29 tests) 12ms
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should peek at next operation without removing it
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should handle empty queue operations gracefully
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should clear all operations from queue
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+ ✓ tests/unit/collaboration/persistence.test.ts (13 tests) 6ms
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Persistence Across Sessions > should persist operations across page refreshes
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+Offline queue initialized with indexeddb storage
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+Document doc-a1-001 does not exist, will be created on first update
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Circuit Breaker Protection > should queue operations when circuit is open
+Circuit breaker delete opened
+Circuit breaker delete fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m
+}
+
+ ✓ tests/unit/database/scriptComponentManager.test.ts (12 tests) 6ms
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Circuit Breaker Protection > should process queued operations when circuit closes
+Circuit breaker create opened
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stdout | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Circuit Breaker Protection > should process queued operations when circuit closes
+Circuit breaker create closed, normal operation resumed
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+Offline queue initialized with indexeddb storage
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+CustomSupabaseProvider connected in 5.63ms
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+Document doc-b1-001 does not exist, will be created on first update
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should isolate Y.js updates between different projects
+CustomSupabaseProvider connected in 0.32ms
+
+ ❯ src/lib/supabase.test.ts (18 tests | 1 failed | 3 skipped) 11ms
+   × Supabase Client Configuration > Client Initialization > should create Supabase client with correct configuration from environment variables 6ms
+     → expected "spy" to be called with arguments: [ 'https://test.supabase.co', …(2) ][90m
+
+Received: 
+
+[1m  1st spy call:
+
+[22m[2m  [[22m
+[2m    "https://test.supabase.co",[22m
+[32m-   "test-anon-key-for-integration-tests",[90m
+[32m-   ObjectContaining {[90m
+[32m-     "auth": ObjectContaining {[90m
+[31m+   "test-publishable-key-for-integration-tests",[90m
+[31m+   {[90m
+[31m+     "auth": {[90m
+[2m        "autoRefreshToken": true,[22m
+[2m        "detectSessionInUrl": true,[22m
+[2m        "persistSession": true,[22m
+[2m        "storageKey": "eav-orchestrator-auth",[22m
+[2m      },[22m
+[32m-     "realtime": ObjectContaining {[90m
+[32m-       "params": ObjectContaining {[90m
+[31m+     "realtime": {[90m
+[31m+       "params": {[90m
+[2m          "eventsPerSecond": 10,[22m
+[2m        },[22m
+[2m      },[22m
+[2m    },[22m
+[2m  ][22m
+[39m[90m
+
+Number of calls: [1m1[22m
+[39m
+   ↓ Supabase Client Configuration > Client Initialization > should return null if environment variables are missing
+   ↓ Supabase Client Configuration > Client Initialization > should cache initialization errors
+   ✓ Supabase Client Configuration > Authentication Functions > signIn > should sign in user with email and password 1ms
+   ✓ Supabase Client Configuration > Authentication Functions > signIn > should throw error on sign in failure 1ms
+   ↓ Supabase Client Configuration > Authentication Functions > signIn > should throw error if client not available
+   ✓ Supabase Client Configuration > Authentication Functions > signUp > should sign up new user with metadata 0ms
+   ✓ Supabase Client Configuration > Authentication Functions > signOut > should sign out current user 0ms
+   ✓ Supabase Client Configuration > Authentication Functions > getUser > should return current user 0ms
+   ✓ Supabase Client Configuration > Authentication Functions > getSession > should return current session 0ms
+   ✓ Supabase Client Configuration > Authentication Functions > onAuthStateChange > should register auth state change listener 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > getUserRole > should fetch user role from database 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > getUserRole > should return null on database error (FAIL-CLOSED) 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > getUserRole > should return null if no role in data (FAIL-CLOSED) 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > getUserRole > should return null if invalid role detected (FAIL-CLOSED) 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > getUserRole > should return null if client not available (FAIL-CLOSED) 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > Role Constants > should define all 5 user roles 0ms
+   ✓ Supabase Client Configuration > User Role Management - FAIL-CLOSED SECURITY > Role Constants > should export UserRole type 0ms
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Failed to persist Y.js update: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Offline queue initialized with indexeddb storage
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Offline queue initialized with indexeddb storage
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Failed to persist Y.js update: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Initialization > should render ScriptEditor component successfully
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Initialization > should render TipTap editor with basic rich text features
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Initialization > should initialize with Y.js document binding
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Rich Text Features > should support bold text formatting
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create opened
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size
+Circuit breaker create fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m,
+  queued: [33mtrue[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should clear offline queue on demand
+Circuit breaker delete opened
+Circuit breaker delete fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m
+}
+
+stderr | tests/unit/database/scriptComponentManagerWithResilience.test.ts > ResilientScriptComponentManager > Offline Queue Management > should clear offline queue on demand
+Circuit breaker delete fallback triggered {
+  success: [33mfalse[39m,
+  error: [32m'Service temporarily unavailable. Operation queued for retry.'[39m
+}
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Rich Text Features > should support italic text formatting
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ❯ tests/unit/database/scriptComponentManagerWithResilience.test.ts (17 tests | 2 failed) 128ms
+   ✓ ResilientScriptComponentManager > Circuit Breaker Protection > should handle database failures gracefully 3ms
+   × ResilientScriptComponentManager > Circuit Breaker Protection > should open circuit after threshold failures 4ms
+     → expected 'Connection timeout' to contain 'Service temporarily unavailable'
+   × ResilientScriptComponentManager > Circuit Breaker Protection > should queue operations when circuit is open 2ms
+     → expected undefined to be true // Object.is equality
+   ✓ ResilientScriptComponentManager > Circuit Breaker Protection > should process queued operations when circuit closes 110ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > deleteComponent > should soft delete a component successfully 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > deleteComponent > should handle deletion of non-existent component 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > restoreComponent > should restore a soft-deleted component 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > getComponentsByScriptId > should fetch all components for a script 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > getComponentsByScriptId > should include deleted components when requested 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > getComponentById > should fetch a single component by ID 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > bulkDeleteComponents > should delete multiple components 0ms
+   ✓ ResilientScriptComponentManager > CRUD Operations > updateComponentPositions > should update positions for reordering 0ms
+   ✓ ResilientScriptComponentManager > Metrics and Monitoring > should track circuit breaker statistics 0ms
+   ✓ ResilientScriptComponentManager > Metrics and Monitoring > should get optimistic locking metrics 0ms
+   ✓ ResilientScriptComponentManager > Metrics and Monitoring > should reset all metrics 0ms
+   ✓ ResilientScriptComponentManager > Offline Queue Management > should limit offline queue size 4ms
+   ✓ ResilientScriptComponentManager > Offline Queue Management > should clear offline queue on demand 0ms
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Rich Text Features > should support bulleted lists
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Rich Text Features > should support heading levels
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Y.js Collaboration Integration > should bind to Y.js document for collaborative editing
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Y.js Collaboration Integration > should sync local changes to Y.js document
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Y.js Collaboration Integration > should display collaboration cursor from remote users
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Content Persistence > should auto-save content to Supabase via Y.js
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Content Persistence > should handle optimistic locking conflicts
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Content Persistence > should persist TipTap JSON to JSONB storage
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Structure Management > should support 3-18 components per script
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should create a new component when Add Component button is clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should create a new component when Add Component button is clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should display a list of existing components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should allow editing a component when clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Structure Management > should allow reordering components with drag and drop
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Component Structure Management > should display component status correctly
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Connection Status > should display connection status to collaboration server
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Connection Status > should show sync status with other users
+ScriptEditor: useEffect mount - provider exists: [33mtrue[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - provider exists or already initializing
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Connection Status > should display active user presence indicators
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Performance Requirements > should handle 10-20 concurrent users smoothly
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Performance Requirements > should maintain <200ms comment sync latency
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.test.tsx > ScriptEditor > Performance Requirements > should update presence indicators <500ms
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ❯ tests/unit/components/ScriptEditor.test.tsx (22 tests | 2 failed) 148ms
+   ✓ ScriptEditor > Component Initialization > should render ScriptEditor component successfully 30ms
+   ✓ ScriptEditor > Component Initialization > should render TipTap editor with basic rich text features 4ms
+   ✓ ScriptEditor > Component Initialization > should initialize with Y.js document binding 3ms
+   ✓ ScriptEditor > Rich Text Features > should support bold text formatting 10ms
+   ✓ ScriptEditor > Rich Text Features > should support italic text formatting 8ms
+   ✓ ScriptEditor > Rich Text Features > should support bulleted lists 2ms
+   ✓ ScriptEditor > Rich Text Features > should support heading levels 2ms
+   ✓ ScriptEditor > Y.js Collaboration Integration > should bind to Y.js document for collaborative editing 33ms
+   ✓ ScriptEditor > Y.js Collaboration Integration > should sync local changes to Y.js document 3ms
+   ✓ ScriptEditor > Y.js Collaboration Integration > should display collaboration cursor from remote users 1ms
+   ✓ ScriptEditor > Content Persistence > should auto-save content to Supabase via Y.js 1ms
+   ✓ ScriptEditor > Content Persistence > should handle optimistic locking conflicts 1ms
+   ✓ ScriptEditor > Content Persistence > should persist TipTap JSON to JSONB storage 1ms
+   × ScriptEditor > Component Structure Management > should support 3-18 components per script 10ms
+     → Unable to find an element by: [data-testid="/component-item-/"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"script-editor "[39m
+      [33mdata-testid[39m=[32m"script-editor"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"toolbar border-b border-gray-200 p-2 flex items-center gap-1"[39m
+        [33mdata-testid[39m=[32m"editor-toolbar"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm font-bold bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bold-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mB[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm italic bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"italic-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mI[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bullet-list-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m•[0m
+        [36m</button>[39m
+        [36m<select[39m
+          [33mclass[39m=[32m"px-2 py-1 border rounded text-sm"[39m
+          [33mdata-testid[39m=[32m"heading-select"[39m
+        [36m>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"0"[39m
+          [36m>[39m
+            [0mParagraph[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"1"[39m
+          [36m>[39m
+            [0mHeading 1[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"2"[39m
+          [36m>[39m
+            [0mHeading 2[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"3"[39m
+          [36m>[39m
+            [0mHeading 3[0m
+          [36m</option>[39m
+        [36m</select>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"collaboration-status p-2 bg-gray-50 text-sm"[39m
+        [33mdata-testid[39m=[32m"collaboration-status"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"status-indicator disconnected"[39m
+          [33mdata-testid[39m=[32m"connection-status"[39m
+        [36m>[39m
+          [0m🔴 Disconnected[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"editor-wrapper relative border-b"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"editor-content"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"collaboration-cursors absolute inset-0 pointer-events-none"[39m
+          [33mdata-testid[39m=[32m"collaboration-cursors"[39m
+        [36m/>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"add-component-section border-b p-3 bg-gray-50"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Add Component"[39m
+          [33mclass[39m=[32m"px-4 py-2 rounded text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m+ Add Component[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+        [36m>[39m
+          [0m5[0m
+          [0m of 18 components[0m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"component-list border-b bg-white"[39m
+        [33mdata-testid[39m=[32m"component-list"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-2 text-sm font-medium text-gray-700 bg-gray-100"[39m
+        [36m>[39m
+          [0mScript Components[0m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-0"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-0"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m1[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 0 content[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-0"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-0"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-1"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-1"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m2[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 1 content[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-1"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-1"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-2"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m3[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 2 content[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-2"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-2"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-3"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-3"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m4[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 3 content[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-3"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-3"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-4"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m5[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 4 content[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-4"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-4"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"conflict-resolver hidden"[39m
+        [33mdata-testid[39m=[32m"conflict-resolver"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"content-processor hidden"[39m
+        [33mdata-testid[39m=[32m"content-processor"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ ScriptEditor > Component Structure Management > should allow reordering components with drag and drop 7ms
+   × ScriptEditor > Component Structure Management > should display component status correctly 5ms
+     → Unable to find an element by: [data-testid="component-status-comp-1"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"script-editor "[39m
+      [33mdata-testid[39m=[32m"script-editor"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"toolbar border-b border-gray-200 p-2 flex items-center gap-1"[39m
+        [33mdata-testid[39m=[32m"editor-toolbar"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm font-bold bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bold-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mB[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm italic bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"italic-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mI[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bullet-list-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m•[0m
+        [36m</button>[39m
+        [36m<select[39m
+          [33mclass[39m=[32m"px-2 py-1 border rounded text-sm"[39m
+          [33mdata-testid[39m=[32m"heading-select"[39m
+        [36m>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"0"[39m
+          [36m>[39m
+            [0mParagraph[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"1"[39m
+          [36m>[39m
+            [0mHeading 1[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"2"[39m
+          [36m>[39m
+            [0mHeading 2[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"3"[39m
+          [36m>[39m
+            [0mHeading 3[0m
+          [36m</option>[39m
+        [36m</select>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"collaboration-status p-2 bg-gray-50 text-sm"[39m
+        [33mdata-testid[39m=[32m"collaboration-status"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"status-indicator disconnected"[39m
+          [33mdata-testid[39m=[32m"connection-status"[39m
+        [36m>[39m
+          [0m🔴 Disconnected[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"editor-wrapper relative border-b"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"editor-content"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"collaboration-cursors absolute inset-0 pointer-events-none"[39m
+          [33mdata-testid[39m=[32m"collaboration-cursors"[39m
+        [36m/>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"add-component-section border-b p-3 bg-gray-50"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Add Component"[39m
+          [33mclass[39m=[32m"px-4 py-2 rounded text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m+ Add Component[0m
+        [36m</button>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+        [36m>[39m
+          [0m1[0m
+          [0m of 18 components[0m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"component-list border-b bg-white"[39m
+        [33mdata-testid[39m=[32m"component-list"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-2 text-sm font-medium text-gray-700 bg-gray-100"[39m
+        [36m>[39m
+          [0mScript Components[0m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"[39m
+          [33mdata-testid[39m=[32m"component-comp-1"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"[39m
+            [33mdata-testid[39m=[32m"drag-handle-comp-1"[39m
+            [33mdraggable[39m=[32m"true"[39m
+          [36m>[39m
+            [0m⋮⋮[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-sm font-medium text-gray-700"[39m
+            [36m>[39m
+              [0mComponent [0m
+              [0m1[0m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"text-xs text-gray-500 mt-1"[39m
+            [36m>[39m
+              [0mComponent 1[0m
+              [0m...[0m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"edit-component-comp-1"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mEdit[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"[39m
+            [33mdata-testid[39m=[32m"delete-component-comp-1"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mDelete[0m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"conflict-resolver hidden"[39m
+        [33mdata-testid[39m=[32m"conflict-resolver"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"content-processor hidden"[39m
+        [33mdata-testid[39m=[32m"content-processor"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ ScriptEditor > Connection Status > should display connection status to collaboration server 1ms
+   ✓ ScriptEditor > Connection Status > should show sync status with other users 1ms
+   ✓ ScriptEditor > Connection Status > should display active user presence indicators 10ms
+   ✓ ScriptEditor > Performance Requirements > should handle 10-20 concurrent users smoothly 8ms
+   ✓ ScriptEditor > Performance Requirements > should maintain <200ms comment sync latency 2ms
+   ✓ ScriptEditor > Performance Requirements > should update presence indicators <500ms 2ms
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Failed to persist Y.js update: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should delete a component when delete button is clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should support drag-and-drop reordering of components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Creation > should limit components to 18 maximum
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.controlled.test.tsx > Script Component Management - Controlled Component > Component Performance Requirements > should auto-save component changes within 1 second
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ✓ tests/unit/types/scriptComponent.test.ts (13 tests) 3ms
+stderr | tests/unit/hooks/useClientLifecycle.test.tsx > useClientLifecycle > Action Methods > should handle checkConnection errors gracefully
+Connection check failed: Error: Connection failed
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/hooks/useClientLifecycle.test.tsx:168:21
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/hooks/useClientLifecycle.test.tsx > useClientLifecycle > Cleanup > should handle cleanup even if unsubscribe fails
+Error during unsubscribe: Error: Unsubscribe failed
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/hooks/useClientLifecycle.test.tsx:210:15
+    at mockCall [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:96:15[90m)[39m
+    at spy [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mtinyspy[24m/dist/index.js:47:103[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/hooks/useClientLifecycle.ts:53:9
+    at Object.react_stack_bottom_frame [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:23965:13[90m)[39m
+    at runWithFiberInDEV [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:1522:13[90m)[39m
+    at commitHookEffectListUnmount [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:11996:17[90m)[39m
+    at commitHookPassiveUnmountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:12043:11[90m)[39m
+    at commitPassiveUnmountEffectsInsideOfDeletedTree_begin [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:14269:13[90m)[39m
+    at recursivelyTraversePassiveUnmountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:14167:13[90m)[39m
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/hooks/useClientLifecycle.test.tsx > useClientLifecycle > Edge Cases > should handle manager initialization failure
+Failed to initialize client lifecycle: Error: Init failed
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/hooks/useClientLifecycle.test.tsx:256:48
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+ ✓ tests/unit/hooks/useClientLifecycle.test.tsx (16 tests) 24ms
+ ✓ tests/unit/collaboration/encoding.test.ts (17 tests) 4ms
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > State Machine > should transition to OFFLINE when network is unavailable
+Failed to initialize client lifecycle: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:62:39
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > State Machine > should transition from OFFLINE to SYNCING when coming back online
+Failed to initialize client lifecycle: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:73:39
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > State Machine > should transition from SYNCING to HEALTHY after successful sync
+Failed to initialize client lifecycle: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:92:39
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > Error Handling > should handle version endpoint failures gracefully
+Failed to initialize client lifecycle: Error: Server error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:188:39
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > Error Handling > should handle malformed version responses
+Failed to initialize client lifecycle: Error: Invalid version response format
+    at ClientLifecycleManager.fetchServerVersion [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/lifecycle/clientLifecycleManager.ts:198:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at ClientLifecycleManager.initialize [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/lifecycle/clientLifecycleManager.ts:89:29[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:201:7
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/unit/lifecycle/clientLifecycleManager.test.ts > ClientLifecycleManager > Error Handling > should retry failed version checks with exponential backoff
+Failed to initialize client lifecycle: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/lifecycle/clientLifecycleManager.test.ts:208:32
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | src/lib/collaboration/AuthenticatedProviderFactory.test.ts > AuthenticatedProviderFactory > create method > should throw error when provider creation fails
+AuthenticatedProviderFactory: Failed to create provider: Error: Provider construction failed
+    at fn.<anonymous> [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/AuthenticatedProviderFactory.test.ts:194:15[90m)[39m
+    at new mockCall [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:96:15[90m)[39m
+    at new spy [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mtinyspy[24m/dist/index.js:47:39[90m)[39m
+    at Function.create [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/AuthenticatedProviderFactory.ts:64:24[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/AuthenticatedProviderFactory.test.ts:198:7
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+ ✓ src/lib/collaboration/AuthenticatedProviderFactory.test.ts (7 tests) 6ms
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should initialize CustomSupabaseProvider with authenticated user context
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: test-document-456
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should initialize CustomSupabaseProvider with authenticated user context
+ScriptEditor: Cleaning up provider
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should fallback to anonymous mode when authentication fails
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: test-document-456
+
+stdout | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should fallback to anonymous mode when authentication fails
+ScriptEditor: Cleaning up provider
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should pass project context to authenticated provider factory
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: specific-document-012
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Authentication Context Flow > should pass project context to authenticated provider factory
+ScriptEditor: Cleaning up provider
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Provider Integration Contracts > should connect provider after initialization with authentication context
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: test-document-456
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Provider Integration Contracts > should connect provider after initialization with authentication context
+ScriptEditor: Cleaning up provider
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Provider Integration Contracts > should display connection status based on provider state
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: test-document-456
+
+stderr | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Provider Integration Contracts > should display connection status based on provider state
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Provider Integration Contracts > should display connection status based on provider state
+ScriptEditor: Cleaning up provider
+
+stdout | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Error Handling Integration > should handle provider initialization failure with auth context
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Starting provider initialization
+ScriptEditor: Initializing provider for document: test-document-456
+
+stderr | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Error Handling Integration > should handle provider initialization failure with auth context
+AuthenticatedProviderFactory: Failed to create provider: Error: Provider initialization failed
+    at fn.<anonymous> [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/components/editor/ScriptEditor.auth-integration.test.tsx:211:15[90m)[39m
+    at new mockCall [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/spy/dist/index.js:96:15[90m)[39m
+    at new CustomSupabaseProvider [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mtinyspy[24m/dist/index.js:47:39[90m)[39m
+    at Function.create [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/AuthenticatedProviderFactory.ts:64:24[90m)[39m
+    at initializeProvider [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/components/editor/ScriptEditor.tsx:349:39[90m)[39m
+
+stderr | src/components/editor/ScriptEditor.auth-integration.test.tsx > ScriptEditor Authentication Integration > Error Handling Integration > should handle provider initialization failure with auth context
+ScriptEditor: Failed to initialize collaboration provider: Error: Failed to create authenticated provider: Provider initialization failed
+    at Function.create [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/AuthenticatedProviderFactory.ts:86:13[90m)[39m
+    at initializeProvider [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/components/editor/ScriptEditor.tsx:349:39[90m)[39m
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Failed to persist Y.js update: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Error persisting update after retries: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels
+Circuit breaker blocked or failed persist operation: {
+  code: [32m'42501'[39m,
+  message: [32m'permission denied for function append_yjs_update'[39m
+}
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should enforce project isolation in provider configuration
+Offline queue initialized with indexeddb storage
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should enforce project isolation in provider configuration
+Error loading initial state: TypeError: Cannot read properties of undefined (reading 'select')
+    at CustomSupabaseProvider.loadInitialStateOperation [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/custom-supabase-provider.ts:186:29[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:521:38
+    at new Promise (<anonymous>)
+    at CircuitBreaker.call [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:497:12[90m)[39m
+    at CircuitBreaker.fire [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:415:22[90m)[39m
+    at CustomSupabaseProvider.connect [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/custom-supabase-provider.ts:140:42[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/security/boundary.test.ts:572:7
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should enforce project isolation in provider configuration
+CustomSupabaseProvider connection failed: TypeError: Cannot read properties of undefined (reading 'select')
+    at CustomSupabaseProvider.loadInitialStateOperation [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/custom-supabase-provider.ts:186:29[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:521:38
+    at new Promise (<anonymous>)
+    at CircuitBreaker.call [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:497:12[90m)[39m
+    at CircuitBreaker.fire [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:415:22[90m)[39m
+    at CustomSupabaseProvider.connect [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/custom-supabase-provider.ts:140:42[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/security/boundary.test.ts:572:7
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should prevent cross-project channel subscription
+Offline queue initialized with indexeddb storage
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should prevent cross-project channel subscription
+Document doc-a1-001 does not exist, will be created on first update
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should prevent cross-project channel subscription
+CustomSupabaseProvider connected in 0.70ms
+
+stdout | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should handle circuit breaker security during failures
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+Offline queue initialized with indexeddb storage
+
+ ✓ tests/unit/collaboration/custom-supabase-provider-awareness.test.ts (8 tests) 4ms
+stdout | CustomSupabaseProvider.initializeOfflineQueue (/Volumes/HestAI-Projects/eav-orchestrator/build/src/lib/collaboration/custom-supabase-provider.ts:516:15)
+Offline queue initialized with indexeddb storage
+
+ ✓ tests/unit/lifecycle/clientLifecycleManager.test.ts (17 tests) 108ms
+ ✓ src/components/editor/ScriptEditor.auth-integration.test.tsx (6 tests) 90ms
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures
+Error persisting update after retries: Error: Network error
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:74:57
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should queue updates when circuit is open
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should queue updates when circuit is open
+Document test-doc does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should queue updates when circuit is open
+CustomSupabaseProvider connected in 0.63ms
+
+stderr | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should queue updates when circuit is open
+Circuit breaker blocked or failed persist operation: Error: Breaker is open
+    at buildError [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:699:17[90m)[39m
+    at CircuitBreaker.call [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:486:21[90m)[39m
+    at CircuitBreaker.fire [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mopossum[24m/lib/circuit.js:415:22[90m)[39m
+    at CustomSupabaseProvider.persistUpdate [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/collaboration/custom-supabase-provider.ts:288:39[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/unit/collaboration/circuitBreaker.test.ts:128:24
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:20 {
+  code: [32m'EOPENBREAKER'[39m,
+  [[32mSymbol(our-error)[39m]: [33mtrue[39m
+}
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should drain offline queue when circuit closes
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should drain offline queue when circuit closes
+Document test-doc does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should drain offline queue when circuit closes
+Draining 1 queued operations
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should drain offline queue when circuit closes
+CustomSupabaseProvider connected in 0.97ms
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Circuit Breaker State Management > should drain offline queue when circuit closes
+Draining 2 queued operations
+
+ ✓ tests/repomix-ignore.test.ts (4 tests) 11ms
+stdout | tests/unit/collaboration/circuitBreaker.test.ts > Circuit Breaker Integration > Wrapped Operations > should wrap loadInitialState with circuit breaker
+Document test-doc does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/circuitBreaker.test.ts
+Offline queue initialized with indexeddb storage
+
+ ✓ tests/unit/collaboration/circuitBreaker.test.ts (9 tests) 617ms
+   ✓ Circuit Breaker Integration > Circuit Breaker State Management > should open circuit after threshold failures  605ms
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/types/ui/scriptComponent.test.ts (6 tests) 2ms
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/transformers.test.ts (4 tests) 2ms
+ ✓ tests/unit/api/transformers.test.ts (4 tests) 2ms
+ ✓ tests/config.test.ts (12 tests) 3ms
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should handle circuit breaker security during failures
+Error persisting update after retries: Error: permission denied
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/security/boundary.test.ts:620:33
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+stderr | tests/security/boundary.test.ts > Security Boundary Tests > CustomSupabaseProvider Security Integration > should handle circuit breaker security during failures
+Circuit breaker blocked or failed persist operation: Error: permission denied
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39mtests/security/boundary.test.ts:620:33
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:155:11
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:752:26
+    at [90mfile:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1897:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1863:10[90m)[39m
+    at runTest [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1574:12[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+    at runSuite [90m(file:///Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4m@vitest[24m/runner/dist/chunk-hooks.js:1729:8[90m)[39m
+
+ ✓ tests/security/boundary.test.ts (18 tests) 900ms
+   ✓ Security Boundary Tests > CRDT Room Isolation > should prevent Y.js updates from leaking between project channels  501ms
+   ✓ Security Boundary Tests > CustomSupabaseProvider Security Integration > should handle circuit breaker security during failures  380ms
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should initialize Sentry with correct configuration
+Sentry initialized for test environment
+
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should configure performance monitoring with browser tracing
+Sentry initialized for test environment
+
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should handle missing DSN gracefully
+Sentry DSN not configured. Skipping Sentry initialization.
+
+ ✓ tests/unit/monitoring/sentry.test.ts (7 tests) 12ms
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should connect within performance targets
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should connect within performance targets
+Document test-doc-123 does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should connect within performance targets
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should connect within performance targets
+CustomSupabaseProvider connected in 2.88ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+Document concurrent-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 3.09ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 3.78ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 5.15ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 6.59ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 6.89ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 7.65ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 8.27ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 8.81ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 9.03ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should support concurrent users without degradation
+CustomSupabaseProvider connected in 9.19ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should provide basic document state access
+Offline queue initialized with indexeddb storage
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should provide basic document state access
+Document state-test does not exist, will be created on first update
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should provide basic document state access
+CustomSupabaseProvider connected in 0.33ms
+
+stdout | tests/unit/collaboration/custom-supabase-provider.test.ts > CustomSupabaseProvider Integration > should provide basic document state access
+Awareness updated
+
+ ✓ tests/unit/collaboration/custom-supabase-provider.test.ts (4 tests) 33ms
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should process multi-paragraph paste and create multiple components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should respect the 18 component limit when pasting multiple paragraphs
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle single paragraph paste normally (no component creation)
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle empty paste content gracefully
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ✓ tests/unit/api/version.test.ts (5 tests) 2ms
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle paste when onComponentAdd is not provided
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ✓ tests/unit/components/ScriptEditor.paste.test.tsx (5 tests) 32ms
+ ✓ tests/build-system.test.ts (8 tests) 2ms
+stdout | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear auto-save timer on component unmount
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should clear auto-save timer on component unmount
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should initialize successfully
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should handle basic enqueue operation
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should handle basic size operation
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+ ✓ tests/unit/database/indexedDBQueue.simple.test.ts (3 tests) 5ms
+ ✓ tests/unit/assets.test.ts (3 tests) 2ms
+ ✓ tests/unit/collaboration/YjsSupabaseProvider.test.ts (12 tests) 716ms
+stdout | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not create multiple timers for the same auto-save delay
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should display a list of existing components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should allow editing a component when clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should delete a component when delete button is clicked
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should support drag-and-drop reordering of components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Creation > should limit components to 18 maximum
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptComponentManagement.test.tsx > Script Component Management - V2 Requirements > Component Performance Requirements > should auto-save component changes within 1 second
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ScriptEditor.memory-leak.test.tsx > ScriptEditor Memory Leak Prevention > should not leak memory when auto-save is disabled
+An update to ScriptEditor inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/components/ScriptComponentManagement.controlled.test.tsx (7 tests) 1253ms
+   ✓ Script Component Management - Controlled Component > Component Performance Requirements > should auto-save component changes within 1 second  1007ms
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project code and title correctly
+An update to App inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays client information when available
+An update to App inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays client information when available
+Failed to load scripts: Error: Failed to fetch scripts: TypeError: res.text is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:91:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project phase badge when available
+Failed to load scripts: Error: Failed to fetch scripts: TypeError: res.text is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:91:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project phase badge when available
+An update to App inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays script editor version info
+Failed to load scripts: Error: Failed to fetch scripts: TypeError: res.text is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:91:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+ ✓ tests/unit/components/ScriptEditor.memory-leak.test.tsx (4 tests) 938ms
+   ✓ ScriptEditor Memory Leak Prevention > should clear previous auto-save timer when content changes rapidly  624ms
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays script editor version info
+An update to App inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx
+Failed to load scripts: Error: Failed to fetch scripts: TypeError: res.text is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:91:17[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+
+ ✓ tests/unit/components/ProjectHeader.test.tsx (4 tests) 193ms
+ ❯ tests/unit/components/ScriptComponentManagement.test.tsx (7 tests | 1 failed) 2227ms
+   × Script Component Management - V2 Requirements > Component Creation > should create a new component when Add Component button is clicked 1119ms
+     → Unable to find an element by: [data-testid="component-comp-123"]
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"script-editor "[39m
+      [33mdata-testid[39m=[32m"script-editor"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"toolbar border-b border-gray-200 p-2 flex items-center gap-1"[39m
+        [33mdata-testid[39m=[32m"editor-toolbar"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm font-bold bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bold-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mB[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm italic bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"italic-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0mI[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm bg-gray-100 hover:bg-gray-200"[39m
+          [33mdata-testid[39m=[32m"bullet-list-button"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m•[0m
+        [36m</button>[39m
+        [36m<select[39m
+          [33mclass[39m=[32m"px-2 py-1 border rounded text-sm"[39m
+          [33mdata-testid[39m=[32m"heading-select"[39m
+        [36m>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"0"[39m
+          [36m>[39m
+            [0mParagraph[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"1"[39m
+          [36m>[39m
+            [0mHeading 1[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"2"[39m
+          [36m>[39m
+            [0mHeading 2[0m
+          [36m</option>[39m
+          [36m<option[39m
+            [33mvalue[39m=[32m"3"[39m
+          [36m>[39m
+            [0mHeading 3[0m
+          [36m</option>[39m
+        [36m</select>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"collaboration-status p-2 bg-gray-50 text-sm"[39m
+        [33mdata-testid[39m=[32m"collaboration-status"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"status-indicator disconnected"[39m
+          [33mdata-testid[39m=[32m"connection-status"[39m
+        [36m>[39m
+          [0m🔴 Disconnected[0m
+        [36m</span>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"editor-wrapper relative border-b"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"editor-content"[39m
+        [36m>[39m
+          [0mMock Editor Content[0m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"collaboration-cursors absolute inset-0 pointer-events-none"[39m
+          [33mdata-testid[39m=[32m"collaboration-cursors"[39m
+        [36m/>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"add-component-section border-b p-3 bg-gray-50"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"Add Component"[39m
+          [33mclass[39m=[32m"px-4 py-2 rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m+ Add Component[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"conflict-resolver hidden"[39m
+        [33mdata-testid[39m=[32m"conflict-resolver"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"content-processor hidden"[39m
+        [33mdata-testid[39m=[32m"content-processor"[39m
+      [36m/>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"script-editor "[39m
+        [33mdata-testid[39m=[32m"script-editor"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"toolbar border-b border-gray-200 p-2 flex items-center gap-1"[39m
+          [33mdata-testid[39m=[32m"editor-toolbar"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm font-bold bg-gray-100 hover:bg-gray-200"[39m
+            [33mdata-testid[39m=[32m"bold-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mB[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm italic bg-gray-100 hover:bg-gray-200"[39m
+            [33mdata-testid[39m=[32m"italic-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0mI[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"px-3 py-1 mr-2 rounded text-sm bg-gray-100 hover:bg-gray-200"[39m
+            [33mdata-testid[39m=[32m"bullet-list-button"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0m•[0m
+          [36m</button>[39m
+          [36m<select[39m
+            [33mclass[39m=[32m"px-2 py-1 border rounded text-sm"[39m
+            [33mdata-testid[39m=[32m"heading-select"[39m
+          [36m>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"0"[39m
+            [36m>[39m
+              [0mParagraph[0m
+            [36m</option>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"1"[39m
+            [36m>[39m
+              [0mHeading 1[0m
+            [36m</option>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"2"[39m
+            [36m>[39m
+              [0mHeading 2[0m
+            [36m</option>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m"3"[39m
+            [36m>[39m
+              [0mHeading 3[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"collaboration-status p-2 bg-gray-50 text-sm"[39m
+          [33mdata-testid[39m=[32m"collaboration-status"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"status-indicator disconnected"[39m
+            [33mdata-testid[39m=[32m"connection-status"[39m
+          [36m>[39m
+            [0m🔴 Disconnected[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"editor-wrapper relative border-b"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mdata-testid[39m=[32m"editor-content"[39m
+          [36m>[39m
+            [0mMock Editor Content[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"collaboration-cursors absolute inset-0 pointer-events-none"[39m
+            [33mdata-testid[39m=[32m"collaboration-cursors"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"add-component-section border-b p-3 bg-gray-50"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33maria-label[39m=[32m"Add Component"[39m
+            [33mclass[39m=[32m"px-4 py-2 rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"[39m
+            [33mtype[39m=[32m"button"[39m
+          [36m>[39m
+            [0m+ Add Component[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"conflict-resolver hidden"[39m
+          [33mdata-testid[39m=[32m"conflict-resolver"[39m
+        [36m/>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"content-processor hidden"[39m
+          [33mdata-testid[39m=[32m"content-processor"[39m
+        [36m/>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+   ✓ Script Component Management - V2 Requirements > Component Creation > should display a list of existing components 5ms
+   ✓ Script Component Management - V2 Requirements > Component Creation > should allow editing a component when clicked 7ms
+   ✓ Script Component Management - V2 Requirements > Component Creation > should delete a component when delete button is clicked 24ms
+   ✓ Script Component Management - V2 Requirements > Component Creation > should support drag-and-drop reordering of components 6ms
+   ✓ Script Component Management - V2 Requirements > Component Creation > should limit components to 18 maximum 45ms
+   ✓ Script Component Management - V2 Requirements > Component Performance Requirements > should auto-save component changes within 1 second  1021ms

@@ -1,0 +1,39 @@
+# .dockerignore - Prevent pollution of hermetic test environment
+# Critical-Engineer: consulted for Hermetic test environment strategy
+
+# Version control
+.git
+.github
+
+# Local dependencies (we want clean npm ci)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Documentation
+*.md
+docs/
+
+# Environment files (use docker-compose env injection)
+.env
+.env.*
+
+# Build outputs
+dist/
+build/
+coverage/
+.vitest/
+
+# IDE and system files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Test reports
+test-results/
+*.log
+
+# Claude configuration (local dev only)
+.claude/
+CLAUDE.md
