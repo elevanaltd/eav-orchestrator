@@ -745,7 +745,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             <div
               key={component.componentId}
               className="component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
-              data-testid={`component-item-${component.componentId} component-${component.componentId}`}
+              data-testid={`component-${component.componentId}`}
               data-component={`component-${component.componentId}`}
               onClick={() => handleComponentClick(component)}
               onDragOver={handleDragOver}

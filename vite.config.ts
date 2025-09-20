@@ -72,6 +72,14 @@ export default defineConfig({
     }
   },
   test: {
+    // Critical-Engineer: consulted for Test infrastructure and memory profiling
+    // Emergency stopgap for memory exhaustion - CRITICAL-ENGINEER-20250920-fce00a54
+    pool: 'forks', // Switch from threads to processes for stability
+    poolOptions: {
+      forks: {
+        maxForks: 4 // Limit parallel processes to prevent memory overload
+      }
+    },
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
