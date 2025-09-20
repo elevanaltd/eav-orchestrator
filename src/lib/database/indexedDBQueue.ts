@@ -122,6 +122,7 @@ export class IndexedDBQueue {
   /**
    * Initialize IndexedDB
    * Critical-Engineer: consulted for Stateful dependency management in test environments (IndexedDB)
+   * Critical-Engineer: consulted for Test environment architecture (fake-indexeddb setup)
    */
   private async initializeIndexedDB(): Promise<void> {
     return new Promise((resolve, reject) => {

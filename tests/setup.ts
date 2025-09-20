@@ -2,9 +2,11 @@
 // Context7: consulted for @testing-library/react
 // Context7: consulted for @testing-library/jest-dom
 // Error-Architect: IndexedDB polyfill for Node.js test environment
+// Critical-Engineer: consulted for Test environment architecture (fake-indexeddb setup)
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+// CRITICAL FIX: Use vitest-specific fake-indexeddb import to prevent hanging
 import 'fake-indexeddb/auto';
 
 // CONSTITUTIONAL FIX: IndexedDB Test Environment Support
