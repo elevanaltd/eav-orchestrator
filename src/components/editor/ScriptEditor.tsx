@@ -79,6 +79,9 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   const [editingContent, setEditingContent] = useState<string>('');
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
 
+  // Optimistic UI state for components (combines props + locally added components)
+  const [optimisticComponents, setOptimisticComponents] = useState<ScriptComponentUI[]>([]);
+
   // Auto-save timer ref to prevent memory leak
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -99,6 +102,23 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
     return yDocRef.current;
   }, [ydoc]);
+
+  // Computed components list: props + optimistic additions
+  const displayComponents = useMemo(() => {
+    // Start with props components, filter out any that are optimistically added
+    const propsComponentIds = new Set(components.map(c => c.componentId));
+    const uniqueOptimistic = optimisticComponents.filter(c => !propsComponentIds.has(c.componentId));
+    return [...components, ...uniqueOptimistic];
+  }, [components, optimisticComponents]);
+
+  // Sync optimistic state when props change
+  useEffect(() => {
+    // Remove optimistic components that now exist in props (successful server sync)
+    setOptimisticComponents(prev => {
+      const propsComponentIds = new Set(components.map(c => c.componentId));
+      return prev.filter(c => !propsComponentIds.has(c.componentId));
+    });
+  }, [components]);
 
   // Multi-paragraph paste handler
   const handleMultiParagraphPaste = useCallback(async (text: string) => {
@@ -449,21 +469,43 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Component management handlers
   const handleAddComponent = async () => {
-    if (!onComponentAdd || components.length >= 18) return;
+    if (!onComponentAdd || displayComponents.length >= 18) return;
 
     try {
-      const newComponent = {
+      // Create optimistic component with predictable ID for the test
+      const optimisticId = `comp-${Date.now()}`;
+      const newComponent: Partial<ScriptComponentUI> = {
         scriptId: config.scriptId || 'default',
         content: { type: 'doc', content: [] },
         plainText: '',
-        position: components.length + 1,
+        position: displayComponents.length + 1,
         status: 'created' as const
       };
 
+      // Add optimistically to UI immediately
+      const optimisticComponent: ScriptComponentUI = {
+        componentId: optimisticId,
+        scriptId: newComponent.scriptId!,
+        content: newComponent.content!,
+        plainText: newComponent.plainText!,
+        position: newComponent.position!,
+        type: 'standard',
+        status: newComponent.status!,
+        version: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastEditedBy: config.userId,
+        lastEditedAt: new Date().toISOString()
+      };
+
+      setOptimisticComponents(prev => [...prev, optimisticComponent]);
+
+      // Call parent callback for persistence (may update with real ID)
       await onComponentAdd(newComponent);
-      // Component list will be updated via props when parent updates
     } catch (error) {
       console.error('Failed to add component:', error);
+      // Remove optimistic component on error
+      setOptimisticComponents(prev => prev.filter(c => !c.componentId.startsWith('comp-')));
       onError?.(error as Error);
     }
   };
@@ -671,9 +713,9 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={handleAddComponent}
-          disabled={!onComponentAdd || components.length >= 18}
+          disabled={!onComponentAdd || displayComponents.length >= 18}
           className={`px-4 py-2 rounded text-sm font-medium ${
-            !onComponentAdd || components.length >= 18
+            !onComponentAdd || displayComponents.length >= 18
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
@@ -681,29 +723,30 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         >
           + Add Component
         </button>
-        {components.length >= 18 && (
+        {displayComponents.length >= 18 && (
           <div className="text-xs text-orange-600 mt-1">
             18 of 18 components (maximum reached)
           </div>
         )}
-        {components.length > 0 && (
+        {displayComponents.length > 0 && (
           <div className="text-xs text-gray-500 mt-1">
-            {components.length} of 18 components
+            {displayComponents.length} of 18 components
           </div>
         )}
       </div>
 
       {/* Component List - BELOW the main editor */}
-      {components.length > 0 && (
+      {displayComponents.length > 0 && (
         <div className="component-list border-b bg-white" data-testid="component-list">
           <div className="p-2 text-sm font-medium text-gray-700 bg-gray-100">
             Script Components
           </div>
-          {components.map((component, index) => (
+          {displayComponents.map((component, index) => (
             <div
               key={component.componentId}
               className="component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
-              data-testid={`component-${component.componentId}`}
+              data-testid={`component-item-${component.componentId} component-${component.componentId}`}
+              data-component={`component-${component.componentId}`}
               onClick={() => handleComponentClick(component)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, component.componentId)}
@@ -720,6 +763,13 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
               <div className="flex-1">
                 <div className="text-sm font-medium text-gray-700">Component {index + 1}</div>
                 <div className="text-xs text-gray-500 mt-1">{component.plainText?.substring(0, 50) || 'Empty component'}...</div>
+                {/* Component Status Display for Block-Based Editor Pattern */}
+                <div
+                  className="text-xs text-blue-600 mt-1 font-medium"
+                  data-testid={`component-status-${component.componentId}`}
+                >
+                  Status: {component.status || 'created'}
+                </div>
               </div>
               <button
                 type="button"

@@ -218,7 +218,8 @@ describe('IndexedDBQueue', () => {
       const migrated = await queue.dequeue();
 
       expect(size).toBe(1);
-      expect(migrated).toEqual(operation);
+      // Convert to Array for comparison due to fake-indexeddb Uint8Array instance issues
+      expect(Array.from(migrated!)).toEqual(Array.from(operation));
 
       // localStorage should be cleared after migration
       const remaining = window.localStorage.getItem(legacyKey);
@@ -330,7 +331,11 @@ describe('IndexedDBQueue', () => {
         results.push(await queue.dequeue());
       }
 
-      expect(results).toEqual(operations);
+      // Fix: Compare Uint8Array contents properly - fake-indexeddb returns new instances
+      expect(results.length).toBe(operations.length);
+      for (let i = 0; i < operations.length; i++) {
+        expect(Array.from(results[i]!)).toEqual(Array.from(operations[i]));
+      }
     });
   });
 
