@@ -22,6 +22,21 @@ const theme = {
   blue: '#3b82f6'
 };
 
+// Mock project data - will be replaced with SmartSuite integration
+interface ProjectInfo {
+  eavCode: string;      // e.g., "EAV023"
+  projectTitle: string; // e.g., "Berkeley Homes"
+  clientName?: string;  // e.g., "Berkeley Construction"
+  projectPhase?: string; // e.g., "Production"
+}
+
+const mockProjectData: ProjectInfo = {
+  eavCode: 'EAV023',
+  projectTitle: 'Berkeley Homes',
+  clientName: 'Berkeley Construction',
+  projectPhase: 'Production'
+};
+
 type TabId = 'script' | 'voice' | 'scenes' | 'direction';
 
 interface Tab {
@@ -294,6 +309,95 @@ function App() {
       {/* Client Lifecycle Status Banner */}
       {renderStatusBanner()}
 
+      {/* Project Header Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '20px 30px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          {/* Project Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{
+              background: `linear-gradient(135deg, ${theme.red} 0%, ${theme.midDark} 100%)`,
+              color: 'white',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '700',
+              letterSpacing: '0.5px',
+              boxShadow: '0 2px 8px rgba(212, 14, 67, 0.2)'
+            }}>
+              {mockProjectData.eavCode}
+            </div>
+            <div>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: theme.dark,
+                margin: '0 0 4px 0',
+                lineHeight: '1.2'
+              }}>
+                {mockProjectData.projectTitle}
+              </h2>
+              {mockProjectData.clientName && (
+                <p style={{
+                  fontSize: '14px',
+                  color: '#64748b',
+                  margin: 0,
+                  fontWeight: '500'
+                }}>
+                  Client: {mockProjectData.clientName}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Project Status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {mockProjectData.projectPhase && (
+              <div style={{
+                background: theme.green,
+                color: 'white',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontSize: '13px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 2px 4px rgba(77, 176, 83, 0.2)'
+              }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '50%',
+                  display: 'inline-block'
+                }} />
+                {mockProjectData.projectPhase}
+              </div>
+            )}
+            <div style={{
+              fontSize: '12px',
+              color: '#94a3b8',
+              textAlign: 'right',
+              fontWeight: '500'
+            }}>
+              <div>Script Editor v2.1</div>
+              <div>Real-time Collaboration</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Tab Navigation */}
       <div style={{
         display: 'flex',
@@ -336,7 +440,7 @@ function App() {
       {activeTab === 'script' ? (
         <div style={{
           display: 'flex',
-          height: 'calc(100vh - 156px)', // Reduced from 180px - header (72px) + tabs (52px) + padding
+          height: 'calc(100vh - 220px)', // Adjusted for header (72px) + project header (64px) + tabs (52px) + padding
           background: theme.light
         }}>
           {/* Left Sidebar - Script List */}
@@ -601,12 +705,12 @@ function App() {
           <div style={{
             flex: 1,
             background: 'white',
-            padding: '32px',
+            padding: '20px',
             overflowY: 'auto',
             borderRight: '1px solid #e2e8f0'
           }}>
             <div style={{
-              maxWidth: '800px',
+              maxWidth: '1200px',
               margin: '0 auto'
             }}>
               {selectedScript ? (
@@ -955,7 +1059,7 @@ function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          height: 'calc(100vh - 180px)',
+          height: 'calc(100vh - 220px)',
           background: 'white'
         }}>
           <div style={{ textAlign: 'center', padding: '40px' }}>

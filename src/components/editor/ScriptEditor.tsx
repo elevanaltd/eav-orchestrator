@@ -100,6 +100,61 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     return yDocRef.current;
   }, [ydoc]);
 
+  // Multi-paragraph paste handler
+  const handleMultiParagraphPaste = useCallback(async (text: string) => {
+    if (!onComponentAdd) return false;
+
+    // Split text by double line breaks or single line breaks (for different paste sources)
+    const paragraphs = text
+      .split(/\n\s*\n|\n/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    // Only process if we have multiple paragraphs and won't exceed limit
+    if (paragraphs.length <= 1) return false;
+
+    const newComponentsCount = paragraphs.length;
+    const currentComponentsCount = components.length;
+
+    if (currentComponentsCount + newComponentsCount > 18) {
+      // Only create components up to the limit
+      const availableSlots = 18 - currentComponentsCount;
+      if (availableSlots <= 0) return false;
+
+      console.log(`Multi-paragraph paste: Creating ${availableSlots} components (${newComponentsCount} paragraphs detected, ${18 - availableSlots} excluded due to limit)`);
+      paragraphs.splice(availableSlots); // Trim to available slots
+    }
+
+    try {
+      // Create components for each paragraph
+      for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const newComponent = {
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [{ type: 'text', text: paragraph }]
+              }
+            ]
+          },
+          contentPlain: paragraph,
+          status: 'created' as const
+        };
+
+        await onComponentAdd(newComponent);
+      }
+
+      console.log(`Multi-paragraph paste: Successfully created ${paragraphs.length} components`);
+      return true; // Indicate paste was handled
+    } catch (error) {
+      console.error('Failed to create components from multi-paragraph paste:', error);
+      onError?.(error as Error);
+      return false;
+    }
+  }, [onComponentAdd, components.length, onError]);
+
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
     extensions: [
@@ -127,6 +182,34 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       attributes: {
         class: 'prose prose-sm focus:outline-none min-h-[200px] p-4',
         'data-testid': 'editor-content'
+      },
+      handlePaste: (_view, event) => {
+        // Get the pasted text
+        const text = event.clipboardData?.getData('text/plain');
+
+        if (text) {
+          // Check if this is a multi-paragraph paste
+          const paragraphs = text
+            .split(/\n\s*\n|\n/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+
+          if (paragraphs.length > 1) {
+            // Handle multi-paragraph paste asynchronously
+            handleMultiParagraphPaste(text).then(handled => {
+              if (handled) {
+                // Prevent default paste behavior since we handled it
+                event.preventDefault();
+              }
+            });
+
+            // Prevent default paste for multi-paragraph content
+            return true;
+          }
+        }
+
+        // Allow default paste behavior for single paragraphs
+        return false;
       }
     },
     onUpdate: ({ editor }) => {
@@ -141,7 +224,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     onSelectionUpdate: ({ editor }) => {
       updateEditorState(editor);
     }
-  }, [yDoc, provider, collaborationProvider, config.userName, config.userColor]);
+  }, [yDoc, provider, collaborationProvider, config.userName, config.userColor, handleMultiParagraphPaste]);
 
   // Auto-save handler
   const handleAutoSave = useCallback(async (content: Record<string, unknown>) => {
@@ -346,10 +429,22 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Formatting button handlers
   const formatHandlers = {
-    bold: () => editor?.chain().focus().toggleBold().run(),
-    italic: () => editor?.chain().focus().toggleItalic().run(),
-    bulletList: () => editor?.chain().focus().toggleBulletList().run(),
-    heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => editor?.chain().focus().toggleHeading({ level }).run()
+    bold: () => {
+      editor?.chain().focus().toggleBold().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    italic: () => {
+      editor?.chain().focus().toggleItalic().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    bulletList: () => {
+      editor?.chain().focus().toggleBulletList().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => {
+      editor?.chain().focus().toggleHeading({ level }).run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    }
   };
 
   // Component management handlers
@@ -472,11 +567,11 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   return (
     <div className={`script-editor ${className}`} data-testid="script-editor">
       {/* Toolbar */}
-      <div className="toolbar border-b border-gray-200 p-2 flex gap-2" data-testid="editor-toolbar">
+      <div className="toolbar border-b border-gray-200 p-2 flex items-center gap-1" data-testid="editor-toolbar">
         <button
           type="button"
           onClick={formatHandlers.bold}
-          className={`px-3 py-1 rounded ${editorState.formatting.bold ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-1 rounded text-sm font-bold ${editorState.formatting.bold ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="bold-button"
         >
           B
@@ -484,7 +579,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.italic}
-          className={`px-3 py-1 rounded ${editorState.formatting.italic ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-1 rounded text-sm italic ${editorState.formatting.italic ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="italic-button"
         >
           I
@@ -492,7 +587,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.bulletList}
-          className={`px-3 py-1 rounded ${editorState.formatting.bulletList ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm ${editorState.formatting.bulletList ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="bullet-list-button"
         >
           •
@@ -505,9 +600,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             } else {
               formatHandlers.heading(level as 1 | 2 | 3 | 4 | 5 | 6);
             }
+            // Force update editor state after formatting change
+            setTimeout(() => {
+              if (editor) {
+                updateEditorState(editor);
+              }
+            }, 10);
           }}
           value={editorState.formatting.heading || 0}
-          className="px-2 py-1 border rounded"
+          className="px-2 py-1 border rounded text-sm"
           data-testid="heading-select"
         >
           <option value={0}>Paragraph</option>
@@ -555,8 +656,18 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         </div>
       )}
 
-      {/* Add Component Section */}
-      <div className="add-component-section border-b p-3">
+      {/* Editor Content */}
+      <div className="editor-wrapper relative border-b">
+        <EditorContent editor={editor} />
+
+        {/* Collaboration Cursors */}
+        <div className="collaboration-cursors absolute inset-0 pointer-events-none" data-testid="collaboration-cursors">
+          {/* Cursors would be rendered here by TipTap collaboration extension */}
+        </div>
+      </div>
+
+      {/* Add Component Section - BELOW the main editor */}
+      <div className="add-component-section border-b p-3 bg-gray-50">
         <button
           type="button"
           onClick={handleAddComponent}
@@ -582,20 +693,23 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         )}
       </div>
 
-      {/* Component List */}
+      {/* Component List - BELOW the main editor */}
       {components.length > 0 && (
-        <div className="component-list border-b" data-testid="component-list">
+        <div className="component-list border-b bg-white" data-testid="component-list">
+          <div className="p-2 text-sm font-medium text-gray-700 bg-gray-100">
+            Script Components
+          </div>
           {components.map((component, index) => (
             <div
               key={component.componentId}
-              className="component-item flex items-center p-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
+              className="component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
               data-testid={`component-${component.componentId}`}
               onClick={() => handleComponentClick(component)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, component.componentId)}
             >
               <div
-                className="drag-handle mr-2 cursor-move"
+                className="drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"
                 data-testid={`drag-handle-${component.componentId}`}
                 draggable
                 onDragStart={(e) => handleDragStart(e, component.componentId)}
@@ -604,16 +718,27 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
                 ⋮⋮
               </div>
               <div className="flex-1">
-                <div className="text-sm text-gray-500">Component {index + 1}</div>
-                <div className="text-xs text-gray-400">{component.plainText?.substring(0, 50) || ''}...</div>
+                <div className="text-sm font-medium text-gray-700">Component {index + 1}</div>
+                <div className="text-xs text-gray-500 mt-1">{component.plainText?.substring(0, 50) || 'Empty component'}...</div>
               </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleComponentClick(component);
+                }}
+                className="edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"
+                data-testid={`edit-component-${component.componentId}`}
+              >
+                Edit
+              </button>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setDeleteConfirmId(component.componentId);
                 }}
-                className="delete-btn ml-2 px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
+                className="delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
                 data-testid={`delete-component-${component.componentId}`}
               >
                 Delete
@@ -625,23 +750,35 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
       {/* Component Editor */}
       {editingComponentId && (
-        <div className="component-editor border-b p-4" data-testid={`component-editor-${editingComponentId}`}>
+        <div className="component-editor border-b p-4 bg-blue-50" data-testid={`component-editor-${editingComponentId}`}>
           <div className="mb-2 text-sm font-medium text-gray-700">
-            Editing Component
+            Editing Component {components.findIndex(c => c.componentId === editingComponentId) + 1}
           </div>
           <textarea
             value={editingContent}
             onChange={(e) => handleComponentEdit(e.target.value)}
-            className="w-full h-32 p-2 border rounded text-sm"
-            placeholder="Component content..."
+            className="w-full h-32 p-3 border rounded text-sm"
+            placeholder="Enter component content..."
           />
-          <button
-            type="button"
-            onClick={() => setEditingComponentId(null)}
-            className="mt-2 px-3 py-1 bg-gray-500 text-white rounded text-xs"
-          >
-            Close Editor
-          </button>
+          <div className="flex gap-2 mt-3">
+            <button
+              type="button"
+              onClick={() => setEditingComponentId(null)}
+              className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+            >
+              Close Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                // Save and close
+                setEditingComponentId(null);
+              }}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+            >
+              Save & Close
+            </button>
+          </div>
         </div>
       )}
 
@@ -672,16 +809,6 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
           </div>
         </div>
       )}
-
-      {/* Editor Content */}
-      <div className="editor-wrapper relative">
-        <EditorContent editor={editor} />
-        
-        {/* Collaboration Cursors */}
-        <div className="collaboration-cursors absolute inset-0 pointer-events-none" data-testid="collaboration-cursors">
-          {/* Cursors would be rendered here by TipTap collaboration extension */}
-        </div>
-      </div>
 
       {/* Comments Panel (placeholder for future implementation) */}
       {config.enableComments && (
