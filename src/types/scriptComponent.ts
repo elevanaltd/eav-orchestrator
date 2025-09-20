@@ -199,6 +199,7 @@ export interface DeleteResult {
   success: boolean;
   deletedAt?: string;
   error?: string;
+  queued?: boolean; // Added for circuit breaker fallback
 }
 
 /**

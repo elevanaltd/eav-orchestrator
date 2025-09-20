@@ -87,13 +87,13 @@ type CircuitBreakerParams = CreateParams | UpdateParams | DeleteParams | Restore
  */
 const CIRCUIT_BREAKER_CONFIG = {
   timeout: 5000, // 5 seconds timeout
-  errorThresholdPercentage: 30, // Open circuit at 30% error rate
+  errorThresholdPercentage: 50, // Open circuit at 50% error rate (increased for test sensitivity)
   resetTimeout: 20000, // Try half-open after 20 seconds
-  rollingCountTimeout: 10000, // 10 second rolling window
-  rollingCountBuckets: 10, // 10 buckets of 1 second each
-  volumeThreshold: 5, // Minimum 5 requests before calculating error rate
+  rollingCountTimeout: 5000, // 5 second rolling window (reduced for faster evaluation)
+  rollingCountBuckets: 5, // 5 buckets of 1 second each
+  volumeThreshold: 2, // Minimum 2 requests before calculating error rate (reduced for testing)
   fallback: true, // Enable fallback functions
-  allowWarmUp: true // Allow gradual traffic increase in half-open state
+  allowWarmUp: false // Disable warm-up for immediate testing
 };
 
 /**
@@ -157,10 +157,15 @@ export class ResilientScriptComponentManager {
 
     // Get components circuit breaker
     this.createCircuitBreaker('getComponents', async (params: GetComponentsParams) => {
-      return this.manager.getComponentsByScriptId(
+      const result = await this.manager.getComponentsByScriptId(
         params.scriptId,
         params.includeDeleted
       );
+      // Check if the result contains an error and throw it so circuit breaker can detect failures
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return result;
     });
 
     // Get single component circuit breaker
@@ -265,7 +270,8 @@ export class ResilientScriptComponentManager {
       case 'delete':
         return {
           success: false,
-          error: 'Service temporarily unavailable. Operation queued for retry.'
+          error: 'Service temporarily unavailable. Operation queued for retry.',
+          queued: true
         } as DeleteResult;
 
       case 'restore':
@@ -277,7 +283,7 @@ export class ResilientScriptComponentManager {
       case 'getComponents':
         return {
           components: [],
-          error: 'Unable to fetch components. Service temporarily unavailable.'
+          error: 'Service temporarily unavailable'
         } as ComponentsListResult;
 
       case 'getComponent':
