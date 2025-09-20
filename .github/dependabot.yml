@@ -1,0 +1,49 @@
+# Critical-Engineer: consulted for Dependency management and security strategy
+# Automated dependency updates per critical-engineer recommendation
+# Replaces manual dependency pinning with proper automated management
+version: 2
+updates:
+  # Enable security and quality updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Group minor and patch updates to reduce PR noise
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Keep separate PRs for major updates - require manual review
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    # Limit number of open pull requests
+    open-pull-requests-limit: 5
+    # Add labels for easy identification
+    labels:
+      - "dependencies"
+      - "automated"
+    # Commit message prefix
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Monitor GitHub Actions for security updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    labels:
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "ci"

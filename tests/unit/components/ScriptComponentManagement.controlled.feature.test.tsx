@@ -10,31 +10,33 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
-import type { ScriptComponent } from '../../../src/types/editor';
+import type { ScriptComponentUI } from '../../../src/types/editor';
 
 describe('Script Component Management - Controlled Component', () => {
   // Test wrapper that properly manages component state
   const TestWrapper = ({ initialComponents = [], onAddMock, onUpdateMock, onDeleteMock, onReorderMock }: {
-    initialComponents?: ScriptComponent[];
+    initialComponents?: ScriptComponentUI[];
     onAddMock?: any;
     onUpdateMock?: any;
     onDeleteMock?: any;
     onReorderMock?: any;
   }) => {
-    const [components, setComponents] = React.useState<ScriptComponent[]>(initialComponents);
+    const [components, setComponents] = React.useState<ScriptComponentUI[]>(initialComponents);
 
-    const handleComponentAdd = async (component: Partial<ScriptComponent>): Promise<ScriptComponent> => {
-      const newComponent: ScriptComponent = {
-        id: 'comp-123',
+    const handleComponentAdd = async (component: Partial<ScriptComponentUI>): Promise<ScriptComponentUI> => {
+      const newComponent: ScriptComponentUI = {
+        componentId: 'comp-123',
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: '',
         position: components.length + 1,
         status: 'created',
+        type: 'main',
         version: 1,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         lastEditedBy: 'user-123',
+        lastEditedAt: new Date().toISOString(),
         ...component
       };
 
@@ -47,9 +49,9 @@ describe('Script Component Management - Controlled Component', () => {
       return newComponent;
     };
 
-    const handleComponentUpdate = async (componentId: string, updates: Partial<ScriptComponent>) => {
+    const handleComponentUpdate = async (componentId: string, updates: Partial<ScriptComponentUI>) => {
       setComponents(prev => prev.map(c =>
-        c.id === componentId ? { ...c, ...updates } : c
+        c.componentId === componentId ? { ...c, ...updates } : c
       ));
 
       if (onUpdateMock) {
@@ -58,7 +60,7 @@ describe('Script Component Management - Controlled Component', () => {
     };
 
     const handleComponentDelete = async (componentId: string) => {
-      setComponents(prev => prev.filter(c => c.id !== componentId));
+      setComponents(prev => prev.filter(c => c.componentId !== componentId));
 
       if (onDeleteMock) {
         await onDeleteMock(componentId);
@@ -67,7 +69,7 @@ describe('Script Component Management - Controlled Component', () => {
 
     const handleComponentReorder = async (componentIds: string[]) => {
       setComponents(prev => {
-        const reordered = componentIds.map(id => prev.find(c => c.id === id)!).filter(Boolean);
+        const reordered = componentIds.map(id => prev.find(c => c.componentId === id)!).filter(Boolean);
         return reordered;
       });
 
@@ -109,21 +111,23 @@ describe('Script Component Management - Controlled Component', () => {
     });
 
     it('should display a list of existing components', () => {
-      const mockComponents: ScriptComponent[] = [
+      const mockComponents: ScriptComponentUI[] = [
         {
-          id: 'comp-1',
+          componentId: 'comp-1',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Introduction' }] }] },
           plainText: 'Introduction',
           position: 1.0,
           status: 'created',
+          type: 'main',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         },
         {
-          id: 'comp-2',
+          componentId: 'comp-2',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Operations' }] }] },
           plainText: 'Operations',
@@ -132,10 +136,12 @@ describe('Script Component Management - Controlled Component', () => {
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z',
+          type: 'main'
         },
         {
-          id: 'comp-3',
+          componentId: 'comp-3',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Maintenance' }] }] },
           plainText: 'Maintenance',
@@ -144,7 +150,9 @@ describe('Script Component Management - Controlled Component', () => {
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
         }
       ];
 
@@ -161,8 +169,8 @@ describe('Script Component Management - Controlled Component', () => {
 
     it('should allow editing a component when clicked', async () => {
       const mockOnComponentUpdate = vi.fn();
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Original content' }] }] },
         plainText: 'Original content',
@@ -171,7 +179,9 @@ describe('Script Component Management - Controlled Component', () => {
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
       };
 
       render(<TestWrapper initialComponents={[mockComponent]} onUpdateMock={mockOnComponentUpdate} />);
@@ -188,8 +198,8 @@ describe('Script Component Management - Controlled Component', () => {
 
     it('should delete a component when delete button is clicked', async () => {
       const mockOnComponentDelete = vi.fn();
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: '',
@@ -198,7 +208,9 @@ describe('Script Component Management - Controlled Component', () => {
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
       };
 
       render(<TestWrapper initialComponents={[mockComponent]} onDeleteMock={mockOnComponentDelete} />);
@@ -218,21 +230,23 @@ describe('Script Component Management - Controlled Component', () => {
 
     it('should support drag-and-drop reordering of components', async () => {
       const mockOnComponentReorder = vi.fn();
-      const mockComponents: ScriptComponent[] = [
+      const mockComponents: ScriptComponentUI[] = [
         {
-          id: 'comp-1',
+          componentId: 'comp-1',
           scriptId: 'script-456',
           content: { type: 'doc', content: [] },
           plainText: 'Component 1',
           position: 1.0,
           status: 'created',
+          type: 'main',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         },
         {
-          id: 'comp-2',
+          componentId: 'comp-2',
           scriptId: 'script-456',
           content: { type: 'doc', content: [] },
           plainText: 'Component 2',
@@ -241,7 +255,9 @@ describe('Script Component Management - Controlled Component', () => {
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
         }
       ];
 
@@ -263,7 +279,7 @@ describe('Script Component Management - Controlled Component', () => {
 
     it('should limit components to 18 maximum', async () => {
       const mockComponents = Array.from({ length: 18 }, (_, i) => ({
-        id: `comp-${i + 1}`,
+        componentId: `comp-${i + 1}`,
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: `Component ${i + 1}`,
@@ -272,7 +288,9 @@ describe('Script Component Management - Controlled Component', () => {
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
       }));
 
       render(<TestWrapper initialComponents={mockComponents} />);
@@ -290,8 +308,8 @@ describe('Script Component Management - Controlled Component', () => {
     it('should auto-save component changes within 1 second', async () => {
       const mockOnComponentUpdate = vi.fn();
 
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: '',
@@ -300,7 +318,9 @@ describe('Script Component Management - Controlled Component', () => {
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z',
+        type: 'main'
       };
 
       render(<TestWrapper initialComponents={[mockComponent]} onUpdateMock={mockOnComponentUpdate} />);

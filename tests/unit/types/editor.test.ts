@@ -75,41 +75,44 @@ describe('Editor Types', () => {
     it('should fail: ScriptComponent interface not defined yet', () => {
       // RED STATE: ScriptComponent type not implemented
       const component: ScriptComponent = {
-        id: 'comp-123',
-        scriptId: 'script-456',
-        content: { type: 'doc', content: [] },
-        plainText: 'Plain text version',
+        component_id: 'comp-123',
+        script_id: 'script-456',
+        content_tiptap: { type: 'doc', content: [] },
+        content_plain: 'Plain text version',
         position: 1,
-        status: 'created',
-        createdAt: '2025-01-15T00:00:00Z',
-        updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123',
+        component_type: 'main',
+        component_status: 'created',
+        created_at: '2025-01-15T00:00:00Z',
+        updated_at: '2025-01-15T00:00:00Z',
+        last_edited_by: 'user-123',
+        last_edited_at: '2025-01-15T00:00:00Z',
         version: 1
       };
       
       // Will fail - ScriptComponent interface not implemented
-      expect(component.id).toBe('comp-123');
-      expect(component.status).toBe('created');
+      expect(component.component_id).toBe('comp-123');
+      expect(component.component_status).toBe('created');
     });
 
-    it('should fail: support optional scene mapping', () => {
-      // RED STATE: Optional sceneId field test
+    it('should fail: support different component status values', () => {
+      // RED STATE: Different component status test
       const componentWithScene: ScriptComponent = {
-        id: 'comp-123',
-        scriptId: 'script-456', 
-        content: { type: 'doc', content: [] },
-        plainText: 'Content',
+        component_id: 'comp-123',
+        script_id: 'script-456',
+        content_tiptap: { type: 'doc', content: [] },
+        content_plain: 'Content',
         position: 1,
-        sceneId: 'scene-789', // Optional field
-        status: 'in_edit',
-        createdAt: '2025-01-15T00:00:00Z',
-        updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123',
+        component_type: 'main',
+        component_status: 'in_edit',
+        created_at: '2025-01-15T00:00:00Z',
+        updated_at: '2025-01-15T00:00:00Z',
+        last_edited_by: 'user-123',
+        last_edited_at: '2025-01-15T00:00:00Z',
         version: 1
       };
       
       // Will fail - ScriptComponent interface not implemented
-      expect(componentWithScene.sceneId).toBe('scene-789');
+      expect(componentWithScene.component_status).toBe('in_edit');
     });
   });
 
@@ -378,7 +381,7 @@ describe('Editor Types', () => {
         },
         components: [
           {
-            id: 'comp-1',
+            componentId: 'comp-1',
             scriptId: 'script-integration',
             content: {
               type: 'doc',
@@ -391,10 +394,12 @@ describe('Editor Types', () => {
             },
             plainText: 'Integration test content',
             position: 0,
+            type: 'main',
             status: 'created',
             createdAt: '2025-01-15T00:00:00Z',
             updatedAt: '2025-01-15T00:00:00Z',
             lastEditedBy: 'user-integration',
+            lastEditedAt: '2025-01-15T00:00:00Z',
             version: 1
           }
         ],

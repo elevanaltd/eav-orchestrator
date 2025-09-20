@@ -1,0 +1,18 @@
+# docker-compose.test.yml - Service orchestration for hermetic testing
+# Critical-Engineer: consulted for Hermetic test environment strategy
+version: '3.8'
+
+services:
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    # Pass environment variables for tests
+    environment:
+      - NODE_ENV=test
+      - VITE_SUPABASE_URL=https://test.supabase.co
+      - VITE_SUPABASE_ANON_KEY=test-anon-key-for-integration
+    # Remove read-only mount that was causing issues
+    # Tests run in container's own filesystem
+    command: npm test -- --run --reporter=verbose

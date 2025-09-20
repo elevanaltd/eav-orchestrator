@@ -90,4 +90,31 @@ describe('Build Configuration Validation', () => {
       expect(packageJson.type).toBe('module');
     });
   });
+
+  describe('Dependabot Configuration', () => {
+    const dependabotConfigPath = path.join(process.cwd(), '.github', 'dependabot.yml');
+
+    it('should exist for automated dependency management', () => {
+      // Contract: Dependabot configuration must exist for security updates
+      expect(fs.existsSync(dependabotConfigPath)).toBe(true);
+    });
+
+    it('should contain npm package ecosystem configuration', () => {
+      // Contract: npm dependencies must be monitored for security updates
+      if (fs.existsSync(dependabotConfigPath)) {
+        const dependabotContent = fs.readFileSync(dependabotConfigPath, 'utf-8');
+        expect(dependabotContent).toContain('package-ecosystem: "npm"');
+        expect(dependabotContent).toContain('directory: "/"');
+        expect(dependabotContent).toContain('schedule:');
+      }
+    });
+
+    it('should limit open pull requests to prevent noise', () => {
+      // Contract: Must limit concurrent PRs to maintain productivity
+      if (fs.existsSync(dependabotConfigPath)) {
+        const dependabotContent = fs.readFileSync(dependabotConfigPath, 'utf-8');
+        expect(dependabotContent).toContain('open-pull-requests-limit');
+      }
+    });
+  });
 });

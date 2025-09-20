@@ -21,11 +21,14 @@
 // Context7: consulted for yjs
 // Context7: consulted for @supabase/supabase-js
 // Context7: consulted for opossum
+// Context7: consulted for y-protocols/awareness
 import * as Y from 'yjs';
+import { Awareness } from 'y-protocols/awareness';
 import { SupabaseClient, RealtimeChannel } from '@supabase/supabase-js';
 import { withRetry } from '../resilience/retryWithBackoff';
 // Context7: consulted for opossum
 import CircuitBreaker from 'opossum';
+import { IndexedDBQueue } from '../database/indexedDBQueue';
 
 // Define CircuitBreakerOptions type based on opossum documentation
 interface CircuitBreakerOptions {
@@ -61,6 +64,7 @@ export interface YjsDocument {
 export class CustomSupabaseProvider {
   private supabaseClient: SupabaseClient;
   private ydoc: Y.Doc;
+  public awareness: Awareness; // CRITICAL: Required for CollaborationCursor
   private documentId: string;
   private projectId: string; // CRITICAL: Project-based security
   private tableName: string;
@@ -73,9 +77,8 @@ export class CustomSupabaseProvider {
   private setupRealtimeBreaker: CircuitBreaker;
   private persistUpdateBreaker: CircuitBreaker;
   
-  // Offline queue for durable update storage
-  public offlineQueue: Uint8Array[] = [];
-  private readonly OFFLINE_QUEUE_KEY: string;
+  // Offline queue for durable update storage with IndexedDB fallback chain
+  private indexedDBQueue: IndexedDBQueue;
   
   // Event handlers for circuit breaker state changes
   private circuitBreakerStateChangeHandlers: ((state: string) => void)[] = [];
@@ -85,10 +88,14 @@ export class CustomSupabaseProvider {
     this.config = config;
     this.supabaseClient = config.supabaseClient;
     this.ydoc = config.ydoc;
+
+    // Initialize awareness for cursor tracking (similar to y-websocket)
+    this.awareness = new Awareness(this.ydoc);
+
     this.documentId = config.documentId;
     this.projectId = config.projectId;
     this.tableName = config.tableName || 'yjs_documents';
-    this.OFFLINE_QUEUE_KEY = `offline_queue_${this.documentId}`;
+    this.indexedDBQueue = new IndexedDBQueue(this.documentId);
     
     // Initialize circuit breakers with Critical Engineer specified settings
     const circuitBreakerOptions = {
@@ -117,32 +124,38 @@ export class CustomSupabaseProvider {
     
     // Set up circuit breaker event handlers
     this.setupCircuitBreakerEvents();
-    
-    // Load any persisted offline queue
-    this.loadOfflineQueue();
+
+    // Initialize IndexedDB queue asynchronously
+    this.initializeOfflineQueue();
   }
 
   async connect(): Promise<void> {
     const startTime = performance.now();
-    
+
     try {
+      // Initialize IndexedDB queue before any operations
+      await this.indexedDBQueue.initialize();
+
       // Load initial document state through circuit breaker
       await this.loadInitialStateBreaker.fire();
-      
+
       // Set up real-time subscription through circuit breaker
       await this.setupRealtimeBreaker.fire();
-      
+
       // Set up Y.js update handler
       this.setupYjsUpdateHandler();
-      
+
+      // Set up awareness handlers for cursor tracking
+      this.setupAwarenessHandlers();
+
       // Process any queued offline updates
       await this.drainOfflineQueue();
-      
+
       this.isConnected = true;
-      
+
       const connectionTime = performance.now() - startTime;
       console.log(`CustomSupabaseProvider connected in ${connectionTime.toFixed(2)}ms`);
-      
+
     } catch (error) {
       console.error('CustomSupabaseProvider connection failed:', error);
       throw error;
@@ -153,6 +166,15 @@ export class CustomSupabaseProvider {
     if (this.channel) {
       await this.supabaseClient.removeChannel(this.channel);
     }
+
+    // Clean up awareness
+    if (this.awareness) {
+      this.awareness.destroy();
+    }
+
+    // Close IndexedDB queue
+    await this.indexedDBQueue.close();
+
     this.isConnected = false;
   }
 
@@ -164,9 +186,9 @@ export class CustomSupabaseProvider {
         .from(this.tableName)
         .select('id, state_vector, version')
         .eq('id', this.documentId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() to handle 0 or 1 rows gracefully
 
-      if (docError && docError.code !== 'PGRST116') { // PGRST116 = no rows
+      if (docError) {
         throw new Error(`Failed to load document: ${docError.message}`);
       }
 
@@ -229,6 +251,16 @@ export class CustomSupabaseProvider {
         // Only persist updates that didn't originate from this provider (avoid loops)
         this.persistUpdate(update);
       }
+    });
+  }
+
+  private setupAwarenessHandlers(): void {
+    // Set up awareness update handler for cursor synchronization
+    // This will be used by CollaborationCursor extension
+    this.awareness.on('update', () => {
+      // Awareness updates are handled by the TipTap CollaborationCursor extension
+      // We just need to ensure the awareness object is available
+      console.debug('Awareness updated');
     });
   }
 
@@ -325,6 +357,13 @@ export class CustomSupabaseProvider {
   }
 
   async destroy(): Promise<void> {
+    try {
+      // Close IndexedDB queue
+      await this.indexedDBQueue.close();
+    } catch (error) {
+      console.error('Error closing IndexedDB queue:', error);
+    }
+
     await this.disconnect();
   }
 
@@ -469,72 +508,86 @@ export class CustomSupabaseProvider {
     return aggregatedMetrics;
   }
 
-  // Offline Queue Management Methods
+  // Offline Queue Management Methods with IndexedDB
 
-  private loadOfflineQueue(): void {
+  private async initializeOfflineQueue(): Promise<void> {
     try {
-      const stored = typeof window !== 'undefined' ? window.localStorage.getItem(this.OFFLINE_QUEUE_KEY) : null;
-      if (stored) {
-        const parsedQueue = JSON.parse(stored);
-        this.offlineQueue = parsedQueue.map((item: number[]) => new Uint8Array(item));
-      }
+      await this.indexedDBQueue.initialize();
+      console.log(`Offline queue initialized with ${this.indexedDBQueue.storageType} storage`);
     } catch (error) {
-      console.error('Error loading offline queue from localStorage:', error);
-      this.offlineQueue = [];
-    }
-  }
-
-  private saveOfflineQueue(): void {
-    try {
-      const serializedQueue = this.offlineQueue.map(item => Array.from(item));
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(this.OFFLINE_QUEUE_KEY, JSON.stringify(serializedQueue));
-      }
-    } catch (error) {
-      console.error('Error saving offline queue to localStorage:', error);
+      console.error('Failed to initialize offline queue:', error);
     }
   }
 
   public async queueUpdate(updateData: Uint8Array): Promise<void> {
-    this.offlineQueue.push(updateData);
-    this.saveOfflineQueue();
-  }
-
-  public getOfflineQueue(): Uint8Array[] {
-    return [...this.offlineQueue]; // Return copy to prevent external mutation
-  }
-
-  public getPersistedQueue(): Uint8Array[] {
     try {
-      const stored = typeof window !== 'undefined' ? window.localStorage.getItem(this.OFFLINE_QUEUE_KEY) : null;
-      if (stored) {
-        const parsedQueue = JSON.parse(stored);
-        return parsedQueue.map((item: number[]) => new Uint8Array(item));
-      }
-      return [];
+      await this.indexedDBQueue.enqueue(updateData);
     } catch (error) {
-      console.error('Error reading persisted queue:', error);
+      console.error('Failed to queue update to IndexedDB:', error);
+      // Fallback is handled internally by IndexedDBQueue
+    }
+  }
+
+  public async getOfflineQueue(): Promise<Uint8Array[]> {
+    try {
+      const queueSize = await this.indexedDBQueue.size();
+      const queue: Uint8Array[] = [];
+
+      // For compatibility, return a snapshot of the queue
+      for (let i = 0; i < queueSize; i++) {
+        const item = await this.indexedDBQueue.peek();
+        if (item) {
+          queue.push(item);
+          // Temporarily dequeue and re-enqueue to simulate array-like access
+          await this.indexedDBQueue.dequeue();
+          if (i < queueSize - 1) {
+            await this.indexedDBQueue.enqueue(item);
+          }
+        }
+      }
+
+      // Re-enqueue the last item if we had any
+      if (queue.length > 0) {
+        await this.indexedDBQueue.enqueue(queue[queue.length - 1]);
+      }
+
+      return queue;
+    } catch (error) {
+      console.error('Error reading offline queue:', error);
       return [];
     }
+  }
+
+  public async getPersistedQueue(): Promise<Uint8Array[]> {
+    // With IndexedDB queue, persisted and in-memory are the same
+    return this.getOfflineQueue();
   }
 
   public async drainOfflineQueue(): Promise<void> {
-    if (this.offlineQueue.length === 0) return;
+    try {
+      const queueSize = await this.indexedDBQueue.size();
+      if (queueSize === 0) return;
 
-    const queueToProcess = [...this.offlineQueue];
-    this.offlineQueue = [];
-    this.saveOfflineQueue();
+      console.log(`Draining ${queueSize} queued operations`);
 
-    for (const updateData of queueToProcess) {
-      try {
-        // Call persistUpdateOperation directly, bypassing the circuit breaker
-        // since drainOfflineQueue is typically called when the circuit is closed
-        await this.persistUpdateOperation(updateData);
-      } catch (error) {
-        console.error('Error processing queued update:', error);
-        // Re-queue failed updates
-        await this.queueUpdate(updateData);
+      // Process all queued operations
+      while (true) {
+        const updateData = await this.indexedDBQueue.dequeue();
+        if (!updateData) break;
+
+        try {
+          // Call persistUpdateOperation directly, bypassing the circuit breaker
+          // since drainOfflineQueue is typically called when the circuit is closed
+          await this.persistUpdateOperation(updateData);
+        } catch (error) {
+          console.error('Error processing queued update:', error);
+          // Re-queue the failed update
+          await this.queueUpdate(updateData);
+        }
       }
+    } catch (error) {
+      console.error('Error draining offline queue:', error);
     }
   }
+
 }

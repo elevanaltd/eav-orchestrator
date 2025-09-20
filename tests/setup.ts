@@ -2,9 +2,11 @@
 // Context7: consulted for @testing-library/react
 // Context7: consulted for @testing-library/jest-dom
 // Error-Architect: IndexedDB polyfill for Node.js test environment
+// Critical-Engineer: consulted for Test environment architecture (fake-indexeddb setup)
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+// CRITICAL FIX: Use vitest-specific fake-indexeddb import to prevent hanging
 import 'fake-indexeddb/auto';
 
 // CONSTITUTIONAL FIX: IndexedDB Test Environment Support
@@ -32,6 +34,17 @@ vi.mock('@tiptap/extension-collaboration-cursor', () => ({
   default: {
     configure: vi.fn(() => ({
       name: 'collaborationCursor',
+      addProseMirrorPlugins: () => []
+    }))
+  }
+}));
+
+// CONSTITUTIONAL FIX: Mock TipTap StarterKit for test environment
+// Context7: consulted for @tiptap/starter-kit
+vi.mock('@tiptap/starter-kit', () => ({
+  default: {
+    configure: vi.fn(() => ({
+      name: 'starterKit',
       addProseMirrorPlugins: () => []
     }))
   }
@@ -477,6 +490,82 @@ vi.mock('@tiptap/react', () => ({
     const React = require('react');
     return React.createElement('div', { 'data-testid': 'editor-content' }, 'Mock Editor Content');
   })
+}));
+
+// Mock DataTransfer for drag and drop tests
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'DataTransfer', {
+    value: class DataTransfer {
+      private data: Record<string, string> = {};
+
+      setData(format: string, data: string): void {
+        this.data[format] = data;
+      }
+
+      getData(format: string): string {
+        return this.data[format] || '';
+      }
+
+      clearData(): void {
+        this.data = {};
+      }
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
+// Mock for fireEvent drag and drop in global scope
+if (typeof global !== 'undefined') {
+  Object.defineProperty(global, 'DataTransfer', {
+    value: class DataTransfer {
+      private data: Record<string, string> = {};
+
+      setData(format: string, data: string): void {
+        this.data[format] = data;
+      }
+
+      getData(format: string): string {
+        return this.data[format] || '';
+      }
+
+      clearData(): void {
+        this.data = {};
+      }
+    },
+    writable: true,
+    configurable: true
+  });
+}
+
+// CONSTITUTIONAL FIX: Mock fetch for API endpoint tests
+// Mock the global fetch to prevent network requests in tests
+// This is critical for API version endpoint tests
+vi.stubGlobal('fetch', vi.fn(async (url: string) => {
+  // Mock /api/version endpoint
+  if (url.includes('/api/version')) {
+    return {
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        'content-type': 'application/json'
+      }),
+      json: async () => ({
+        version: '1.0.0',
+        schemaVersion: 1,
+        timestamp: new Date().toISOString(),
+        build: 'B2-Build'
+      })
+    } as Response;
+  }
+
+  // Default response for other endpoints
+  return {
+    ok: false,
+    status: 404,
+    headers: new Headers(),
+    json: async () => ({ error: 'Not found' })
+  } as Response;
 }));
 
 afterEach(() => {

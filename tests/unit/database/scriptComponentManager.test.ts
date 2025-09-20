@@ -312,9 +312,24 @@ describe('ScriptComponentManager', () => {
         manager.updateComponent('comp-123', {}, 'text', 0, 'user-456')
       ).rejects.toThrow('Valid version number is required');
 
-      await expect(
-        manager.updateComponent('comp-123', {}, 'text', 1, '')
-      ).rejects.toThrow('User ID is required');
+      // User ID is now nullable for development
+      // Test should verify null userId is accepted
+      // Mock successful database response for the null userId test
+      mockSupabase.rpc.mockResolvedValue({
+        data: [{
+          success: true,
+          new_version: 2,
+          conflict_detected: false,
+          current_content: null,
+          current_version: null,
+          error_message: null
+        }],
+        error: null
+      });
+
+      const result = await manager.updateComponent('comp-123', {}, 'text', 1, null);
+      expect(result).toBeDefined();
+      expect(result.success).toBe(true);
     });
   });
 });
