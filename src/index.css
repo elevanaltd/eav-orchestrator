@@ -1,4 +1,11 @@
 /* TRACED_BYPASS: test commit 614d8b4 - implementing CSS after RED state test */
+/* Critical-Engineer: consulted for CSS build pipeline and Tailwind configuration */
+
+/* Tailwind CSS Directives - MUST BE FIRST */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* =================================================================
    EAV Orchestrator - Global Styles
    Foundation CSS for collaborative video production system
