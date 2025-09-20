@@ -121,6 +121,7 @@ export class IndexedDBQueue {
 
   /**
    * Initialize IndexedDB
+   * Critical-Engineer: consulted for Stateful dependency management in test environments (IndexedDB)
    */
   private async initializeIndexedDB(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -130,15 +131,28 @@ export class IndexedDBQueue {
         return;
       }
 
+      // Constitutional Fix: Add timeout wrapper to prevent hanging tests
+      const timeoutId = setTimeout(() => {
+        reject(new Error('IndexedDB initialization timeout after 2000ms'));
+      }, 2000);
+
       const request = window.indexedDB.open(IndexedDBQueue.DB_NAME, IndexedDBQueue.DB_VERSION);
 
       request.onerror = () => {
+        clearTimeout(timeoutId);
         reject(new Error(`IndexedDB open failed: ${request.error?.message}`));
       };
 
       request.onsuccess = () => {
+        clearTimeout(timeoutId);
         this.db = request.result;
         resolve();
+      };
+
+      // Constitutional Fix: Add onblocked handler to prevent hanging
+      request.onblocked = () => {
+        clearTimeout(timeoutId);
+        reject(new Error('IndexedDB blocked - another connection preventing upgrade'));
       };
 
       request.onupgradeneeded = (event) => {
