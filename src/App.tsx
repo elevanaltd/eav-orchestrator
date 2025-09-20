@@ -9,6 +9,10 @@ import type { ScriptComponentUI } from './types/editor';
 import { ScriptComponentManager } from './lib/database/scriptComponentManager';
 import { getSupabase } from './lib/supabase';
 import { useClientLifecycle } from './hooks/useClientLifecycle';
+import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './hooks/useAuth';
+import { LoginForm } from './components/auth/LoginForm';
+import { UserMenu } from './components/auth/UserMenu';
 
 // EAV Brand Colors
 const theme = {
@@ -53,7 +57,8 @@ const tabs: Tab[] = [
   { id: 'direction', label: 'Edit Direction', icon: '🎯', implemented: false }
 ];
 
-function App() {
+function AppContent() {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<TabId>('script');
   const [scripts, setScripts] = useState<VideoScript[]>([]);
   const [selectedScript, setSelectedScript] = useState<VideoScript | null>(null);
@@ -149,6 +154,23 @@ function App() {
     loadComponents();
   }, [selectedScript, componentManager]);
 
+  // Show loading screen while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading EAV Orchestrator...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated
+  if (!user) {
+    return <LoginForm />;
+  }
+
   // Component management handlers
   const handleComponentAdd = async (component: Partial<ScriptComponentUI>): Promise<ScriptComponentUI> => {
     if (!selectedScript) {
@@ -165,11 +187,14 @@ function App() {
         component_status: component.status || 'created'
       };
 
+      // Use authenticated user ID for component creation
+      const userId = user.id;
+
       const result = await componentManager.createComponent(
         apiComponent.script_id!,
         apiComponent.content_tiptap,
         apiComponent.content_plain,
-        'demo-user', // In production, this would come from auth context
+        userId,
         apiComponent.position,
         apiComponent.component_status
       );
@@ -298,12 +323,17 @@ function App() {
         padding: '20px 30px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
       }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
-          EAV Orchestrator
-        </h1>
-        <p style={{ fontSize: '14px', opacity: 0.9 }}>
-          Collaborative Video Production System - V2-V8 Workflows
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
+              EAV Orchestrator
+            </h1>
+            <p style={{ fontSize: '14px', opacity: 0.9 }}>
+              Collaborative Video Production System - V2-V8 Workflows
+            </p>
+          </div>
+          <UserMenu />
+        </div>
       </header>
 
       {/* Client Lifecycle Status Banner */}
@@ -796,8 +826,8 @@ function App() {
                           projectId: 'eav-orchestrator-main', // Required for collaboration
                           documentId: selectedScript.id,
                           scriptId: selectedScript.id, // Add scriptId for component creation
-                          userId: 'demo-user',
-                          userName: 'Demo User',
+                          userId: user.id, // Authenticated user
+                          userName: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
                           autoSave: true,
                           autoSaveDelay: 1000
                         }}
@@ -1155,6 +1185,15 @@ const ErrorFallback = ({ error, resetError }: { error: unknown; resetError: () =
       </div>
     </div>
 );
+
+// Main App component with Authentication Provider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
 
 // Wrap App with Sentry Error Boundary for production error monitoring
 const AppWithErrorBoundary = Sentry.withErrorBoundary(App, {
