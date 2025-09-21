@@ -15,8 +15,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/**/*.test.ts tests/**/*.test.tsx src/**/*.test.ts src/**/*.test.tsx --exclude='tests/**/*.feature.test.*' --exclude='tests/**/*.integration.test.*'",
-    "test:feature": "vitest run tests/**/*.feature.test.ts tests/**/*.feature.test.tsx src/**/*.feature.test.ts src/**/*.feature.test.tsx",
-    "test:integration": "vitest run tests/integration/**/*.test.ts tests/integration/**/*.test.tsx src/**/*.integration.test.ts src/**/*.integration.test.tsx",
+    "test:feature": "vitest run tests/**/*.feature.test.ts tests/**/*.feature.test.tsx",
+    "test:integration": "vitest run -c vitest.integration.config.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "validate": "npm run lint && npm run typecheck && npm run test:unit"
