@@ -19,7 +19,7 @@
     "test:all": "NODE_OPTIONS='--max-old-space-size=8192' vitest run",
     "test:watch": "NODE_OPTIONS='--max-old-space-size=8192' vitest",
     "test:coverage": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --coverage",
-    "test:integration": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --config vitest.config.integration.ts",
+    "test:integration": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --config vitest.integration.config.ts",
     "validate": "npm run lint && npm run typecheck && npm run test"
   },
   "repository": {
