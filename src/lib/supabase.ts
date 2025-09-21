@@ -19,6 +19,8 @@
 
 // Context7: consulted for @supabase/supabase-js
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+// Critical-Engineer: Use singleton client to prevent multiple instances
+import { supabase as singletonClient } from './supabaseClient';
 
 // Environment configuration with validation
 // Testable environment access function with new key format support
@@ -51,9 +53,7 @@ const getEnvironmentConfig = () => {
   return { supabaseUrl, supabaseAnonKey };
 };
 
-// Singleton pattern for Supabase client with error boundary
-let supabaseClient: SupabaseClient | null = null;
-let initializationError: Error | null = null;
+// Legacy variables kept for compatibility (now unused - singleton handles this)
 
 /**
  * Get or create Supabase client singleton
@@ -61,37 +61,9 @@ let initializationError: Error | null = null;
  * Circuit breaker integration maintained through CustomSupabaseProvider
  */
 export const getSupabase = (): SupabaseClient | null => {
-  // Return cached error state - don't retry initialization on every call
-  if (initializationError) {
-    return null;
-  }
-
-  if (!supabaseClient) {
-    try {
-      const { supabaseUrl, supabaseAnonKey } = getEnvironmentConfig();
-
-      supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          storageKey: 'eav-orchestrator-auth', // Prevent session conflicts
-        },
-        realtime: {
-          params: {
-            eventsPerSecond: 10, // Match CustomSupabaseProvider configuration
-          },
-        },
-      });
-    } catch (error) {
-      // Cache the initialization error to prevent retry loops
-      initializationError = error instanceof Error ? error : new Error('Supabase initialization failed');
-      console.error('Critical: Supabase client initialization failed:', initializationError);
-      return null;
-    }
-  }
-
-  return supabaseClient;
+  // Critical-Engineer: Use singleton client to prevent multiple GoTrueClient instances
+  // Return the singleton client instead of creating a new one
+  return singletonClient;
 };
 
 // Export alias for compatibility

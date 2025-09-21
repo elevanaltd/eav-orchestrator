@@ -16,6 +16,15 @@ node_modules/
 
 # Testing
 coverage/
+test-results/
+playwright-report/
+
+# Playwright visual test artifacts
+/tests/visual/**/test-results/
+/tests/visual/**/*-actual.png
+/tests/visual/**/*-diff.png
+# But keep the expected baseline images
+!/tests/visual/**/*-expected.png
 
 # Production
 build/

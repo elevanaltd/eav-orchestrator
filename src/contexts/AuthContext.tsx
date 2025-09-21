@@ -39,6 +39,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  console.log('🔐 AuthProvider: Component mounting...');
+
   const [state, setState] = useState<AuthState>({
     user: null,
     role: null,
@@ -46,12 +48,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error: null,
   });
 
+  console.log('🔐 AuthProvider: Initial state set, loading =', state.loading);
+
   // Setup reactive auth subscription - no polling needed
   useEffect(() => {
+    console.log('🔐 AuthProvider: useEffect running - setting up auth subscription...');
+
     // Critical-Engineer: consulted for Authentication strategy and React integration pattern
     // Use reactive onAuthStateChange instead of polling getUser() - fixes hanging issue
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        console.log('🔐 AuthProvider: Auth state change callback fired!', _event, session ? 'session exists' : 'no session');
+
         try {
           if (session?.user?.id) {
             const role = await getUserRole(session.user.id);
@@ -63,6 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               error: null,
             });
           } else {
+            console.log('🔐 AuthProvider: No session - setting unauthenticated state');
             setState({
               user: null,
               role: null,
@@ -82,8 +91,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
+    console.log('🔐 AuthProvider: Auth subscription established, subscription:', subscription);
+
     // Cleanup subscription on unmount - prevents memory leaks
     return () => {
+      console.log('🔐 AuthProvider: Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []); // Empty dependency array - subscription runs once
