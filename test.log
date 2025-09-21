@@ -1,14 +1,29 @@
 
 > build@1.0.0 test
-> NODE_OPTIONS='--max-old-space-size=8192' vitest run --exclude '**/**.feature.test.**'
+> vitest run --exclude '**/**.feature.test.**'
 
 
  RUN  v3.2.4 /Volumes/HestAI-Projects/eav-orchestrator/build
+
+ ✓ tests/repomix-ignore.test.ts (4 tests) 9ms
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should initialize successfully
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
 
 stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should initialize IndexedDB with correct schema
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should initialize Sentry with correct configuration
+Sentry initialized for test environment
+
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should configure performance monitoring with browser tracing
+Sentry initialized for test environment
+
+stdout | tests/unit/monitoring/sentry.test.ts > Sentry Error Monitoring Integration > should handle missing DSN gracefully
+Sentry DSN not configured. Skipping Sentry initialization.
+
+ ✓ tests/unit/types/editor.test.ts (16 tests) 3ms
 stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB Queue Operations > should enqueue operations to IndexedDB
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
@@ -29,6 +44,17 @@ stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > IndexedDB
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should handle basic enqueue operation
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+stdout | tests/unit/database/indexedDBQueue.simple.test.ts > IndexedDBQueue - Simple Tests > should handle basic size operation
+Running schema migrations from version 0 to 1
+Applying schema migration for version 1
+
+ ✓ tests/unit/monitoring/sentry.test.ts (7 tests) 38ms
+ ✓ tests/config.test.ts (12 tests) 3ms
+ ✓ tests/unit/database/indexedDBQueue.simple.test.ts (3 tests) 7ms
 stderr | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Fallback Chain Implementation > should fallback to localStorage when IndexedDB unavailable
 IndexedDB initialization failed, falling back to localStorage: Error: IndexedDB not supported
     at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/database/indexedDBQueue.ts:131:16
@@ -88,6 +114,29 @@ stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Error Han
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
+ ✓ tests/unit/types/scriptComponent.test.ts (13 tests) 3ms
+ ❯ tests/unit/collaboration/encoding.test.ts (17 tests | 4 failed) 7ms
+   ✓ Binary Encoding Utilities > encodeBinaryUpdate > should encode Uint8Array to base64 string 1ms
+   ✓ Binary Encoding Utilities > encodeBinaryUpdate > should handle empty arrays 0ms
+   ✓ Binary Encoding Utilities > encodeBinaryUpdate > should handle large binary data 0ms
+   ✓ Binary Encoding Utilities > encodeBinaryUpdate > should produce deterministic output 0ms
+   ✓ Binary Encoding Utilities > decodeBinaryUpdate > should decode base64 string to Uint8Array 0ms
+   ✓ Binary Encoding Utilities > decodeBinaryUpdate > should handle empty strings 0ms
+   ✓ Binary Encoding Utilities > decodeBinaryUpdate > should roundtrip with encoding 0ms
+   ✓ Binary Encoding Utilities > decodeBinaryUpdate > should throw error for invalid base64 0ms
+   × Binary Encoding Utilities > validateBinaryUpdate > should validate correct Yjs update structure 3ms
+     → expected false to be true // Object.is equality
+   ✓ Binary Encoding Utilities > validateBinaryUpdate > should reject malformed update data 0ms
+   ✓ Binary Encoding Utilities > validateBinaryUpdate > should reject empty updates 0ms
+   ✓ Binary Encoding Utilities > validateBinaryUpdate > should handle maximum size limit 0ms
+   × Binary Encoding Utilities > Yjs Integration > should encode and decode real Yjs updates 0ms
+     → expected '' to be 'Hello Yjs CRDT!' // Object.is equality
+   × Binary Encoding Utilities > Yjs Integration > should preserve CRDT merge semantics 1ms
+     → expected 'User 1 edit' to be 'User 2 edit' // Object.is equality
+   × Binary Encoding Utilities > Yjs Integration > should handle complex document structures 0ms
+     → doc.getArray is not a function
+   ✓ Binary Encoding Utilities > Error Handling > should provide detailed error messages 0ms
+   ✓ Binary Encoding Utilities > Error Handling > should handle null/undefined inputs gracefully 0ms
 stderr | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Error Handling and Resilience > should handle IndexedDB quota exceeded gracefully
 IndexedDB initialization failed, falling back to localStorage: Error: IndexedDB open failed: undefined
     at Object.request.onerror [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/database/indexedDBQueue.ts:144:16[90m)[39m
@@ -114,10 +163,15 @@ stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Performan
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
+ ✓ tests/unit/ordering/fractionalIndex.test.ts (29 tests) 12ms
+ ✓ tests/unit/scripts/test-memory-monitor.test.ts (5 tests) 3ms
+ ✓ src/lib/supabase.test.ts (18 tests | 3 skipped) 7ms
+ ✓ tests/unit/resilience/retryWithBackoff.test.ts (17 tests) 17ms
 stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Performance Requirements > should not block main thread during operations
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
+ ✓ tests/unit/database/scriptComponentManager.test.ts (12 tests) 6ms
 stderr | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Browser Compatibility > should handle private browsing mode gracefully
 IndexedDB initialization failed, falling back to localStorage: Error: IndexedDB open failed: undefined
     at Object.request.onerror [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/lib/database/indexedDBQueue.ts:144:16[90m)[39m
@@ -166,33 +220,261 @@ stdout | tests/unit/database/indexedDBQueue.test.ts > IndexedDBQueue > Schema Ve
 Running schema migrations from version 0 to 1
 Applying schema migration for version 1
 
- ✓ tests/unit/database/indexedDBQueue.test.ts (26 tests | 2 skipped) 45ms
- ✓ tests/unit/ordering/fractionalIndex.test.ts (29 tests) 11ms
- ✓ tests/repomix-ignore.test.ts (4 tests) 7ms
- ✓ src/lib/supabase.test.ts (18 tests | 3 skipped) 4ms
- ✓ tests/unit/resilience/retryWithBackoff.test.ts (17 tests) 3ms
- ✓ tests/unit/database/scriptComponentManager.test.ts (12 tests) 2ms
- ✓ tests/unit/collaboration/encoding.test.ts (17 tests) 1ms
- ✓ tests/unit/types/editor.test.ts (16 tests) 1ms
- ✓ tests/unit/types/scriptComponent.test.ts (13 tests) 1ms
-⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+ ✓ tests/unit/database/indexedDBQueue.test.ts (26 tests | 2 skipped) 170ms
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should process multi-paragraph paste and create multiple components
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
 
-Vitest caught 1 unhandled error during the test run.
-This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should respect the 18 component limit when pasting multiple paragraphs
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
 
-⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
-Error: Worker terminated due to reaching memory limit: JS heap out of memory
- ❯ [kOnExit] node:internal/worker:315:26
- ❯ Worker.<computed>.onexit node:internal/worker:231:20
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle single paragraph paste normally (no component creation)
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
-Serialized Error: { code: 'ERR_WORKER_OUT_OF_MEMORY' }
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle empty paste content gracefully
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+stdout | tests/unit/components/ScriptEditor.paste.test.tsx > ScriptEditor Multi-Paragraph Paste > should handle paste when onComponentAdd is not provided
+ScriptEditor: useEffect mount - provider exists: [33mfalse[39m initializing: [33mfalse[39m
+ScriptEditor: Skipping initialization - missing config
+
+ ✓ tests/unit/components/ScriptEditor.paste.test.tsx (5 tests) 35ms
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project code and title correctly
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project code and title correctly
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays client information when available
+Failed to load scripts: TypeError: componentManager.getAllScripts is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:93:47[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:129:5
+    at Object.react_stack_bottom_frame [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:23953:20[90m)[39m
+    at runWithFiberInDEV [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:1522:13[90m)[39m
+    at commitHookEffectListMount [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:11905:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:12028:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13841:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13957:11[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays client information when available
+An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays client information when available
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/api/version.test.ts (5 tests) 2ms
+ ✓ tests/unit/types/ui/scriptComponent.test.ts (6 tests) 2ms
+ ✓ tests/build-system.test.ts (8 tests) 2ms
+ ✓ tests/unit/transformers.test.ts (4 tests) 2ms
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project phase badge when available
+Failed to load scripts: TypeError: componentManager.getAllScripts is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:93:47[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:129:5
+    at Object.react_stack_bottom_frame [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:23953:20[90m)[39m
+    at runWithFiberInDEV [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:1522:13[90m)[39m
+    at commitHookEffectListMount [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:11905:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:12028:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13841:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13957:11[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project phase badge when available
+An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays project phase badge when available
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/assets.test.ts (3 tests) 2ms
+ ✓ tests/unit/api/transformers.test.ts (4 tests) 2ms
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays script editor version info
+Failed to load scripts: TypeError: componentManager.getAllScripts is not a function
+    at loadScripts [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:93:47[90m)[39m
+    at [90m/Volumes/HestAI-Projects/eav-orchestrator/build/[39msrc/App.tsx:129:5
+    at Object.react_stack_bottom_frame [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:23953:20[90m)[39m
+    at runWithFiberInDEV [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:1522:13[90m)[39m
+    at commitHookEffectListMount [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:11905:29[90m)[39m
+    at commitHookPassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:12028:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13841:13[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+    at commitPassiveMountOnFiber [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13957:11[90m)[39m
+    at recursivelyTraversePassiveMountEffects [90m(/Volumes/HestAI-Projects/eav-orchestrator/build/[39mnode_modules/[4mreact-dom[24m/cjs/react-dom-client.development.js:13815:11[90m)[39m
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays script editor version info
+An update to AuthProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/unit/components/ProjectHeader.test.tsx > Project Header > displays script editor version info
+An update to AppContent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ tests/unit/components/ProjectHeader.test.tsx (4 tests) 207ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/collaboration/encoding.test.ts > Binary Encoding Utilities > validateBinaryUpdate > should validate correct Yjs update structure
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/unit/collaboration/encoding.test.ts:104:23
+    102|       const isValid = validateBinaryUpdate(validUpdate);
+    103|       
+    104|       expect(isValid).toBe(true);
+       |                       ^
+    105|     });
+    106| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/unit/collaboration/encoding.test.ts > Binary Encoding Utilities > Yjs Integration > should encode and decode real Yjs updates
+AssertionError: expected '' to be 'Hello Yjs CRDT!' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Hello Yjs CRDT![39m
+
+ ❯ tests/unit/collaboration/encoding.test.ts:151:50
+    149|       
+    150|       // Verify synchronization
+    151|       expect(doc2.getText('content').toString()).toBe('Hello Yjs CRDT!…
+       |                                                  ^
+    152|     });
+    153| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/unit/collaboration/encoding.test.ts > Binary Encoding Utilities > Yjs Integration > should preserve CRDT merge semantics
+AssertionError: expected 'User 1 edit' to be 'User 2 edit' // Object.is equality
+
+Expected: [32m"User [7m2[27m edit"[39m
+Received: [31m"User [7m1[27m edit"[39m
+
+ ❯ tests/unit/collaboration/encoding.test.ts:174:50
+    172|       
+    173|       // Both documents should converge to same state
+    174|       expect(doc1.getText('content').toString()).toBe(doc2.getText('co…
+       |                                                  ^
+    175|     });
+    176| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/unit/collaboration/encoding.test.ts > Binary Encoding Utilities > Yjs Integration > should handle complex document structures
+TypeError: doc.getArray is not a function
+ ❯ tests/unit/collaboration/encoding.test.ts:181:26
+    179|       
+    180|       // Create complex nested structure
+    181|       const yarray = doc.getArray('items');
+       |                          ^
+    182|       const ymap = doc.getMap('metadata');
+    183|       const ytext = doc.getText('content');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
 
 
- Test Files  9 passed (22)
-      Tests  147 passed | 5 skipped (158)
-     Errors  1 error
-   Start at  09:51:30
-   Duration  36.41s (transform 112ms, setup 82ms, collect 114ms, tests 74ms, environment 159ms, prepare 24ms)
+ Test Files  1 failed | 20 passed (21)
+      Tests  4 failed | 209 passed | 5 skipped (218)
+   Start at  10:58:22
+   Duration  1.16s (transform 515ms, setup 1.96s, collect 1.13s, tests 540ms, environment 5.28s, prepare 746ms)
 

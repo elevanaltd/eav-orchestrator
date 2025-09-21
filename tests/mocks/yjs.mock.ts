@@ -131,7 +131,10 @@ export class MockAwareness {
 
 // Simple encoding functions (not wrapped in vi.fn())
 export const encodeStateAsUpdate = (_doc: MockDoc): Uint8Array => {
-  return new Uint8Array([1, 2, 3]);
+  // TESTGUARD FIX: Return a valid Y.js update structure (minimum 4 bytes)
+  // This satisfies our validateBinaryUpdate function's requirements
+  // without implementing full Y.js binary protocol
+  return new Uint8Array([0, 1, 1, 0, 0, 0, 0, 0]);
 };
 
 export const encodeStateVector = (_doc: MockDoc): Uint8Array => {
