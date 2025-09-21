@@ -152,18 +152,30 @@ export const auth = {
   },
 
   async getUser() {
+    // Critical-Engineer: consulted for Authentication hanging issue and diagnostic strategy
+    // NOTE: This method is legacy - use reactive onAuthStateChange in React components
+
     const client = getSupabase();
     if (!client) {
       throw new Error('Supabase client not available - system configuration error');
     }
 
-    const { data, error } = await client.auth.getUser();
+    try {
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
 
-    if (error) {
+      if (sessionError) {
+        return null;
+      }
+
+      if (!sessionData.session) {
+        return null;
+      }
+
+      return sessionData.session.user;
+    } catch (error) {
+      console.error('auth.getUser(): Session check failed:', error);
       throw error;
     }
-
-    return data.user;
   },
 
   async getSession() {

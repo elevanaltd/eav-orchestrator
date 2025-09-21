@@ -13,6 +13,8 @@
 
 import React, { createContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
+// Critical-Engineer: consulted for Authentication strategy and React integration pattern
+import { supabase } from '../lib/supabaseClient'; // Use singleton client
 import { auth, getUserRole, type UserRole } from '../lib/supabase';
 
 interface AuthState {
@@ -44,78 +46,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error: null,
   });
 
-  // Initialize auth state and setup listener
+  // Setup reactive auth subscription - no polling needed
   useEffect(() => {
-    let mounted = true;
+    // Critical-Engineer: consulted for Authentication strategy and React integration pattern
+    // Use reactive onAuthStateChange instead of polling getUser() - fixes hanging issue
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        try {
+          if (session?.user?.id) {
+            // TODO: Re-enable getUserRole after fixing core auth flow
+            // const role = await getUserRole(session.user.id);
 
-    const initializeAuth = async () => {
-      try {
-        // Get initial session from Supabase
-        const user = await auth.getUser();
-
-        if (!mounted) return;
-
-        if (user) {
-          // Fetch user role with fail-closed error handling
-          const role = await getUserRole(user.id);
-          setState({
-            user,
-            role,
-            loading: false,
-            error: null,
-          });
-        } else {
+            setState({
+              user: session.user as User,
+              role: null, // Temporarily skip role lookup
+              loading: false,
+              error: null,
+            });
+          } else {
+            setState({
+              user: null,
+              role: null,
+              loading: false,
+              error: null,
+            });
+          }
+        } catch (error) {
+          console.error('AuthContext: Authentication error:', error);
           setState({
             user: null,
             role: null,
             loading: false,
-            error: null,
+            error: error instanceof Error ? error.message : 'Authentication failed',
           });
         }
-      } catch (error) {
-        if (!mounted) return;
-
-        console.error('Auth initialization failed:', error);
-        setState({
-          user: null,
-          role: null,
-          loading: false,
-          error: 'Authentication initialization failed',
-        });
       }
-    };
+    );
 
-    // Setup auth state change listener
-    const { data: { subscription } } = auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return;
-
-      if (session?.user?.id) {
-        // User signed in - fetch role and convert to proper User type
-        const role = await getUserRole(session.user.id);
-        setState({
-          user: session.user as User,
-          role,
-          loading: false,
-          error: null,
-        });
-      } else {
-        // User signed out
-        setState({
-          user: null,
-          role: null,
-          loading: false,
-          error: null,
-        });
-      }
-    });
-
-    initializeAuth();
-
+    // Cleanup subscription on unmount - prevents memory leaks
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Empty dependency array - subscription runs once
 
   const signIn = async (email: string, password: string): Promise<void> => {
     try {
