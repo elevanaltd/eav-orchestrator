@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Critical-Engineer: consulted for Authentication strategy and React integration pattern
     // Use reactive onAuthStateChange instead of polling getUser() - fixes hanging issue
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         try {
           if (session?.user?.id) {
             const role = await getUserRole(session.user.id);
