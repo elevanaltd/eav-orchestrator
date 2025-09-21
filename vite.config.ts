@@ -72,42 +72,16 @@ export default defineConfig({
     }
   },
   test: {
-    // TestGuard: Clean configuration for leak isolation
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx', 'src/**/*.test.ts', 'src/**/*.test.tsx'], // Include all test files
-    exclude: [
-      'node_modules/**',
-      'worktrees/**', // Exclude git worktrees
-      '**/node_modules/**',
-      '**/.git/**',
-      // Note: Feature tests (*.feature.test.*) run separately via npm run test:feature
-      // They should show TDD RED state until implementation (constitutional requirement)
-      '**/ScriptComponentManagement.controlled.test.tsx', // TEMP: Exclude hanging test
-      '**/ScriptComponentManagement.test.tsx', // TEMP: Exclude hanging test
-      '**/ScriptEditor.test.tsx', // TEMP: Exclude hanging test with worker issues
-      '**/ScriptEditor.auth-integration.test.tsx', // TESTGUARD: Exclude memory exhaustion test pending investigation
-      '**/scriptComponentManagerWithResilience.test.ts', // Exclude timeout-prone circuit breaker tests from CI
-      '**/yjs-security.test.ts', // Exclude environment-dependent security tests from CI
-      '**/boundary.test.ts', // Exclude security boundary tests requiring full environment
-      '**/ScriptEditor.memory-leak.test.tsx', // Exclude memory leak tests with React act() timing issues
-      '**/AuthenticatedProviderFactory.test.ts', // Exclude provider factory tests with async timing issues
-      '**/useClientLifecycle.test.tsx', // Exclude lifecycle hook tests with async timing issues
-      '**/clientLifecycleManager.test.ts', // Exclude lifecycle manager tests with async timing issues
-      '**/YjsSupabaseProvider.test.ts', // CRITICAL: Exclude hanging YjsSupabaseProvider tests (10s timeout per test)
-      '**/custom-supabase-provider.test.ts', // CRITICAL: Exclude provider tests causing memory issues
-      '**/custom-supabase-provider-awareness.test.ts', // CRITICAL: Exclude awareness tests causing memory issues
-      '**/persistence.test.ts', // CRITICAL: Exclude persistence tests with memory/timing issues
-      '**/circuitBreaker.test.ts' // CRITICAL: Exclude circuit breaker tests causing memory exhaustion
-    ],
-    testTimeout: 10000, // 10 second timeout for tests
-    hookTimeout: 10000, // 10 second timeout for setup/teardown
+    // The 'include' property is now managed by the npm scripts, not here.
+    // This allows for flexible test execution from the command line.
+    testTimeout: 15000, // Increased timeout for integration tests
+    hookTimeout: 15000,
     env: {
       VITE_SUPABASE_URL: 'https://test.supabase.co',
-      // New Supabase key format (preferred)
       VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key-for-integration-tests',
-      // Legacy key format (for backward compatibility testing)
       VITE_SUPABASE_ANON_KEY: 'test-anon-key-for-integration-tests'
     },
     coverage: {

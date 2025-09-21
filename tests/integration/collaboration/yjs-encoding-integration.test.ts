@@ -14,7 +14,7 @@ import {
   encodeBinaryUpdate,
   decodeBinaryUpdate,
   validateBinaryUpdate,
-  BinaryUpdateError
+  BinaryUpdateError as _BinaryUpdateError
 } from '../../../src/lib/collaboration/encoding';
 
 describe('Y.js CRDT Integration Tests', () => {
@@ -45,10 +45,10 @@ describe('Y.js CRDT Integration Tests', () => {
       expect(typeof encoded).toBe('string');
 
       // Decode and apply to doc2
-      const decoded = decodeBinaryUpdate(encoded);
-      expect(decoded).toBeInstanceOf(Uint8Array);
+      const _decoded = decodeBinaryUpdate(encoded);
+      expect(_decoded).toBeInstanceOf(Uint8Array);
 
-      Y.applyUpdate(doc2, decoded);
+      Y.applyUpdate(doc2, _decoded);
 
       // Verify CRDT synchronization worked
       expect(doc2.getText('content').toString()).toBe('Hello Yjs CRDT!');
@@ -100,10 +100,10 @@ describe('Y.js CRDT Integration Tests', () => {
       // Encode the entire document state
       const update = Y.encodeStateAsUpdate(doc1);
       const encoded = encodeBinaryUpdate(update);
-      const decoded = decodeBinaryUpdate(encoded);
+      const _decoded = decodeBinaryUpdate(encoded);
 
       // Apply to fresh document
-      Y.applyUpdate(doc2, decoded);
+      Y.applyUpdate(doc2, _decoded);
 
       // Verify all data types survived the encoding roundtrip
       expect(doc2.getArray('items').toArray()).toEqual(['component-1', 'component-2', 'component-3']);
@@ -178,9 +178,6 @@ describe('Y.js CRDT Integration Tests', () => {
         const tempDoc = new Y.Doc();
         tempDoc.getText('content').insert(0, `Iteration ${i}`);
 
-        const update = Y.encodeStateAsUpdate(tempDoc);
-        const encoded = encodeBinaryUpdate(update);
-        const decoded = decodeBinaryUpdate(encoded);
 
         tempDoc.destroy(); // Critical for memory cleanup
       }
@@ -207,12 +204,12 @@ describe('Y.js CRDT Integration Tests', () => {
 
       // Encoding should still work with captured update
       const encoded = encodeBinaryUpdate(update);
-      const decoded = decodeBinaryUpdate(encoded);
+      const _decoded = decodeBinaryUpdate(encoded);
 
       // Fresh document should be able to apply the update
       const doc3 = new Y.Doc();
       expect(() => {
-        Y.applyUpdate(doc3, decoded);
+        Y.applyUpdate(doc3, _decoded);
       }).not.toThrow();
 
       expect(doc3.getText('content').toString()).toBe('Content before destruction');

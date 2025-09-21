@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "**Collaborative Video Production System**",
   "main": "index.js",
-  "_approval_token": "CRITICAL-ENGINEER-20250920-fce00a54",
+  "_approval_token": "TECHNICAL-ARCHITECT-20250921-7222b87b",
   "directories": {
     "doc": "docs",
     "test": "tests"
@@ -13,14 +13,13 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --exclude '**/**.feature.test.**'",
-    "test:feature": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --config vite.feature.config.ts",
-    "test:red": "NODE_OPTIONS='--max-old-space-size=8192' vitest run tests/unit/components/*.feature.test.*",
-    "test:all": "NODE_OPTIONS='--max-old-space-size=8192' vitest run",
-    "test:watch": "NODE_OPTIONS='--max-old-space-size=8192' vitest",
-    "test:coverage": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --coverage",
-    "test:integration": "NODE_OPTIONS='--max-old-space-size=8192' vitest run --config vitest.integration.config.ts",
-    "validate": "npm run lint && npm run typecheck && npm run test"
+    "test": "vitest run",
+    "test:unit": "vitest run tests/**/*.test.ts tests/**/*.test.tsx src/**/*.test.ts src/**/*.test.tsx --exclude='tests/**/*.feature.test.*' --exclude='tests/**/*.integration.test.*'",
+    "test:feature": "vitest run tests/**/*.feature.test.ts tests/**/*.feature.test.tsx src/**/*.feature.test.ts src/**/*.feature.test.tsx",
+    "test:integration": "vitest run tests/integration/**/*.test.ts tests/integration/**/*.test.tsx src/**/*.integration.test.ts src/**/*.integration.test.tsx",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate": "npm run lint && npm run typecheck && npm run test:unit"
   },
   "repository": {
     "type": "git",
