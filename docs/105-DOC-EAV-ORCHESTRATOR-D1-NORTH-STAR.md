@@ -130,9 +130,10 @@ Viewer: Read-only access for stakeholders
 ```yaml
 Database: PostgreSQL with JSONB for rich content
 Authentication: Supabase with 5-role RLS system
-Real-time: Supabase Realtime for collaboration
-Rich_Text: TipTap editor with JSON storage + plain text projections
-Change_Detection: Semantic hashing for content versioning
+  Real-time: Supabase Realtime for collaboration
+    - The definitive architecture is documented in `203-DOC-ARCHITECTURE-YJS-SUPABASE-COLLABORATION.md`.
+  Rich_Text: TipTap editor with JSON storage + plain text projections
+  Change_Detection: Semantic hashing for content versioning
 ```
 
 ### Supabase Infrastructure Requirements
