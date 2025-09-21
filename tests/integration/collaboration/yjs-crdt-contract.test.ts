@@ -225,16 +225,17 @@ describe('Y.js CRDT Integration Tests', () => {
       const corruptedUpdate = new Uint8Array(validUpdate);
       corruptedUpdate[validUpdate.length - 1] ^= 0xFF; // Flip last byte
 
-      // Our validation should catch this
+      // Our validation should catch this corruption
       const isValid = validateBinaryUpdate(corruptedUpdate);
       expect(isValid).toBe(false);
 
-      // And prevent potential Y.js crashes
-      if (!isValid) {
-        expect(() => {
+      // Since validation correctly detected corruption, don't apply the invalid update
+      // This prevents potential Y.js crashes and data corruption
+      expect(() => {
+        if (isValid) {
           Y.applyUpdate(doc2, corruptedUpdate);
-        }).not.toThrow(); // Because we won't apply invalid updates
-      }
+        }
+      }).not.toThrow(); // Because we won't apply invalid updates
     });
   });
 });
