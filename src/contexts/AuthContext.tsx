@@ -54,24 +54,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('🔐 AuthProvider: useEffect running - setting up auth subscription...');
 
-    // Critical-Engineer: consulted for Authentication strategy and React integration pattern
-    // Use reactive onAuthStateChange instead of polling getUser() - fixes hanging issue
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        console.log('🔐 AuthProvider: Auth state change callback fired!', _event, session ? 'session exists' : 'no session');
+    let mounted = true; // Track if component is still mounted
 
-        try {
-          if (session?.user?.id) {
-            const role = await getUserRole(session.user.id);
+    // Handle auth state updates
+    const handleAuthChange = async (session: any) => {
+      if (!mounted) return; // Prevent updates after unmount
 
+      try {
+        if (session?.user?.id) {
+          console.log('🔐 AuthProvider: Session exists, fetching user role...');
+
+          // Add timeout to getUserRole to prevent hanging
+          const rolePromise = getUserRole(session.user.id);
+          const timeoutPromise = new Promise<null>((resolve) => {
+            setTimeout(() => {
+              console.warn('🔐 AuthProvider: getUserRole timed out, proceeding without role');
+              resolve(null);
+            }, 2000);
+          });
+
+          const role = await Promise.race([rolePromise, timeoutPromise]);
+          console.log('🔐 AuthProvider: User role fetched:', role);
+
+          if (mounted) {
             setState({
               user: session.user as User,
               role,
               loading: false,
               error: null,
             });
-          } else {
-            console.log('🔐 AuthProvider: No session - setting unauthenticated state');
+            console.log('🔐 AuthProvider: State updated with authenticated user');
+          }
+        } else {
+          console.log('🔐 AuthProvider: No session - setting unauthenticated state');
+          if (mounted) {
             setState({
               user: null,
               role: null,
@@ -79,8 +95,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               error: null,
             });
           }
-        } catch (error) {
-          console.error('AuthContext: Authentication error:', error);
+        }
+      } catch (error) {
+        console.error('AuthContext: Authentication error:', error);
+        if (mounted) {
           setState({
             user: null,
             role: null,
@@ -89,6 +107,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           });
         }
       }
+    };
+
+    // Skip initial session check - let onAuthStateChange handle it
+    // This prevents the hanging issue with getSession()
+    console.log('🔐 AuthProvider: Skipping initial session check, waiting for auth state change...');
+
+    // Set to not loading after a delay ONLY if we haven't received auth state
+    let authStateReceived = false;
+
+    const fallbackTimer = setTimeout(() => {
+      if (mounted && state.loading && !authStateReceived) {
+        console.log('🔐 AuthProvider: No auth state received, setting to unauthenticated');
+        setState({
+          user: null,
+          role: null,
+          loading: false,
+          error: null,
+        });
+      }
+    }, 1000); // Give onAuthStateChange a second to fire
+
+    // Critical-Engineer: consulted for Authentication strategy and React integration pattern
+    // Use reactive onAuthStateChange for subsequent changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        console.log('🔐 AuthProvider: Auth state change callback fired!', _event, session ? 'session exists' : 'no session');
+        authStateReceived = true; // Mark that we've received auth state
+        await handleAuthChange(session);
+      }
     );
 
     console.log('🔐 AuthProvider: Auth subscription established, subscription:', subscription);
@@ -96,6 +143,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Cleanup subscription on unmount - prevents memory leaks
     return () => {
       console.log('🔐 AuthProvider: Cleaning up auth subscription');
+      mounted = false;
+      clearTimeout(fallbackTimer); // Clear the fallback timer
       subscription.unsubscribe();
     };
   }, []); // Empty dependency array - subscription runs once

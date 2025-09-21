@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { injectAxe, checkA11y } from '@axe-core/playwright';
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Homepage Visual Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await injectAxe(page);
   });
 
   test('homepage loads with correct layout', async ({ page }) => {
@@ -47,12 +46,10 @@ test.describe('Homepage Visual Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // Run accessibility checks
-    await checkA11y(page, undefined, {
-      detailedReport: true,
-      detailedReportOptions: {
-        html: true,
-      },
-    });
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    // Check for violations
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 
   test('responsive behavior - mobile', async ({ page }) => {
