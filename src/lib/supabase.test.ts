@@ -165,8 +165,9 @@ describe('Supabase Client Configuration', () => {
     describe('getUser', () => {
       it('should return current user', async () => {
         const mockUser = { id: 'user-789', email: 'current@example.com' };
-        mockSupabaseClient.auth.getUser.mockResolvedValue({
-          data: { user: mockUser },
+        // Mock getSession since getUser() now calls getSession() internally
+        mockSupabaseClient.auth.getSession.mockResolvedValue({
+          data: { session: { user: mockUser } },
           error: null,
         });
 
