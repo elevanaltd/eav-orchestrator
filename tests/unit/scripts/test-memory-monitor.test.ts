@@ -1,7 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 // Context7: consulted for vitest
-import { execSync } from 'child_process'
-// Context7: consulted for child_process
 import fs from 'fs'
 // Context7: consulted for fs
 import path from 'path'
