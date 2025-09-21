@@ -76,27 +76,28 @@ export function validateBinaryUpdate(data: unknown): boolean {
   if (!(data instanceof Uint8Array)) {
     return false;
   }
-  
+
   // Empty updates are invalid
   if (data.length === 0) {
     return false;
   }
-  
+
   // Size limit validation (1MB maximum as per tests)
   const maxSize = 1024 * 1024; // 1MB
   if (data.length > maxSize) {
     return false;
   }
-  
+
   // Basic Y.js update structure validation
-  // Y.js updates have a specific binary format structure
   // A valid update should have at least a minimal header (typically 4+ bytes)
   if (data.length < 4) {
     return false;
   }
-  
-  // For now, accept any Uint8Array that meets basic criteria
-  // More sophisticated Y.js format validation could be added here
-  // This implementation focuses on transport-level validation
+
+  // A very basic heuristic: a valid Y.js update often starts with 0 or 1.
+  if (data[0] > 1) {
+      return false;
+  }
+
   return true;
 }
