@@ -8,7 +8,9 @@
  * Critical-engineer: consulted for standard RLS policy integration
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+// Context7: consulted for vitest
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// Context7: consulted for yjs
 import * as Y from 'yjs';
 
 // This import will FAIL until CustomSupabaseProvider is implemented
@@ -26,12 +28,28 @@ describe('CustomSupabaseProvider Integration', () => {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: null, error: null })
+            single: vi.fn().mockResolvedValue({ data: null, error: null }),
+            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null })
           })
         }),
         upsert: vi.fn().mockResolvedValue({ error: null })
       })
     };
+  });
+
+  afterEach(() => {
+    // TESTGUARD MEMORY FIX: Critical cleanup to prevent memory exhaustion
+    // 1. Destroy Y.Doc to free CRDT memory
+    if (ydoc) {
+      ydoc.destroy();
+      ydoc = null as any;
+    }
+
+    // 2. Restore all mocks to prevent accumulation
+    vi.restoreAllMocks();
+
+    // 3. Clear any timers that might be lingering
+    vi.clearAllTimers();
   });
 
   it('should successfully import CustomSupabaseProvider', async () => {

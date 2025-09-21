@@ -7,50 +7,76 @@
 // Context7: consulted for vitest
 import { describe, it, expect, vi } from 'vitest';
 // Context7: consulted for @testing-library/react
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ScriptEditor } from '../../../src/components/editor/ScriptEditor';
-import type { ScriptComponent } from '../../../src/types/editor';
+import type { ScriptComponentUI } from '../../../src/types/editor';
 
 describe('Script Component Management - V2 Requirements', () => {
   // Test setup helper - not weakening tests, just providing required props
-  const setup = (props = {}) => {
-    const defaultProps = {
+  const setup = (props: any = {}) => {
+    const defaultProps: any = {
       config: { documentId: 'doc-123', userName: 'test-user', userId: 'user-123' },
-      components: [],
       onComponentAdd: vi.fn(),
       onComponentUpdate: vi.fn(),
       onComponentDelete: vi.fn(),
-      onComponentReorder: vi.fn(),
-      ...props
+      onComponentReorder: vi.fn()
     };
+
+    // Better prop merging - only include components if explicitly provided
+    Object.keys(props).forEach(key => {
+      if (key !== 'components' || props.components !== undefined) {
+        defaultProps[key] = props[key];
+      }
+    });
+
     return render(<ScriptEditor {...defaultProps} />);
   };
 
   describe('Component Creation', () => {
     it('should create a new component when Add Component button is clicked', async () => {
       // RED STATE: This test MUST fail - Add Component button doesn't exist
-      const mockOnComponentAdd = vi.fn().mockResolvedValue({
-        id: 'comp-123',
-        scriptId: 'script-456',
-        content: { type: 'doc', content: [] },
-        plainText: '',
-        position: 1.0,
-        status: 'created',
-        version: 1,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        lastEditedBy: 'user-123'
-      } as ScriptComponent);
+      const TestWrapper = () => {
+        const [components, setComponents] = React.useState<ScriptComponentUI[]>([]);
 
-      setup({ onComponentAdd: mockOnComponentAdd });
+        const handleComponentAdd = async (_component: Partial<ScriptComponentUI>): Promise<ScriptComponentUI> => {
+          const newComponent: ScriptComponentUI = {
+            componentId: 'comp-123',
+            scriptId: 'script-456',
+            content: { type: 'doc', content: [] },
+            plainText: '',
+            position: 1.0,
+            status: 'created',
+            type: 'standard',
+            version: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            lastEditedBy: 'user-123',
+            lastEditedAt: new Date().toISOString()
+          };
+
+          // Update state to make component appear in list
+          setComponents(prev => [...prev, newComponent]);
+          return newComponent;
+        };
+
+        return (
+          <ScriptEditor
+            config={{ documentId: 'doc-123', userName: 'test-user', userId: 'user-123' }}
+            components={components}
+            onComponentAdd={handleComponentAdd}
+            onComponentUpdate={vi.fn()}
+            onComponentDelete={vi.fn()}
+            onComponentReorder={vi.fn()}
+          />
+        );
+      };
+
+      render(<TestWrapper />);
 
       // This will fail - button doesn't exist
       const addButton = screen.getByRole('button', { name: /add component/i });
       fireEvent.click(addButton);
-
-      await waitFor(() => {
-        expect(mockOnComponentAdd).toHaveBeenCalled();
-      });
 
       // Verify component appears in list (will fail)
       await waitFor(() => {
@@ -60,42 +86,48 @@ describe('Script Component Management - V2 Requirements', () => {
 
     it('should display a list of existing components', () => {
       // RED STATE: Component list UI doesn't exist
-      const mockComponents: ScriptComponent[] = [
+      const mockComponents: ScriptComponentUI[] = [
         {
-          id: 'comp-1',
+          componentId: 'comp-1',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Introduction' }] }] },
           plainText: 'Introduction',
           position: 1.0,
           status: 'created',
+          type: 'standard',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         },
         {
-          id: 'comp-2',
+          componentId: 'comp-2',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Operations' }] }] },
           plainText: 'Operations',
           position: 2.0,
           status: 'created',
+          type: 'standard',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         },
         {
-          id: 'comp-3',
+          componentId: 'comp-3',
           scriptId: 'script-456',
           content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Maintenance' }] }] },
           plainText: 'Maintenance',
           position: 3.0,
           status: 'created',
+          type: 'standard',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         }
       ];
 
@@ -114,17 +146,19 @@ describe('Script Component Management - V2 Requirements', () => {
     it('should allow editing a component when clicked', async () => {
       // RED STATE: Component editing doesn't exist
       const mockOnComponentUpdate = vi.fn();
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Original content' }] }] },
         plainText: 'Original content',
         position: 1.0,
         status: 'created',
+        type: 'standard',
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z'
       };
 
       setup({
@@ -145,17 +179,19 @@ describe('Script Component Management - V2 Requirements', () => {
     it('should delete a component when delete button is clicked', async () => {
       // RED STATE: Component deletion doesn't exist
       const mockOnComponentDelete = vi.fn();
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: '',
         position: 1.0,
         status: 'created',
+        type: 'standard',
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z'
       };
 
       setup({
@@ -179,30 +215,34 @@ describe('Script Component Management - V2 Requirements', () => {
     it('should support drag-and-drop reordering of components', async () => {
       // RED STATE: Drag and drop doesn't exist
       const mockOnComponentReorder = vi.fn();
-      const mockComponents: ScriptComponent[] = [
+      const mockComponents: ScriptComponentUI[] = [
         {
-          id: 'comp-1',
+          componentId: 'comp-1',
           scriptId: 'script-456',
           content: { type: 'doc', content: [] },
           plainText: 'Component 1',
           position: 1.0,
           status: 'created',
+          type: 'standard',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         },
         {
-          id: 'comp-2',
+          componentId: 'comp-2',
           scriptId: 'script-456',
           content: { type: 'doc', content: [] },
           plainText: 'Component 2',
           position: 2.0,
           status: 'created',
+          type: 'standard',
           version: 1,
           createdAt: '2025-01-15T00:00:00Z',
           updatedAt: '2025-01-15T00:00:00Z',
-          lastEditedBy: 'user-123'
+          lastEditedBy: 'user-123',
+          lastEditedAt: '2025-01-15T00:00:00Z'
         }
       ];
 
@@ -228,16 +268,18 @@ describe('Script Component Management - V2 Requirements', () => {
     it('should limit components to 18 maximum', async () => {
       // RED STATE: Component limit logic doesn't exist
       const mockComponents = Array.from({ length: 18 }, (_, i) => ({
-        id: `comp-${i + 1}`,
+        componentId: `comp-${i + 1}`,
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: `Component ${i + 1}`,
         position: i + 1,
         status: 'created' as const,
+        type: 'standard',
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z'
       }));
 
       setup({ components: mockComponents });
@@ -256,17 +298,19 @@ describe('Script Component Management - V2 Requirements', () => {
       // RED STATE: Auto-save doesn't exist
       const mockOnComponentUpdate = vi.fn();
 
-      const mockComponent: ScriptComponent = {
-        id: 'comp-1',
+      const mockComponent: ScriptComponentUI = {
+        componentId: 'comp-1',
         scriptId: 'script-456',
         content: { type: 'doc', content: [] },
         plainText: '',
         position: 1.0,
         status: 'created',
+        type: 'standard',
         version: 1,
         createdAt: '2025-01-15T00:00:00Z',
         updatedAt: '2025-01-15T00:00:00Z',
-        lastEditedBy: 'user-123'
+        lastEditedBy: 'user-123',
+        lastEditedAt: '2025-01-15T00:00:00Z'
       };
 
       setup({

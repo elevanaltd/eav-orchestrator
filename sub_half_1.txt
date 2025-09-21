@@ -1,0 +1,10 @@
+src/components/editor/ScriptEditor.auth-integration.test.tsx
+src/lib/collaboration/AuthenticatedProviderFactory.test.ts
+src/lib/supabase.test.ts
+tests/build-system.test.ts
+tests/config.test.ts
+tests/repomix-ignore.test.ts
+tests/security/boundary.test.ts
+tests/unit/api/transformers.test.ts
+tests/unit/api/version.test.ts
+tests/unit/assets.test.ts

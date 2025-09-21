@@ -21,7 +21,9 @@ import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
 
 import { ScriptEditorProps, EditorState, SaveStatus } from '../../types/editor';
-import { YjsSupabaseProvider } from '../../lib/collaboration/YjsSupabaseProvider';
+import type { ScriptComponentUI } from '../../types/editor';
+import { AuthenticatedProviderFactory } from '../../lib/collaboration/AuthenticatedProviderFactory';
+import { CustomSupabaseProvider } from '../../lib/collaboration/custom-supabase-provider';
 import { processTipTapContent } from '../../lib/content/content-processor';
 
 export const ScriptEditor: React.FC<ScriptEditorProps> = ({
@@ -32,6 +34,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   initialContent,
   activeUsers = [],
   onContentChange,
+  onComponentAdd,
+  onComponentUpdate,
+  onComponentDelete,
+  onComponentReorder,
   onSave,
   onError,
   className = ''
@@ -67,35 +73,163 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     retryCount: 0
   });
 
-  const [collaborationProvider] = useState<YjsSupabaseProvider | null>(null);
+  const [collaborationProvider, setCollaborationProvider] = useState<CustomSupabaseProvider | null>(null);
+  const [editingComponentId, setEditingComponentId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState<string>('');
+  const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
+
+  // Optimistic UI state for components (combines props + locally added components)
+  const [optimisticComponents, setOptimisticComponents] = useState<ScriptComponentUI[]>([]);
 
   // Auto-save timer ref to prevent memory leak
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Create or use existing Y.js document
-  const yDoc = useMemo(() => ydoc || new Y.Doc(), [ydoc]);
+  // Provider initialization ref to prevent double-initialization in StrictMode
+  const providerInitRef = useRef<boolean>(false);
+  const providerCleanupRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Stable Y.js document reference
+  const yDocRef = useRef<Y.Doc | null>(null);
+
+  // Create or use existing Y.js document - stable reference
+  const yDoc = useMemo(() => {
+    if (ydoc) return ydoc;
+    
+    // Create stable Y.Doc instance only once using ref
+    if (!yDocRef.current) {
+      yDocRef.current = new Y.Doc();
+    }
+    return yDocRef.current;
+  }, [ydoc]);
+
+  // Computed components list: props + optimistic additions
+  const displayComponents = useMemo(() => {
+    // Start with props components, filter out any that are optimistically added
+    const propsComponentIds = new Set(components.map(c => c.componentId));
+    const uniqueOptimistic = optimisticComponents.filter(c => !propsComponentIds.has(c.componentId));
+    return [...components, ...uniqueOptimistic];
+  }, [components, optimisticComponents]);
+
+  // Sync optimistic state when props change
+  useEffect(() => {
+    // Remove optimistic components that now exist in props (successful server sync)
+    setOptimisticComponents(prev => {
+      const propsComponentIds = new Set(components.map(c => c.componentId));
+      return prev.filter(c => !propsComponentIds.has(c.componentId));
+    });
+  }, [components]);
+
+  // Multi-paragraph paste handler
+  const handleMultiParagraphPaste = useCallback(async (text: string) => {
+    if (!onComponentAdd) return false;
+
+    // Split text by double line breaks or single line breaks (for different paste sources)
+    const paragraphs = text
+      .split(/\n\s*\n|\n/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+
+    // Only process if we have multiple paragraphs and won't exceed limit
+    if (paragraphs.length <= 1) return false;
+
+    const newComponentsCount = paragraphs.length;
+    const currentComponentsCount = components.length;
+
+    if (currentComponentsCount + newComponentsCount > 18) {
+      // Only create components up to the limit
+      const availableSlots = 18 - currentComponentsCount;
+      if (availableSlots <= 0) return false;
+
+      console.log(`Multi-paragraph paste: Creating ${availableSlots} components (${newComponentsCount} paragraphs detected, ${18 - availableSlots} excluded due to limit)`);
+      paragraphs.splice(availableSlots); // Trim to available slots
+    }
+
+    try {
+      // Create components for each paragraph
+      for (let i = 0; i < paragraphs.length; i++) {
+        const paragraph = paragraphs[i];
+        const newComponent = {
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [{ type: 'text', text: paragraph }]
+              }
+            ]
+          },
+          contentPlain: paragraph,
+          status: 'created' as const
+        };
+
+        await onComponentAdd(newComponent);
+      }
+
+      console.log(`Multi-paragraph paste: Successfully created ${paragraphs.length} components`);
+      return true; // Indicate paste was handled
+    } catch (error) {
+      console.error('Failed to create components from multi-paragraph paste:', error);
+      onError?.(error as Error);
+      return false;
+    }
+  }, [onComponentAdd, components.length, onError]);
 
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Disable History extension - Y.js Collaboration provides its own history
+        history: false,
+      }),
       Collaboration.configure({
         document: yDoc,
         field: 'content'
       }),
-      CollaborationCursor.configure({
-        provider: provider || collaborationProvider,
-        user: {
-          name: config.userName,
-          color: config.userColor || '#007acc'
-        }
-      })
+      // Only add CollaborationCursor if we have a provider with awareness
+      ...((provider?.awareness || collaborationProvider?.awareness) ? [
+        CollaborationCursor.configure({
+          provider: provider || collaborationProvider,
+          user: {
+            name: config.userName,
+            color: config.userColor || '#007acc'
+          }
+        } as Parameters<typeof CollaborationCursor.configure>[0])
+      ] : [])
     ],
     content: initialContent || { type: 'doc', content: [] },
     editorProps: {
       attributes: {
         class: 'prose prose-sm focus:outline-none min-h-[200px] p-4',
         'data-testid': 'editor-content'
+      },
+      handlePaste: (_view, event) => {
+        // Get the pasted text
+        const text = event.clipboardData?.getData('text/plain');
+
+        if (text) {
+          // Check if this is a multi-paragraph paste
+          const paragraphs = text
+            .split(/\n\s*\n|\n/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+
+          if (paragraphs.length > 1) {
+            // Handle multi-paragraph paste asynchronously
+            handleMultiParagraphPaste(text).then(handled => {
+              if (handled) {
+                // Prevent default paste behavior since we handled it
+                event.preventDefault();
+              }
+            });
+
+            // Prevent default paste for multi-paragraph content
+            return true;
+          }
+        }
+
+        // Allow default paste behavior for single paragraphs
+        return false;
       }
     },
     onUpdate: ({ editor }) => {
@@ -110,7 +244,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     onSelectionUpdate: ({ editor }) => {
       updateEditorState(editor);
     }
-  }, [yDoc, provider, collaborationProvider, config.userName, config.userColor]);
+  }, [yDoc, provider, collaborationProvider, config.userName, config.userColor, handleMultiParagraphPaste]);
 
   // Auto-save handler
   const handleAutoSave = useCallback(async (content: Record<string, unknown>) => {
@@ -210,12 +344,81 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Initialize collaboration provider if not provided
   useEffect(() => {
-    if (!provider && !collaborationProvider) {
-      // Create provider would normally happen here
-      // For now, we'll use the mock in tests
-      console.log('ScriptEditor: Collaboration provider would be initialized here');
+    console.log('ScriptEditor: useEffect mount - provider exists:', !!provider, 'initializing:', providerInitRef.current);
+
+    // Skip if provider is already provided or already initializing
+    if (provider || providerInitRef.current) {
+      console.log('ScriptEditor: Skipping initialization - provider exists or already initializing');
+      return;
     }
-  }, [provider, collaborationProvider]);
+
+    // Skip if required config is missing
+    if (!config.projectId || !config.documentId) {
+      console.log('ScriptEditor: Skipping initialization - missing config');
+      return;
+    }
+
+    // Mark as initializing to prevent double-initialization in StrictMode
+    console.log('ScriptEditor: Starting provider initialization');
+    providerInitRef.current = true;
+
+    const initializeProvider = async () => {
+      try {
+        console.log('ScriptEditor: Initializing provider for document:', config.documentId);
+
+        const authenticatedProvider = await AuthenticatedProviderFactory.create({
+          projectId: config.projectId!,
+          documentId: config.documentId!,
+          ydoc: yDoc,
+          onSync: () => {
+            console.log('ScriptEditor: Provider synced');
+          },
+          onError: (error) => {
+            console.error('ScriptEditor: Provider error:', error);
+            onError?.(error);
+          },
+          onStatusChange: (status) => {
+            console.log('ScriptEditor: Provider status:', status);
+          }
+        });
+
+        await authenticatedProvider.connect();
+        setCollaborationProvider(authenticatedProvider);
+
+        // Store cleanup function
+        providerCleanupRef.current = async () => {
+          console.log('ScriptEditor: Cleaning up provider');
+          if (typeof authenticatedProvider.destroy === 'function') {
+            try {
+              await authenticatedProvider.destroy();
+            } catch (error) {
+              console.error('ScriptEditor: Error destroying provider:', error);
+            }
+          }
+        };
+
+      } catch (error) {
+        console.error('ScriptEditor: Failed to initialize collaboration provider:', error);
+        onError?.(error as Error);
+        // Reset initialization flag on error to allow retry
+        providerInitRef.current = false;
+      }
+    };
+
+    initializeProvider();
+
+    // Cleanup function
+    return () => {
+      // Execute stored cleanup if available
+      if (providerCleanupRef.current) {
+        providerCleanupRef.current().then(() => {
+          providerCleanupRef.current = null;
+          providerInitRef.current = false;
+          setCollaborationProvider(null);
+        });
+      }
+    };
+  }, [provider, config.projectId, config.documentId, onError, yDoc]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -225,29 +428,192 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         clearTimeout(autoSaveTimerRef.current);
         autoSaveTimerRef.current = null;
       }
-      
-      if (!ydoc) {
-        yDoc?.destroy();
+
+      // Cleanup collaboration provider
+      if (collaborationProvider && !provider) {
+        if (typeof collaborationProvider.destroy === 'function') {
+          const destroyResult = collaborationProvider.destroy();
+          if (destroyResult && typeof destroyResult.catch === 'function') {
+            destroyResult.catch(console.error);
+          }
+        }
+      }
+
+      // Cleanup Y.Doc only if we created it (not provided via props)
+      if (!ydoc && yDocRef.current) {
+        yDocRef.current.destroy();
+        yDocRef.current = null;
       }
     };
-  }, [yDoc, ydoc]);
+  }, [ydoc, collaborationProvider, provider]);
 
   // Formatting button handlers
   const formatHandlers = {
-    bold: () => editor?.chain().focus().toggleBold().run(),
-    italic: () => editor?.chain().focus().toggleItalic().run(),
-    bulletList: () => editor?.chain().focus().toggleBulletList().run(),
-    heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => editor?.chain().focus().toggleHeading({ level }).run()
+    bold: () => {
+      editor?.chain().focus().toggleBold().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    italic: () => {
+      editor?.chain().focus().toggleItalic().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    bulletList: () => {
+      editor?.chain().focus().toggleBulletList().run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    },
+    heading: (level: 1 | 2 | 3 | 4 | 5 | 6) => {
+      editor?.chain().focus().toggleHeading({ level }).run();
+      setTimeout(() => editor && updateEditorState(editor), 10);
+    }
+  };
+
+  // Component management handlers
+  const handleAddComponent = async () => {
+    if (!onComponentAdd || displayComponents.length >= 18) return;
+
+    try {
+      // Create optimistic component with predictable ID for the test
+      const optimisticId = `comp-${Date.now()}`;
+      const newComponent: Partial<ScriptComponentUI> = {
+        scriptId: config.scriptId || 'default',
+        content: { type: 'doc', content: [] },
+        plainText: '',
+        position: displayComponents.length + 1,
+        status: 'created' as const
+      };
+
+      // Add optimistically to UI immediately
+      const optimisticComponent: ScriptComponentUI = {
+        componentId: optimisticId,
+        scriptId: newComponent.scriptId!,
+        content: newComponent.content!,
+        plainText: newComponent.plainText!,
+        position: newComponent.position!,
+        type: 'standard',
+        status: newComponent.status!,
+        version: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastEditedBy: config.userId,
+        lastEditedAt: new Date().toISOString()
+      };
+
+      setOptimisticComponents(prev => [...prev, optimisticComponent]);
+
+      // Call parent callback for persistence (may update with real ID)
+      await onComponentAdd(newComponent);
+    } catch (error) {
+      console.error('Failed to add component:', error);
+      // Remove optimistic component on error
+      setOptimisticComponents(prev => prev.filter(c => !c.componentId.startsWith('comp-')));
+      onError?.(error as Error);
+    }
+  };
+
+  const handleComponentClick = (component: ScriptComponentUI) => {
+    setEditingComponentId(component.componentId);
+    setEditingContent(component.plainText || '');
+  };
+
+  const handleComponentEdit = (newContent: string) => {
+    setEditingContent(newContent);
+
+    // Auto-save after 1 second
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (editingComponentId && onComponentUpdate) {
+        try {
+          await onComponentUpdate(editingComponentId, {
+            plainText: newContent,
+            content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: newContent }] }] }
+          });
+        } catch (error) {
+          console.error('Failed to update component:', error);
+          onError?.(error as Error);
+        }
+      }
+      autoSaveTimerRef.current = null;
+    }, 1000);
+  };
+
+  const handleDeleteComponent = async (componentId: string) => {
+    if (!onComponentDelete) return;
+
+    try {
+      await onComponentDelete(componentId);
+      setDeleteConfirmId(null);
+    } catch (error) {
+      console.error('Failed to delete component:', error);
+      onError?.(error as Error);
+    }
+  };
+
+  const handleComponentReorder = async (draggedIds: string[]) => {
+    if (!onComponentReorder) return;
+
+    try {
+      await onComponentReorder(draggedIds);
+    } catch (error) {
+      console.error('Failed to reorder components:', error);
+      onError?.(error as Error);
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, componentId: string) => {
+    // Store in both dataTransfer and local state for test environment compatibility
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('text/plain', componentId);
+    }
+    setDraggedComponentId(componentId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetComponentId: string) => {
+    e.preventDefault();
+
+    // Try to get dragged ID from dataTransfer first, then fallback to local state
+    let draggedComponentIdValue = '';
+    if (e.dataTransfer) {
+      draggedComponentIdValue = e.dataTransfer.getData('text/plain');
+    }
+
+    // Fallback to local state for test environments
+    if (!draggedComponentIdValue && draggedComponentId) {
+      draggedComponentIdValue = draggedComponentId;
+    }
+
+    if (draggedComponentIdValue && draggedComponentIdValue !== targetComponentId) {
+      const draggedIndex = components.findIndex(c => c.componentId === draggedComponentIdValue);
+      const targetIndex = components.findIndex(c => c.componentId === targetComponentId);
+
+      if (draggedIndex !== -1 && targetIndex !== -1) {
+        const newOrder = [...components];
+        const [draggedComponent] = newOrder.splice(draggedIndex, 1);
+        newOrder.splice(targetIndex, 0, draggedComponent);
+
+        const reorderedIds = newOrder.map(c => c.componentId);
+        handleComponentReorder(reorderedIds);
+      }
+    }
+
+    // Clear the dragged component state
+    setDraggedComponentId(null);
   };
 
   return (
     <div className={`script-editor ${className}`} data-testid="script-editor">
       {/* Toolbar */}
-      <div className="toolbar border-b border-gray-200 p-2 flex gap-2" data-testid="editor-toolbar">
+      <div className="toolbar border-b border-gray-200 p-2 flex items-center gap-1" data-testid="editor-toolbar">
         <button
           type="button"
           onClick={formatHandlers.bold}
-          className={`px-3 py-1 rounded ${editorState.formatting.bold ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm font-bold ${editorState.formatting.bold ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="bold-button"
         >
           B
@@ -255,7 +621,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.italic}
-          className={`px-3 py-1 rounded ${editorState.formatting.italic ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm italic ${editorState.formatting.italic ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="italic-button"
         >
           I
@@ -263,7 +629,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         <button
           type="button"
           onClick={formatHandlers.bulletList}
-          className={`px-3 py-1 rounded ${editorState.formatting.bulletList ? 'bg-blue-100' : 'bg-gray-100'}`}
+          className={`px-3 py-1 mr-2 rounded text-sm ${editorState.formatting.bulletList ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 hover:bg-gray-200'}`}
           data-testid="bullet-list-button"
         >
           •
@@ -276,9 +642,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             } else {
               formatHandlers.heading(level as 1 | 2 | 3 | 4 | 5 | 6);
             }
+            // Force update editor state after formatting change
+            setTimeout(() => {
+              if (editor) {
+                updateEditorState(editor);
+              }
+            }, 10);
           }}
           value={editorState.formatting.heading || 0}
-          className="px-2 py-1 border rounded"
+          className="px-2 py-1 border rounded text-sm"
           data-testid="heading-select"
         >
           <option value={0}>Paragraph</option>
@@ -290,10 +662,10 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
       {/* Collaboration Status */}
       <div className="collaboration-status p-2 bg-gray-50 text-sm" data-testid="collaboration-status">
-        <span className={`status-indicator ${provider ? 'connected' : 'disconnected'}`} data-testid="connection-status">
-          {provider ? '🟢 Connected' : '🔴 Disconnected'}
+        <span className={`status-indicator ${(provider || collaborationProvider) ? 'connected' : 'disconnected'}`} data-testid="connection-status">
+          {(provider || collaborationProvider) ? '🟢 Connected' : '🔴 Disconnected'}
         </span>
-        {provider && (
+        {(provider || collaborationProvider) && (
           <span className="ml-4" data-testid="sync-status">
             {saveStatus.isSaving ? '⏳ Syncing...' : '✅ Synced'}
           </span>
@@ -326,41 +698,167 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         </div>
       )}
 
-      {/* Component List */}
-      {components.length > 0 && (
-        <div className="component-list border-b" data-testid="component-list">
-          {components.map((component, index) => (
-            <div
-              key={component.id}
-              className="component-item flex items-center p-2 border-b last:border-b-0"
-              data-testid={`component-item-${component.id}`}
-            >
-              <div className="drag-handle mr-2 cursor-move" data-testid={`drag-handle-${component.id}`}>
-                ⋮⋮
-              </div>
-              <div className="flex-1">
-                <div className="text-sm text-gray-500">Component {index + 1}</div>
-                <div className="text-xs text-gray-400">{component.plainText.substring(0, 50)}...</div>
-              </div>
-              {component.sceneId && (
-                <div className="scene-mapping text-xs text-blue-600" data-testid={`scene-mapping-${component.id}`}>
-                  Scene: {component.sceneId}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Editor Content */}
-      <div className="editor-wrapper relative">
+      <div className="editor-wrapper relative border-b">
         <EditorContent editor={editor} />
-        
+
         {/* Collaboration Cursors */}
         <div className="collaboration-cursors absolute inset-0 pointer-events-none" data-testid="collaboration-cursors">
           {/* Cursors would be rendered here by TipTap collaboration extension */}
         </div>
       </div>
+
+      {/* Add Component Section - BELOW the main editor */}
+      <div className="add-component-section border-b p-3 bg-gray-50">
+        <button
+          type="button"
+          onClick={handleAddComponent}
+          disabled={!onComponentAdd || displayComponents.length >= 18}
+          className={`px-4 py-2 rounded text-sm font-medium ${
+            !onComponentAdd || displayComponents.length >= 18
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+          aria-label="Add Component"
+        >
+          + Add Component
+        </button>
+        {displayComponents.length >= 18 && (
+          <div className="text-xs text-orange-600 mt-1">
+            18 of 18 components (maximum reached)
+          </div>
+        )}
+        {displayComponents.length > 0 && (
+          <div className="text-xs text-gray-500 mt-1">
+            {displayComponents.length} of 18 components
+          </div>
+        )}
+      </div>
+
+      {/* Component List - BELOW the main editor */}
+      {displayComponents.length > 0 && (
+        <div className="component-list border-b bg-white" data-testid="component-list">
+          <div className="p-2 text-sm font-medium text-gray-700 bg-gray-100">
+            Script Components
+          </div>
+          {displayComponents.map((component, index) => (
+            <div
+              key={component.componentId}
+              className="component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
+              data-testid={`component-${component.componentId}`}
+              data-component={`component-${component.componentId}`}
+              onClick={() => handleComponentClick(component)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, component.componentId)}
+            >
+              <div
+                className="drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"
+                data-testid={`drag-handle-${component.componentId}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, component.componentId)}
+                onClick={(e) => e.stopPropagation()}
+              >
+                ⋮⋮
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-700">Component {index + 1}</div>
+                <div className="text-xs text-gray-500 mt-1">{component.plainText?.substring(0, 50) || 'Empty component'}...</div>
+                {/* Component Status Display for Block-Based Editor Pattern */}
+                <div
+                  className="text-xs text-blue-600 mt-1 font-medium"
+                  data-testid={`component-status-${component.componentId}`}
+                >
+                  Status: {component.status || 'created'}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleComponentClick(component);
+                }}
+                className="edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"
+                data-testid={`edit-component-${component.componentId}`}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirmId(component.componentId);
+                }}
+                className="delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
+                data-testid={`delete-component-${component.componentId}`}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Component Editor */}
+      {editingComponentId && (
+        <div className="component-editor border-b p-4 bg-blue-50" data-testid={`component-editor-${editingComponentId}`}>
+          <div className="mb-2 text-sm font-medium text-gray-700">
+            Editing Component {components.findIndex(c => c.componentId === editingComponentId) + 1}
+          </div>
+          <textarea
+            value={editingContent}
+            onChange={(e) => handleComponentEdit(e.target.value)}
+            className="w-full h-32 p-3 border rounded text-sm"
+            placeholder="Enter component content..."
+          />
+          <div className="flex gap-2 mt-3">
+            <button
+              type="button"
+              onClick={() => setEditingComponentId(null)}
+              className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+            >
+              Close Editor
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                // Save and close
+                setEditingComponentId(null);
+              }}
+              className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+            >
+              Save & Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmId && (
+        <div className="delete-confirmation-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg">
+            <div className="mb-4 text-lg font-medium">Confirm Delete</div>
+            <div className="mb-4 text-sm text-gray-600">
+              Are you sure you want to delete this component? This action cannot be undone.
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleDeleteComponent(deleteConfirmId)}
+                className="px-4 py-2 bg-red-600 text-white rounded text-sm"
+              >
+                Confirm Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Comments Panel (placeholder for future implementation) */}
       {config.enableComments && (

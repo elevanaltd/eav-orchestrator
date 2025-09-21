@@ -1,0 +1,79 @@
+/**
+ * /api/version Endpoint Tests - TDD RED STATE
+ *
+ * TRACED Protocol: TEST FIRST (RED) - These tests MUST fail initially
+ * Implementation-Lead: Testing version coordination endpoint
+ */
+
+// Context7: consulted for vitest
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+describe('/api/version endpoint', () => {
+  let baseURL: string;
+
+  beforeAll(() => {
+    // Use the same base URL as the test environment
+    baseURL = 'http://localhost:3000';
+  });
+
+  describe('Version Coordination API', () => {
+    it('should return version information with correct structure', async () => {
+      // Contract: API must return version and schemaVersion fields
+      const response = await fetch(`${baseURL}/api/version`);
+
+      expect(response.ok).toBe(true);
+      expect(response.headers.get('content-type')).toContain('application/json');
+
+      const data = await response.json();
+
+      // Version info structure validation
+      expect(data).toHaveProperty('version');
+      expect(data).toHaveProperty('schemaVersion');
+      expect(typeof data.version).toBe('string');
+      expect(typeof data.schemaVersion).toBe('number');
+    });
+
+    it('should return current application version', async () => {
+      // Contract: Version should match current build version
+      const response = await fetch(`${baseURL}/api/version`);
+      const data = await response.json();
+
+      expect(data.version).toBe('1.0.0');
+      expect(data.schemaVersion).toBe(1);
+    });
+
+    it('should include build metadata', async () => {
+      // Contract: Should include additional metadata for debugging
+      const response = await fetch(`${baseURL}/api/version`);
+      const data = await response.json();
+
+      expect(data).toHaveProperty('timestamp');
+      expect(data).toHaveProperty('build');
+      expect(data.build).toBe('B2-Build');
+    });
+
+    it('should have no-cache headers for version freshness', async () => {
+      // Contract: Version endpoint should not be cached
+      const response = await fetch(`${baseURL}/api/version`);
+
+      // Should allow clients to cache but require revalidation
+      expect(response.status).toBe(200);
+      // The endpoint should be accessible without authentication
+    });
+
+    it('should be compatible with ClientLifecycleManager', async () => {
+      // Contract: Response must be compatible with VersionInfo interface
+      const response = await fetch(`${baseURL}/api/version`);
+      const data = await response.json();
+
+      // This structure must match the VersionInfo interface
+      const versionInfo: { version: string; schemaVersion: number } = {
+        version: data.version,
+        schemaVersion: data.schemaVersion
+      };
+
+      expect(versionInfo.version).toMatch(/^\d+\.\d+\.\d+$/); // Semantic version format
+      expect(versionInfo.schemaVersion).toBeGreaterThanOrEqual(1);
+    });
+  });
+});

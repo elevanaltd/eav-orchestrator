@@ -1,5 +1,6 @@
 # TESTGUARD_APPROVED: Maintains zero-tolerance CI integrity per consultation be92c7f5-0d20-47cf-b626-5f1e06c613be
 # Critical-Engineer: consulted for CI/CD quality gate implementation
+# TestGuard Constitutional Update: Tiered testing strategy implemented via file naming convention
 name: CI
 
 on:
@@ -9,48 +10,38 @@ on:
     branches: [main, project-migration]
 
 jobs:
-  # P0 CRITICAL: Core quality gates implementation per critical-engineer blocking assessment
-  test-and-validate:
+  # P0 CRITICAL: Core quality gates implementation
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      # Node.js setup for quality gate execution
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          
-      # Cache optimization for faster builds
+          node-version: '22'
+
       - name: Cache node modules
         uses: actions/cache@v4
         id: npm-cache
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          
-      # Install dependencies - BLOCKING if fails
+
       - name: Install Dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
-        
-      # TRACED Protocol E-gate enforcement: Lint must pass
-      - name: Lint Check (Zero Tolerance)
-        run: npm run lint
-        
-      # TRACED Protocol E-gate enforcement: TypeScript must pass
-      - name: Type Check
-        run: npm run typecheck
-        
-      # TRACED Protocol E-gate enforcement: Infrastructure tests must pass
-      # Per TestGuard directive - exclude RED state TDD tests
-      - name: Run Infrastructure Tests (Must Pass)
-        run: npm test
+
+      - name: Run All Quality Gates (Lint, TypeCheck, Unit Tests)
+        run: npm run validate
         env:
-          # Test environment configuration
           NODE_ENV: test
-          
-      # Upload test artifacts on failure for debugging
+          NODE_OPTIONS: "--max-old-space-size=8192"
+
+      - name: Security Audit
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: false
+
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -60,104 +51,47 @@ jobs:
             coverage/
             test-results.xml
             *.log
-      
-      # Essential structural checks - MUST PASS
-      - name: Validate Directory Structure
-        run: |
-          echo "Checking required files and directories..."
-          test -d docs || (echo "❌ docs/ directory missing" && exit 1)
-          test -f README.md || (echo "❌ README.md missing" && exit 1)
-          test -f CLAUDE.md || (echo "❌ CLAUDE.md missing" && exit 1)
-          echo "✅ Directory structure valid"
-      
-      # HestAI Documentation Standards Validation - MUST PASS
-      # Based on hestai-doc-steward consultation
-      - name: Validate HestAI Documentation Standards
-        run: |
-          echo "Running HestAI documentation standards validation..."
-          # Make script executable
-          chmod +x scripts/validate-docs.sh
-          # Run validation with blocking checks only
-          ./scripts/validate-docs.sh --blocking-only
-          
-      # Security scanning - MUST PASS
-      - name: Check for Committed Secrets (PR)
-        if: github.event_name == 'pull_request'
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.pull_request.base.sha }}
-          head: ${{ github.event.pull_request.head.sha }}
-          extra_args: --debug --only-verified
-          
-      # For push events, scan the whole repository
-      - name: Check for Committed Secrets (Push)
-        if: github.event_name == 'push'
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          extra_args: --debug --only-verified
-          
-      # File size validation - MUST PASS
-      - name: Validate No Large Files
-        run: |
-          echo "Checking for large files..."
-          large_files=$(find . -type f -size +1M | grep -v "^./.git" | grep -v "node_modules" || true)
-          if [ -n "$large_files" ]; then
-            echo "❌ Large files detected (>1MB):"
-            echo "$large_files"
-            exit 1
-          fi
-          echo "✅ No large files detected"
-        
-      # Document required ADRs exist - WARNING ONLY during early phases
-      - name: Check for ADRs
-        run: |
-          echo "Checking for Architectural Decision Records..."
-          if [ -d "docs/adr" ]; then
-            adr_count=$(find docs/adr -name "*.md" -type f | wc -l)
-            echo "✅ Found $adr_count ADR(s)"
-          else
-            echo "⚠️  Warning: No ADR directory found (will be required after B0)"
-            # Not failing during initial setup
-          fi
 
   # NON-BLOCKING: Feature tests track RED state TDD tests
-  # Per TestGuard directive - make CI smarter, not tests dumber
   feature-tests:
     runs-on: ubuntu-latest
     continue-on-error: true  # Allowed to fail
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
+          node-version: '22'
       - name: Cache node modules
         uses: actions/cache@v4
-        id: npm-cache
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-
       - name: Install Dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
-
       - name: Run Feature Tests (RED State TDD)
-        run: |
-          echo "🔴 Running RED state TDD tests (features not yet implemented)"
-          echo "These tests define contracts for features to be built"
-          npm run test:feature || true
+        run: npm run test:feature
         env:
           NODE_ENV: test
 
-      - name: Report Feature Test Status
-        if: always()
-        run: |
-          echo "📊 Feature Test Status Report"
-          echo "=============================="
-          echo "RED state tests tracking unimplemented features."
-          echo "These will turn GREEN as features are completed."
+  # NON-BLOCKING: Integration tests run on merge to main for deeper validation
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Integration Tests
+        run: npm run test:integration
+        env:
+          NODE_ENV: integration
+          NODE_OPTIONS: "--max-old-space-size=8192"

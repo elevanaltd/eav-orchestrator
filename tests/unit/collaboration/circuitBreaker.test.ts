@@ -18,10 +18,12 @@ const mockSupabaseClient = {
     unsubscribe: vi.fn()
   })),
   removeChannel: vi.fn().mockResolvedValue(undefined),
+  // TESTGUARD-APPROVED: TESTGUARD-20250918-475de028 - Mock Fidelity Maintenance
   from: vi.fn(() => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116' } })
+    single: vi.fn().mockResolvedValue({ data: null, error: { code: 'PGRST116' } }),
+    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) // Add missing maybeSingle method
   }))
 } as unknown as SupabaseClient;
 
@@ -35,8 +37,22 @@ describe('Circuit Breaker Integration', () => {
   });
 
   afterEach(() => {
+    // TESTGUARD MEMORY FIX: Proper cleanup sequence
+    // 1. Destroy provider first to clean up event listeners and timers
+    if (provider) {
+      provider.destroy();
+      provider = null as any;
+    }
+
+    // 2. Destroy Y.Doc to free CRDT memory
+    if (ydoc) {
+      ydoc.destroy();
+      ydoc = null as any;
+    }
+
+    // 3. Restore all mocks and clear timers
     vi.restoreAllMocks();
-    ydoc.destroy();
+    vi.clearAllTimers();
   });
 
   describe('Circuit Breaker Configuration', () => {
@@ -114,9 +130,12 @@ describe('Circuit Breaker Integration', () => {
         onError: vi.fn()
       });
 
+      // First connect to initialize the IndexedDB queue
+      await provider.connect();
+
       // Force circuit to open
       provider.circuitBreaker.open();
-      
+
       // Try to persist update - it will throw but should queue
       const update = new Uint8Array([1, 2, 3]);
       try {
@@ -124,21 +143,22 @@ describe('Circuit Breaker Integration', () => {
       } catch (_error) {
         // Expected to throw when circuit is open
       }
-      
+
       // Update should be queued
-      expect(provider.offlineQueue).toBeDefined();
-      expect(provider.offlineQueue.length).toBe(1);
-      expect(provider.offlineQueue[0]).toEqual(update);
+      const queuedOperations = await provider.getOfflineQueue();
+      expect(queuedOperations).toBeDefined();
+      expect(queuedOperations.length).toBe(1);
+      // Compare Uint8Array contents properly
+      expect(Array.from(queuedOperations[0])).toEqual(Array.from(update));
     });
 
     it('should drain offline queue when circuit closes', async () => {
       // Setup successful RPC responses - ensure it returns the expected format
-      (mockSupabaseClient.rpc as any).mockClear();
-      (mockSupabaseClient.rpc as any).mockResolvedValue({ 
+      (mockSupabaseClient.rpc as any).mockResolvedValue({
         data: [{ success: true, new_version: 2 }],
-        error: null 
+        error: null
       });
-      
+
       provider = new CustomSupabaseProvider({
         ydoc: ydoc,
         projectId: 'test-project',
@@ -148,19 +168,25 @@ describe('Circuit Breaker Integration', () => {
         onError: vi.fn()
       });
 
-      // Directly set the offline queue for testing
-      provider.offlineQueue = [
-        new Uint8Array([1, 2, 3]),
-        new Uint8Array([4, 5, 6])
-      ];
-      
-      expect(provider.offlineQueue.length).toBe(2);
+      // Connect to initialize the IndexedDB queue (this will drain any existing queue)
+      await provider.connect();
+
+      // Clear the mock calls AFTER connect, so we only count new operations
+      (mockSupabaseClient.rpc as any).mockClear();
+
+      // Queue some operations for testing
+      await provider.queueUpdate(new Uint8Array([1, 2, 3]));
+      await provider.queueUpdate(new Uint8Array([4, 5, 6]));
+
+      const queuedBefore = await provider.getOfflineQueue();
+      expect(queuedBefore.length).toBe(2);
 
       // Drain the queue
       await provider.drainOfflineQueue();
-      
+
       // Queue should be empty
-      expect(provider.offlineQueue.length).toBe(0);
+      const queuedAfter = await provider.getOfflineQueue();
+      expect(queuedAfter.length).toBe(0);
       
       // RPC should have been called for each queued item
       expect(mockSupabaseClient.rpc).toHaveBeenCalledTimes(2);

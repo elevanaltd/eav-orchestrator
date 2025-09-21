@@ -10,12 +10,13 @@ export interface ScriptComponent {
   script_id: string;
   content_tiptap: object; // TipTap JSON document
   content_plain: string;
-  position_index: number;
-  component_status: ComponentStatus;
+  position: number; // DOUBLE PRECISION in database for O(1) insertions
+  component_type: string; // component_type_enum in database
+  component_status: string; // Database returns string, not enum
   version: number; // CRITICAL: Optimistic locking version
   created_at: string;
   updated_at: string;
-  last_edited_by: string;
+  last_edited_by: string | null;
   last_edited_at: string;
   deleted_at?: string; // Soft delete support
   deleted_by?: string;
@@ -92,7 +93,7 @@ export interface UpdateResult {
 export interface BatchUpdateOperation {
   component_id: string;
   version: number;
-  position_index?: number;
+  position?: number; // Align with database field name
   content?: object;
 }
 
@@ -189,4 +190,74 @@ export interface OptimisticLockConfig {
   enableAutoMerge: boolean;
   conflictResolutionTimeout: number;
   performanceTargetP95: number; // Target: ≤ 500ms
+}
+
+/**
+ * Delete operation result
+ */
+export interface DeleteResult {
+  success: boolean;
+  deletedAt?: string;
+  error?: string;
+  queued?: boolean; // Added for circuit breaker fallback
+}
+
+/**
+ * Restore operation result
+ */
+export interface RestoreResult {
+  success: boolean;
+  restoredAt?: string;
+  error?: string;
+}
+
+/**
+ * Bulk delete operation result
+ */
+export interface BulkDeleteResult {
+  success: boolean;
+  deletedCount: number;
+  failedIds: string[];
+  error?: string;
+}
+
+/**
+ * Component read result
+ */
+export interface ComponentReadResult {
+  component?: ScriptComponent;
+  error?: string;
+}
+
+/**
+ * Components list result
+ */
+export interface ComponentsListResult {
+  components: ScriptComponent[];
+  error?: string;
+}
+
+/**
+ * Component count result
+ */
+export interface ComponentCountResult {
+  count: number;
+  error?: string;
+}
+
+/**
+ * Position update entry for reordering
+ */
+export interface PositionUpdate {
+  componentId: string;
+  position: number;
+}
+
+/**
+ * Position update result
+ */
+export interface PositionUpdateResult {
+  success: boolean;
+  updatedCount: number;
+  error?: string;
 }

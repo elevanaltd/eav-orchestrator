@@ -1,4 +1,11 @@
 /* TRACED_BYPASS: test commit 614d8b4 - implementing CSS after RED state test */
+/* Critical-Engineer: consulted for CSS build pipeline and Tailwind configuration */
+
+/* Tailwind CSS Directives - MUST BE FIRST */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* =================================================================
    EAV Orchestrator - Global Styles
    Foundation CSS for collaborative video production system
@@ -295,6 +302,37 @@ code, kbd, pre, samp {
   }
 }
 
+/* Animations and Keyframes
+   ================================================================= */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
 /* Print Styles
    ================================================================= */
 @media print {
@@ -302,7 +340,7 @@ code, kbd, pre, samp {
     background: white;
     color: black;
   }
-  
+
   a {
     color: black;
     text-decoration: underline;
