@@ -90,7 +90,8 @@ export default defineConfig({
       'worktrees/**', // Exclude git worktrees
       '**/node_modules/**',
       '**/.git/**',
-      '**/**.feature.test.**', // Exclude TDD RED state tests from CI blocking
+      // Note: Feature tests (*.feature.test.*) run separately via npm run test:feature
+      // They should show TDD RED state until implementation (constitutional requirement)
       '**/ScriptComponentManagement.controlled.test.tsx', // TEMP: Exclude hanging test
       '**/ScriptComponentManagement.test.tsx', // TEMP: Exclude hanging test
       '**/ScriptEditor.test.tsx', // TEMP: Exclude hanging test with worker issues
