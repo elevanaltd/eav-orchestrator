@@ -21,6 +21,6 @@
     },
     "types": ["vitest/globals"]
   },
-  "include": ["src", "tests", "vite.config.ts", "vite.feature.config.ts"],
+  "include": ["src", "tests", "vite.config.ts", "vitest.integration.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
