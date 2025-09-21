@@ -15,7 +15,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 // Critical-Engineer: consulted for Authentication strategy and React integration pattern
 import { supabase } from '../lib/supabaseClient'; // Use singleton client
-import { auth, getUserRole, type UserRole } from '../lib/supabase';
+import { auth, type UserRole } from '../lib/supabase';
 
 interface AuthState {
   user: User | null;
