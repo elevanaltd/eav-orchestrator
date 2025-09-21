@@ -71,33 +71,49 @@ export function decodeBinaryUpdate(encoded: string): Uint8Array {
   }
 }
 
+/**
+ * Validates Y.js binary update data using authoritative Y.js library validation
+ *
+ * TestGuard: Constitutional mandate - CONTRACT-DRIVEN-CORRECTION protocol applied
+ * Code-Review-Specialist: Security vulnerability remediation - replaced heuristic validation
+ * Critical-Engineer: consulted for Y.js binary update validation and security architecture
+ */
 export function validateBinaryUpdate(data: unknown): boolean {
   // Basic type validation
   if (!(data instanceof Uint8Array)) {
     return false;
   }
 
-  // Empty updates are invalid
+  // Size limit validation (consistent with MAX_UPDATE_SIZE)
+  if (data.length > MAX_UPDATE_SIZE) {
+    return false;
+  }
+
+  // Empty updates are invalid - Y.js requires content
   if (data.length === 0) {
     return false;
   }
 
-  // Size limit validation (1MB maximum as per tests)
-  const maxSize = 1024 * 1024; // 1MB
-  if (data.length > maxSize) {
+  // AUTHORITATIVE VALIDATION: Use Y.js library itself to validate binary format
+  // This is the only secure way to validate Y.js update data
+  try {
+    // Import Y.js dynamically for runtime availability
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Y = require('yjs');
+
+    // Create temporary document for validation
+    const tempDoc = new Y.Doc();
+
+    // Attempt to apply the update - Y.js will throw if invalid
+    Y.applyUpdate(tempDoc, data);
+
+    // Clean up temporary document
+    tempDoc.destroy();
+
+    // If we reached here, the update is valid
+    return true;
+  } catch {
+    // Y.js rejected the update - it's invalid
     return false;
   }
-
-  // Basic Y.js update structure validation
-  // A valid update should have at least a minimal header (typically 4+ bytes)
-  if (data.length < 4) {
-    return false;
-  }
-
-  // A very basic heuristic: a valid Y.js update often starts with 0 or 1.
-  if (data[0] > 1) {
-      return false;
-  }
-
-  return true;
 }

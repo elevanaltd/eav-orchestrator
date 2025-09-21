@@ -6,12 +6,14 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
-      // Isolate integration tests from global setup mocks
-      setupFiles: [],
+      // Use dedicated integration test setup (no Y.js mocks)
+      setupFiles: ['./tests/integration-setup.ts'],
       include: ['tests/integration/**/*.ts'],
       // Longer timeout for real network/CRDT operations
       testTimeout: 30000,
       hookTimeout: 30000,
+      globals: true,
+      environment: 'jsdom',
     },
   })
 );
