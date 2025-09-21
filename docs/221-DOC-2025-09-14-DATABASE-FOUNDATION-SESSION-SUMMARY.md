@@ -1,3 +1,10 @@
+> **⚠️ DEPRECATION WARNING ⚠️**
+>
+> This document summarizes work based on an initial database schema from migration `003_core_schema.sql`. The Y.js and collaborative editing architecture described herein has been **SUPERSEDED** by a more secure and performant implementation in migration `005_yjs_documents_security_fix.sql`.
+>
+> For the authoritative architecture on collaborative editing, please refer to:
+> **[203-DOC-ARCHITECTURE-YJS-SUPABASE-COLLABORATION.md](./203-DOC-ARCHITECTURE-YJS-SUPABASE-COLLABORATION.md)**
+
 # Session Summary - Database Foundation Complete
 
 **Date:** 2025-09-14

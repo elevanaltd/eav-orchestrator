@@ -45,22 +45,33 @@ We will use **PostgreSQL with a traditional relational model** augmented by **JS
 ### Schema Design Principles
 
 ```sql
--- Example: Script Components table
-CREATE TABLE script_components (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    script_id UUID NOT NULL REFERENCES scripts(id),
-    position INTEGER NOT NULL,
-    content_rich JSONB NOT NULL, -- TipTap JSON
-    content_plain TEXT GENERATED ALWAYS AS (content_rich->>'plainText') STORED,
-    content_hash TEXT GENERATED ALWAYS AS (md5(content_plain)) STORED,
-    status TEXT CHECK (status IN ('draft', 'internal_approved', 'client_approved', 'stale')),
+-- Example: Y.js CRDT Data Model for Collaborative Documents
+-- This pattern uses an append-only log for updates, ensuring data integrity and history.
+
+-- Stores metadata and the latest state vector for efficient sync
+CREATE TABLE yjs_documents (
+    id UUID PRIMARY KEY,
+    project_id UUID NOT NULL REFERENCES projects(id),
+    document_type TEXT NOT NULL,
+    state_vector BYTEA NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1, -- For optimistic locking
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Append-only log of all changes (Y.js updates)
+CREATE TABLE yjs_document_updates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL REFERENCES yjs_documents(id) ON DELETE CASCADE,
+    project_id UUID NOT NULL, -- Denormalized for RLS performance
+    update_data BYTEA NOT NULL,
+    sequence_number BIGSERIAL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Proper indexes for performance
-CREATE INDEX idx_script_components_script_id ON script_components(script_id);
-CREATE INDEX idx_script_components_content_search ON script_components USING GIN(content_rich);
+CREATE INDEX idx_yjs_documents_project_id ON yjs_documents(project_id);
+CREATE INDEX idx_yjs_updates_doc_sequence ON yjs_document_updates(document_id, sequence_number);
 ```
 
 ## Consequences
