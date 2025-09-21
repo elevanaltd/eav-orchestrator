@@ -74,13 +74,17 @@ export default defineConfig({
   test: {
     // Critical-Engineer: consulted for Test infrastructure and memory profiling
     // Emergency stopgap for memory exhaustion - CRITICAL-ENGINEER-20250920-fce00a54
-    // UPDATE: Switching back to threads with single worker to prevent IPC channel issues
-    pool: 'threads', // Use threads to avoid IPC channel closed errors
+    // UPDATE: Using threads with isolation to reduce memory pressure
+    pool: 'threads',
     poolOptions: {
       threads: {
-        singleThread: true // Single thread to prevent worker communication issues
+        singleThread: true, // Single thread to prevent communication issues
+        isolateWorkers: false // Share memory between tests to prevent exhaustion
       }
     },
+    // Additional memory management
+    maxWorkers: 1, // Force single worker to prevent memory multiplication
+    teardownTimeout: 1000, // Quick teardown to prevent memory accumulation
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
