@@ -1,0 +1,9 @@
+tests/unit/collaboration/circuitBreaker.test.ts
+tests/unit/collaboration/custom-supabase-provider-awareness.test.ts
+tests/unit/collaboration/custom-supabase-provider.test.ts
+tests/unit/collaboration/encoding.test.ts
+tests/unit/collaboration/persistence.test.ts
+tests/unit/collaboration/YjsSupabaseProvider.test.ts
+tests/unit/components/ProjectHeader.test.tsx
+tests/unit/components/ScriptComponentManagement.controlled.test.tsx
+tests/unit/components/ScriptComponentManagement.test.tsx

@@ -37,8 +37,22 @@ describe('Circuit Breaker Integration', () => {
   });
 
   afterEach(() => {
+    // TESTGUARD MEMORY FIX: Proper cleanup sequence
+    // 1. Destroy provider first to clean up event listeners and timers
+    if (provider) {
+      provider.destroy();
+      provider = null as any;
+    }
+
+    // 2. Destroy Y.Doc to free CRDT memory
+    if (ydoc) {
+      ydoc.destroy();
+      ydoc = null as any;
+    }
+
+    // 3. Restore all mocks and clear timers
     vi.restoreAllMocks();
-    ydoc.destroy();
+    vi.clearAllTimers();
   });
 
   describe('Circuit Breaker Configuration', () => {

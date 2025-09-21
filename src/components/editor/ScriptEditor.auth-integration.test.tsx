@@ -11,7 +11,7 @@
 // Context7: consulted for vitest
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 // Context7: consulted for @testing-library/react
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 // Context7: consulted for yjs
 import * as Y from 'yjs';
 import { ScriptEditor } from './ScriptEditor';
@@ -55,7 +55,21 @@ describe('ScriptEditor Authentication Integration', () => {
   });
 
   afterEach(() => {
-    mockDoc.destroy();
+    // TESTGUARD MEMORY FIX: Proper cleanup sequence
+    // 1. Clean up React components first
+    cleanup();
+
+    // 2. Destroy Y.Doc to free CRDT memory
+    if (mockDoc) {
+      mockDoc.destroy();
+      mockDoc = null as any;
+    }
+
+    // 3. Restore all mocks to prevent accumulation
+    vi.restoreAllMocks();
+
+    // 4. Clear any timers that might be lingering
+    vi.clearAllTimers();
   });
 
   describe('Authentication Context Flow', () => {

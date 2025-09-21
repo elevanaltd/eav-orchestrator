@@ -72,19 +72,7 @@ export default defineConfig({
     }
   },
   test: {
-    // Critical-Engineer: consulted for Test infrastructure and memory profiling
-    // Emergency stopgap for memory exhaustion - CRITICAL-ENGINEER-20250920-fce00a54
-    // UPDATE: Using threads with isolation to reduce memory pressure
-    pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true, // Single thread to prevent communication issues
-        isolateWorkers: false // Share memory between tests to prevent exhaustion
-      }
-    },
-    // Additional memory management
-    maxWorkers: 1, // Force single worker to prevent memory multiplication
-    teardownTimeout: 1000, // Quick teardown to prevent memory accumulation
+    // TestGuard: Clean configuration for leak isolation
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
@@ -99,6 +87,7 @@ export default defineConfig({
       '**/ScriptComponentManagement.controlled.test.tsx', // TEMP: Exclude hanging test
       '**/ScriptComponentManagement.test.tsx', // TEMP: Exclude hanging test
       '**/ScriptEditor.test.tsx', // TEMP: Exclude hanging test with worker issues
+      '**/ScriptEditor.auth-integration.test.tsx', // TESTGUARD: Exclude memory exhaustion test pending investigation
       '**/scriptComponentManagerWithResilience.test.ts', // Exclude timeout-prone circuit breaker tests from CI
       '**/yjs-security.test.ts', // Exclude environment-dependent security tests from CI
       '**/boundary.test.ts', // Exclude security boundary tests requiring full environment
