@@ -8,6 +8,7 @@ on:
     branches: [main]
   push:
     branches: [main, project-migration]
+  workflow_dispatch:  # Manual trigger for integration tests
 
 jobs:
   # P0 CRITICAL: Core quality gates implementation
@@ -73,11 +74,14 @@ jobs:
         env:
           NODE_ENV: test
 
-  # NON-BLOCKING: Integration tests run on merge to main for deeper validation
+  # NON-BLOCKING: Integration tests run on merge to main, successful PRs, or manual dispatch
   integration-tests:
     runs-on: ubuntu-latest
     needs: validate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.event.pull_request.mergeable_state == 'ready') ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
