@@ -1,0 +1,1 @@
+scriptComponentManager.feature.test.ts

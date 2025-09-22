@@ -134,8 +134,9 @@ test.describe('EAV Orchestrator - Authenticated App UI', () => {
       console.log(`Found ${paragraphCount} paragraph elements`);
 
       // Check if components have card styling (they shouldn't)
-      const cardsWithBorders = await page.locator('[style*="border"], .card, .component-card').count();
-      console.log(`Elements with card-like styling: ${cardsWithBorders}`);
+      // Only check within the script editor area to avoid counting navigation elements
+      const cardsWithBorders = await scriptEditor.locator('[style*="border"], .card, .component-card').count();
+      console.log(`Elements with card-like styling within editor: ${cardsWithBorders}`);
 
       // This should be 0 for Google Docs style
       if (cardsWithBorders > 0) {

@@ -75,6 +75,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   const [collaborationProvider, setCollaborationProvider] = useState<CustomSupabaseProvider | null>(null);
   const [editingComponentId, setEditingComponentId] = useState<string | null>(null);
+  const [menuComponentId, setMenuComponentId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState<string>('');
   const [draggedComponentId, setDraggedComponentId] = useState<string | null>(null);
@@ -510,10 +511,6 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
   };
 
-  const handleComponentClick = (component: ScriptComponentUI) => {
-    setEditingComponentId(component.componentId);
-    setEditingContent(component.plainText || '');
-  };
 
   const handleComponentEdit = (newContent: string) => {
     setEditingContent(newContent);
@@ -551,6 +548,29 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
   };
 
+  const handleMoveComponent = async (componentId: string, direction: 'up' | 'down') => {
+    if (!onComponentReorder) return;
+
+    try {
+      const currentIndex = displayComponents.findIndex(c => c.componentId === componentId);
+      if (currentIndex === -1) return;
+
+      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      if (newIndex < 0 || newIndex >= displayComponents.length) return;
+
+      // Create new order array by swapping positions
+      const reorderedComponents = [...displayComponents];
+      [reorderedComponents[currentIndex], reorderedComponents[newIndex]] =
+        [reorderedComponents[newIndex], reorderedComponents[currentIndex]];
+
+      // Call parent handler with new order
+      await onComponentReorder(reorderedComponents.map(c => c.componentId));
+    } catch (error) {
+      console.error('Failed to move component:', error);
+      onError?.(error as Error);
+    }
+  };
+
   const handleComponentReorder = async (draggedIds: string[]) => {
     if (!onComponentReorder) return;
 
@@ -562,13 +582,13 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     }
   };
 
-  const handleDragStart = (e: React.DragEvent, componentId: string) => {
-    // Store in both dataTransfer and local state for test environment compatibility
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('text/plain', componentId);
-    }
-    setDraggedComponentId(componentId);
-  };
+  // const handleDragStart = (e: React.DragEvent, componentId: string) => {
+  //   // Store in both dataTransfer and local state for test environment compatibility
+  //   if (e.dataTransfer) {
+  //     e.dataTransfer.setData('text/plain', componentId);
+  //   }
+  //   setDraggedComponentId(componentId);
+  // };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -708,107 +728,168 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         </div>
       </div>
 
-      {/* Add Component Section - BELOW the main editor */}
-      <div className="add-component-section border-b p-3 bg-gray-50">
-        <button
-          type="button"
-          onClick={handleAddComponent}
-          disabled={!onComponentAdd || displayComponents.length >= 18}
-          className={`px-4 py-2 rounded text-sm font-medium ${
-            !onComponentAdd || displayComponents.length >= 18
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-          aria-label="Add Component"
-        >
-          + Add Component
-        </button>
-        {displayComponents.length >= 18 && (
-          <div className="text-xs text-orange-600 mt-1">
-            18 of 18 components (maximum reached)
+
+      {/* Document Components - Google Docs Style Seamless Document */}
+      <div className="document-container px-6 py-4 overflow-visible" data-testid="document-container">
+        {displayComponents.map((component, index) => (
+          <div
+            key={component.componentId}
+            className="document-component group relative hover:bg-gray-50 rounded transition-colors duration-200"
+            data-testid={`component-${component.componentId}`}
+            data-component={`component-${component.componentId}`}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, component.componentId)}
+          >
+            {/* Margin controls - Google Docs style */}
+            <div className="absolute left-0 top-0 w-8 h-full flex items-start justify-center pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {/* Three-dot menu button */}
+              <div className="relative">
+                <button
+                  type="button"
+                  className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Toggle menu for this component
+                    setMenuComponentId(
+                      menuComponentId === component.componentId
+                        ? null
+                        : component.componentId
+                    );
+                  }}
+                  data-testid={`menu-button-${component.componentId}`}
+                  title="Component options"
+                >
+                  ⋯
+                </button>
+
+                {/* Dropdown menu */}
+                {menuComponentId === component.componentId && (
+                  <div className="absolute left-8 top-0 bg-white border shadow-lg rounded-lg py-1 z-[1000] min-w-[120px] max-w-[160px]" style={{
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 1000
+                  }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingComponentId(component.componentId);
+                        setEditingContent(component.plainText || '');
+                        setMenuComponentId(null);
+                      }}
+                      className="w-full text-left px-3 py-1 hover:bg-gray-100 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirmId(component.componentId);
+                        setMenuComponentId(null);
+                      }}
+                      className="w-full text-left px-3 py-1 hover:bg-gray-100 text-sm text-red-600"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveComponent(component.componentId, 'up');
+                        setMenuComponentId(null);
+                      }}
+                      disabled={index === 0}
+                      className={`w-full text-left px-3 py-1 hover:bg-gray-100 text-sm ${
+                        index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700'
+                      }`}
+                      title="Move up"
+                    >
+                      ↑ Move Up
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMoveComponent(component.componentId, 'down');
+                        setMenuComponentId(null);
+                      }}
+                      disabled={index === displayComponents.length - 1}
+                      className={`w-full text-left px-3 py-1 hover:bg-gray-100 text-sm ${
+                        index === displayComponents.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700'
+                      }`}
+                      title="Move down"
+                    >
+                      ↓ Move Down
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Component content as Google Docs paragraph */}
+            <div
+              className="script-paragraph min-h-[1.8rem] py-1 cursor-text leading-relaxed text-base"
+              style={{
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '11pt',
+                lineHeight: 1.8,
+                marginBottom: '16px',
+                padding: '4px 0',
+                marginLeft: '32px' // Space for margin controls
+              }}
+              onClick={() => {
+                setEditingComponentId(component.componentId);
+                setEditingContent(component.plainText || '');
+              }}
+              data-component-index={index + 1}
+              data-testid={`component-content-${component.componentId}`}
+            >
+              {component.plainText || (
+                <span className="text-gray-400 italic">
+                  Click to add content...
+                </span>
+              )}
+            </div>
+
+            {/* Hidden status metadata - accessible via data attributes for testing */}
+            <div
+              className="sr-only"
+              data-testid={`component-status-${component.componentId}`}
+              data-status={component.status || 'created'}
+            />
           </div>
-        )}
-        {displayComponents.length > 0 && (
-          <div className="text-xs text-gray-500 mt-1">
-            {displayComponents.length} of 18 components
+        ))}
+
+        {/* Add Component - Google Docs style plus button in margin */}
+        {(onComponentAdd && displayComponents.length < 18) && (
+          <div className="add-component-line group relative hover:bg-gray-50 rounded transition-colors duration-200 min-h-[1.8rem] py-1">
+            <div className="absolute left-0 top-0 w-8 h-full flex items-start justify-center pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <button
+                type="button"
+                onClick={handleAddComponent}
+                className="w-6 h-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center text-sm font-bold"
+                data-testid="add-component-button"
+                title="Add component"
+              >
+                +
+              </button>
+            </div>
+            <div
+              className="text-gray-300 italic cursor-pointer text-base"
+              style={{
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '11pt',
+                lineHeight: 1.8,
+                marginLeft: '32px',
+                padding: '4px 0'
+              }}
+              onClick={handleAddComponent}
+            >
+              Click to add content or hover in margin for + button...
+            </div>
           </div>
         )}
       </div>
-
-      {/* Document Components - Seamless Google Docs Style */}
-      {displayComponents.length > 0 && (
-        <div className="document-components" data-testid="component-list">
-          {displayComponents.map((component, index) => (
-            <div
-              key={component.componentId}
-              className="document-component group relative"
-              data-testid={`component-${component.componentId}`}
-              data-component={`component-${component.componentId}`}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, component.componentId)}
-            >
-              {/* Component content as seamless paragraph */}
-              <p
-                className="prose prose-sm focus:outline-none min-h-[1.5rem] px-4 py-1 cursor-text leading-relaxed"
-                onClick={() => handleComponentClick(component)}
-                data-component-index={index + 1}
-              >
-                {component.plainText || 'Empty component...'}
-              </p>
-
-              {/* Hover controls - only visible on hover */}
-              <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1">
-                {/* Drag handle */}
-                <div
-                  className="drag-handle cursor-move text-gray-300 hover:text-gray-500 p-1"
-                  data-testid={`drag-handle-${component.componentId}`}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, component.componentId)}
-                  onClick={(e) => e.stopPropagation()}
-                  title="Drag to reorder"
-                >
-                  ⋮⋮
-                </div>
-
-                {/* Edit button */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleComponentClick(component);
-                  }}
-                  className="edit-btn text-gray-400 hover:text-blue-600 p-1 text-xs"
-                  data-testid={`edit-component-${component.componentId}`}
-                  title="Edit component"
-                >
-                  ✏️
-                </button>
-
-                {/* Delete button */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmId(component.componentId);
-                  }}
-                  className="delete-btn text-gray-400 hover:text-red-600 p-1 text-xs"
-                  data-testid={`delete-component-${component.componentId}`}
-                  title="Delete component"
-                >
-                  🗑️
-                </button>
-              </div>
-
-              {/* Hidden status metadata - accessible via data attributes for testing */}
-              <div
-                className="sr-only"
-                data-testid={`component-status-${component.componentId}`}
-                data-status={component.status || 'created'}
-              />
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Component Editor - Minimal overlay style */}
       {editingComponentId && (
@@ -833,8 +914,25 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => {
-                // Save and close
+              onClick={async () => {
+                // Save explicitly before closing
+                if (editingComponentId && onComponentUpdate) {
+                  try {
+                    await onComponentUpdate(editingComponentId, {
+                      plainText: editingContent,
+                      content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: editingContent }] }] }
+                    });
+                  } catch (error) {
+                    console.error('Failed to save component:', error);
+                    onError?.(error as Error);
+                    return; // Don't close if save failed
+                  }
+                }
+                // Clear any pending auto-save timer
+                if (autoSaveTimerRef.current) {
+                  clearTimeout(autoSaveTimerRef.current);
+                  autoSaveTimerRef.current = null;
+                }
                 setEditingComponentId(null);
               }}
               className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"

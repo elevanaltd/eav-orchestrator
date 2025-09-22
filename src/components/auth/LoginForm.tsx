@@ -46,9 +46,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
   // Development helper - quick login buttons for test users
   const developmentUsers = [
-    { email: 'admin@example.com', password: 'admin123', role: 'Admin' },
-    { email: 'internal@example.com', password: 'internal123', role: 'Internal' },
-    { email: 'freelancer@example.com', password: 'freelancer123', role: 'Freelancer' },
+    { email: 'dev@localhost', password: 'dev123', role: 'Dev User' },
   ];
 
   const handleDevLogin = async (email: string, password: string) => {

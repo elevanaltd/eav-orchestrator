@@ -19,11 +19,77 @@ describe('ScriptComponentManager', () => {
 
   beforeEach(() => {
     mockSupabase = createMockSupabaseClient(null as any);
-    
+
     // This test MUST fail - ScriptComponentManager doesn't exist yet
     manager = new ScriptComponentManager(mockSupabase as any);
-    
+
     vi.clearAllMocks();
+  });
+
+  describe('Component Creation', () => {
+    it('should use atomic create_component_with_position RPC when position not provided', async () => {
+      // GREEN STATE: Test the new atomic approach that eliminates race conditions
+      const scriptId = 'script-123';
+      const mockCreatedComponent = {
+        id: 'comp-123',
+        position: 1500.0,
+        created_at: new Date().toISOString()
+      };
+
+      // Mock atomic RPC response
+      mockSupabase.rpc.mockImplementation((funcName: string) => {
+        if (funcName === 'create_component_with_position') {
+          return {
+            data: [mockCreatedComponent],
+            error: null
+          };
+        }
+        return { data: null, error: null };
+      });
+
+      // Mock subsequent fetch of full component data
+      mockSupabase.from.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: {
+                component_id: 'comp-123',
+                script_id: scriptId,
+                content_tiptap: { type: 'doc', content: [] },
+                content_plain: '',
+                position: 1500.0,
+                component_type: 'main',
+                component_status: 'created',
+                version: 1,
+                created_at: mockCreatedComponent.created_at,
+                updated_at: mockCreatedComponent.created_at,
+                last_edited_by: 'user-123',
+                last_edited_at: mockCreatedComponent.created_at
+              },
+              error: null
+            })
+          })
+        })
+      });
+
+      // Act
+      await manager.createComponent(
+        scriptId,
+        { type: 'doc', content: [] },
+        '',
+        'user-123'
+      );
+
+      // Assert - should call the new atomic RPC function
+      expect(mockSupabase.rpc).toHaveBeenCalledWith('create_component_with_position', {
+        p_script_id: scriptId,
+        p_content_tiptap: { type: 'doc', content: [] },
+        p_content_plain: '',
+        p_component_status: 'created',
+        p_last_edited_by: 'user-123',
+        p_position: null
+      });
+    });
   });
 
   describe('Single Component Updates with Optimistic Locking', () => {

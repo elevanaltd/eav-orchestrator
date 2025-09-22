@@ -2,9 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 import * as dotenv from 'dotenv';
 
 // Load test environment variables
-// First load .env.test for mock config, then .env.test.local for real credentials
+// First load .env.test for mock config, then .env.test.local for real credentials (with override)
 dotenv.config({ path: '.env.test' });
-dotenv.config({ path: '.env.test.local' });
+dotenv.config({ path: '.env.test.local', override: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.

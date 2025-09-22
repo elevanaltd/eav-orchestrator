@@ -279,16 +279,63 @@ export class ScriptComponentManager {
     this.metrics.totalOperations++;
 
     try {
-      // Get the next position if not provided
-      let finalPosition = position;
-      if (finalPosition === undefined) {
-        const { data: positionData } = await this.supabase.rpc('get_next_position', {
-          p_script_id: scriptId
+      // Critical-Engineer: consulted for Database concurrency control
+      // Use atomic RPC function to eliminate race condition entirely
+      if (position === undefined) {
+        // Use the atomic create function that handles position calculation and insertion in one transaction
+        const { data, error } = await this.supabase.rpc('create_component_with_position', {
+          p_script_id: scriptId,
+          p_content_tiptap: content,
+          p_content_plain: plainText,
+          p_component_status: status,
+          p_last_edited_by: userId || null,
+          p_position: null // Let the function calculate the position atomically
         });
-        finalPosition = positionData || 1000.0;
+
+        if (error) {
+          console.error('Database error creating component with atomic RPC:', error);
+          throw new Error(`Failed to create component: ${error.message}`);
+        }
+
+        if (!data || data.length === 0) {
+          throw new Error('No data returned from atomic component creation');
+        }
+
+        const newComponent = data[0];
+
+        // Success - fetch the full component data to return consistent format
+        const { data: fullData, error: fetchError } = await this.supabase
+          .from('script_components')
+          .select('component_id, script_id, content_tiptap, content_plain, position, component_type, component_status, version, created_at, updated_at, last_edited_by, last_edited_at')
+          .eq('id', newComponent.id)
+          .single();
+
+        if (fetchError || !fullData) {
+          console.error('Failed to fetch created component:', fetchError);
+          throw new Error('Component created but failed to retrieve details');
+        }
+
+        // Success
+        this.metrics.successfulOperations++;
+        this.recordOperationTime(Date.now() - startTime);
+
+        return {
+          component_id: fullData.component_id,
+          script_id: fullData.script_id,
+          content_tiptap: fullData.content_tiptap,
+          content_plain: fullData.content_plain,
+          position: fullData.position,
+          component_type: fullData.component_type,
+          component_status: fullData.component_status,
+          version: fullData.version,
+          created_at: fullData.created_at,
+          updated_at: fullData.updated_at,
+          last_edited_by: fullData.last_edited_by,
+          last_edited_at: fullData.last_edited_at
+        };
       }
 
-      // Insert the new component
+      // If position is provided, use traditional insert (for specific positioning)
       const insertData: {
         script_id: string;
         content_tiptap: object;
@@ -301,7 +348,7 @@ export class ScriptComponentManager {
         script_id: scriptId,
         content_tiptap: content,
         content_plain: plainText,
-        position: finalPosition!,  // We know finalPosition is defined after the check above
+        position: position,
         component_status: status,
         last_edited_at: new Date().toISOString()
       };

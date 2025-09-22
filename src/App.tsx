@@ -210,6 +210,92 @@ function AppContent() {
     }
   };
 
+  const handleComponentUpdate = async (componentId: string, updates: Partial<ScriptComponentUI>): Promise<void> => {
+    if (!selectedScript) {
+      throw new Error('No script selected');
+    }
+
+    try {
+      // Find the current component to get its version
+      const currentComponent = components.find(c => c.component_id === componentId);
+      if (!currentComponent) {
+        throw new Error('Component not found');
+      }
+
+      // Convert UI updates to API format
+      const apiUpdates: { content?: object; plainText?: string } = {};
+      if (updates.content) {
+        apiUpdates.content = updates.content;
+      }
+      if (updates.plainText !== undefined) {
+        apiUpdates.plainText = updates.plainText;
+      }
+
+      // Use authenticated user ID for component update
+      const userId = user.id;
+
+      const result = await componentManager.updateComponent(
+        componentId,
+        apiUpdates.content || currentComponent.content_tiptap,
+        apiUpdates.plainText || currentComponent.content_plain,
+        currentComponent.version,
+        userId
+      );
+
+      // Update local state with optimistic update
+      setComponents(prev => prev.map(comp =>
+        comp.component_id === componentId
+          ? {
+              ...comp,
+              content_tiptap: apiUpdates.content || comp.content_tiptap,
+              content_plain: apiUpdates.plainText || comp.content_plain,
+              version: result.newVersion || comp.version,
+              updated_at: new Date().toISOString()
+            }
+          : comp
+      ));
+    } catch (error) {
+      console.error('Failed to update component:', error);
+      throw error;
+    }
+  };
+
+  const handleComponentDelete = async (componentId: string): Promise<void> => {
+    if (!selectedScript) {
+      throw new Error('No script selected');
+    }
+
+    try {
+      // Here we would call a delete method on the component manager
+      // For now, just remove from local state (soft delete)
+      setComponents(prev => prev.filter(comp => comp.component_id !== componentId));
+    } catch (error) {
+      console.error('Failed to delete component:', error);
+      throw error;
+    }
+  };
+
+  const handleComponentReorder = async (componentIds: string[]): Promise<void> => {
+    if (!selectedScript) {
+      throw new Error('No script selected');
+    }
+
+    try {
+      // Update positions based on new order
+      const reorderedComponents = componentIds.map((id, index) => {
+        const component = components.find(c => c.component_id === id);
+        return component ? { ...component, position: (index + 1) * 1000.0 } : null;
+      }).filter(Boolean) as ScriptComponent[];
+
+      // Here we would call a reorder method on the component manager
+      // For now, just update local state
+      setComponents(reorderedComponents);
+    } catch (error) {
+      console.error('Failed to reorder components:', error);
+      throw error;
+    }
+  };
+
   // Status banner helper function
   const renderStatusBanner = () => {
     if (lifecycleState === 'HEALTHY' || lifecycleState === 'INITIALIZING') {
@@ -836,6 +922,9 @@ function AppContent() {
                           console.log('Content changed:', content);
                         }}
                         onComponentAdd={handleComponentAdd}
+                        onComponentUpdate={handleComponentUpdate}
+                        onComponentDelete={handleComponentDelete}
+                        onComponentReorder={handleComponentReorder}
                         onSave={async (content: EditorJSONContent) => {
                           console.log('Saving content:', content);
                         }}
