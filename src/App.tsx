@@ -137,16 +137,26 @@ function AppContent() {
       return;
     }
     const loadComponents = async () => {
+      console.log('Starting to load components for script:', selectedScript.id);
       setIsLoadingComponents(true);
+
+      // Add a timeout to ensure we don't get stuck loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Component loading timed out, showing editor anyway');
+        setIsLoadingComponents(false);
+      }, 3000); // 3 second timeout
+
       try {
         const result = await componentManager.getComponentsByScriptId(selectedScript.id);
+        console.log('Components loaded:', result);
         // Use database result directly - already matches ScriptComponent interface
         setComponents(result.components);
       } catch (error) {
-        console.error('Failed to load components:', error);
-        // Set empty array on error to prevent UI issues
+        console.error('Failed to load components - will show editor anyway:', error);
+        // Set empty array on error to prevent UI issues - empty array is fine, editor can start empty
         setComponents([]);
       } finally {
+        clearTimeout(timeoutId);
         setIsLoadingComponents(false);
       }
     };
@@ -183,19 +193,21 @@ function AppContent() {
         script_id: component.scriptId || selectedScript.id,
         content_tiptap: component.content || { type: 'doc', content: [] },
         content_plain: component.plainText || '',
-        position: component.position,
+        // Don't pass position for new components - let the RPC function calculate it
+        // position: component.position,
         component_status: component.status || 'created'
       };
 
       // Use authenticated user ID for component creation
       const userId = user.id;
 
+      // Don't pass position parameter if undefined - let RPC calculate it
       const result = await componentManager.createComponent(
         apiComponent.script_id!,
         apiComponent.content_tiptap,
         apiComponent.content_plain,
         userId,
-        apiComponent.position,
+        undefined, // Force undefined position for new components
         apiComponent.component_status
       );
 
