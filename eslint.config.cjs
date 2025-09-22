@@ -98,6 +98,24 @@ module.exports = [
     },
   },
   {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
+      globals: {
+        // Node.js globals for JS files
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+      },
+    },
+  },
+  {
     ignores: ['dist', 'eslint.config.cjs', '*.d.ts', 'vite.config.d.ts', 'vite.config.ts', 'src/**/*.test.ts', 'src/**/*.test.tsx', 'src/**/*.spec.ts', 'src/**/*.spec.tsx'],
   },
 ];

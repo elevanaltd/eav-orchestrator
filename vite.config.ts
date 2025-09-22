@@ -59,7 +59,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
+    port: 5173,
     open: true
   },
   build: {
@@ -70,36 +70,6 @@ export default defineConfig({
         sourcemapExcludeSources: true
       }
     }
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
-    // The 'include' property is now managed by the npm scripts, not here.
-    // This allows for flexible test execution from the command line.
-    testTimeout: 15000, // Increased timeout for integration tests
-    hookTimeout: 15000,
-    env: {
-      VITE_SUPABASE_URL: 'https://test.supabase.co',
-      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key-for-integration-tests',
-      VITE_SUPABASE_ANON_KEY: 'test-anon-key-for-integration-tests'
-    },
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      reportsDirectory: './coverage',
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: [
-        'src/**/*.d.ts',
-        'src/main.tsx', // Entry point
-        'src/vite-env.d.ts'
-      ],
-      thresholds: {
-        lines: 80,
-        functions: 75,
-        branches: 70,
-        statements: 80
-      }
-    }
   }
+  // Test configuration moved to vitest.config.ts for better separation and memory management
 })

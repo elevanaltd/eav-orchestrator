@@ -14,11 +14,18 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:safe": "node --expose-gc --max-old-space-size=2048 ./node_modules/.bin/vitest run",
     "test:unit": "vitest run tests/**/*.test.ts tests/**/*.test.tsx src/**/*.test.ts src/**/*.test.tsx --exclude='tests/**/*.feature.test.*' --exclude='tests/**/*.integration.test.*'",
     "test:feature": "vitest run tests/**/*.feature.test.ts tests/**/*.feature.test.tsx",
     "test:integration": "vitest run -c vitest.integration.config.ts",
-    "test:watch": "vitest",
+    "test:watch": "vitest --reporter=dot",
+    "test:watch:safe": "node --expose-gc --max-old-space-size=2048 ./node_modules/.bin/vitest --reporter=dot",
     "test:coverage": "vitest run --coverage",
+    "test:visual": "playwright test",
+    "test:visual:headed": "playwright test --headed",
+    "test:visual:update": "playwright test --update-snapshots",
+    "test:visual:report": "playwright show-report test-results/visual-html-report",
+    "test:cleanup": "pkill -f vitest || true",
     "validate": "npm run lint && npm run typecheck && npm run test:unit"
   },
   "repository": {
@@ -69,8 +76,10 @@
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.35.0",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
