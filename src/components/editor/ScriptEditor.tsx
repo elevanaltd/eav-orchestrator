@@ -735,80 +735,93 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         )}
       </div>
 
-      {/* Component List - BELOW the main editor */}
+      {/* Document Components - Seamless Google Docs Style */}
       {displayComponents.length > 0 && (
-        <div className="component-list border-b bg-white" data-testid="component-list">
-          <div className="p-2 text-sm font-medium text-gray-700 bg-gray-100">
-            Script Components
-          </div>
+        <div className="document-components" data-testid="component-list">
           {displayComponents.map((component, index) => (
             <div
               key={component.componentId}
-              className="component-item flex items-center p-3 border-b last:border-b-0 cursor-pointer hover:bg-gray-50"
+              className="document-component group relative"
               data-testid={`component-${component.componentId}`}
               data-component={`component-${component.componentId}`}
-              onClick={() => handleComponentClick(component)}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, component.componentId)}
             >
-              <div
-                className="drag-handle mr-3 cursor-move text-gray-400 hover:text-gray-600"
-                data-testid={`drag-handle-${component.componentId}`}
-                draggable
-                onDragStart={(e) => handleDragStart(e, component.componentId)}
-                onClick={(e) => e.stopPropagation()}
+              {/* Component content as seamless paragraph */}
+              <p
+                className="prose prose-sm focus:outline-none min-h-[1.5rem] px-4 py-1 cursor-text leading-relaxed"
+                onClick={() => handleComponentClick(component)}
+                data-component-index={index + 1}
               >
-                ⋮⋮
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-700">Component {index + 1}</div>
-                <div className="text-xs text-gray-500 mt-1">{component.plainText?.substring(0, 50) || 'Empty component'}...</div>
-                {/* Component Status Display for Block-Based Editor Pattern */}
+                {component.plainText || 'Empty component...'}
+              </p>
+
+              {/* Hover controls - only visible on hover */}
+              <div className="absolute right-2 top-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center gap-1">
+                {/* Drag handle */}
                 <div
-                  className="text-xs text-blue-600 mt-1 font-medium"
-                  data-testid={`component-status-${component.componentId}`}
+                  className="drag-handle cursor-move text-gray-300 hover:text-gray-500 p-1"
+                  data-testid={`drag-handle-${component.componentId}`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, component.componentId)}
+                  onClick={(e) => e.stopPropagation()}
+                  title="Drag to reorder"
                 >
-                  Status: {component.status || 'created'}
+                  ⋮⋮
                 </div>
+
+                {/* Edit button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleComponentClick(component);
+                  }}
+                  className="edit-btn text-gray-400 hover:text-blue-600 p-1 text-xs"
+                  data-testid={`edit-component-${component.componentId}`}
+                  title="Edit component"
+                >
+                  ✏️
+                </button>
+
+                {/* Delete button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirmId(component.componentId);
+                  }}
+                  className="delete-btn text-gray-400 hover:text-red-600 p-1 text-xs"
+                  data-testid={`delete-component-${component.componentId}`}
+                  title="Delete component"
+                >
+                  🗑️
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleComponentClick(component);
-                }}
-                className="edit-btn ml-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded text-xs"
-                data-testid={`edit-component-${component.componentId}`}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteConfirmId(component.componentId);
-                }}
-                className="delete-btn ml-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded text-xs"
-                data-testid={`delete-component-${component.componentId}`}
-              >
-                Delete
-              </button>
+
+              {/* Hidden status metadata - accessible via data attributes for testing */}
+              <div
+                className="sr-only"
+                data-testid={`component-status-${component.componentId}`}
+                data-status={component.status || 'created'}
+              />
             </div>
           ))}
         </div>
       )}
 
-      {/* Component Editor */}
+      {/* Component Editor - Minimal overlay style */}
       {editingComponentId && (
-        <div className="component-editor border-b p-4 bg-blue-50" data-testid={`component-editor-${editingComponentId}`}>
+        <div className="component-editor fixed bottom-4 right-4 bg-white border shadow-lg rounded-lg p-4 max-w-md z-50" data-testid={`component-editor-${editingComponentId}`}>
           <div className="mb-2 text-sm font-medium text-gray-700">
-            Editing Component {components.findIndex(c => c.componentId === editingComponentId) + 1}
+            Editing Component {displayComponents.findIndex(c => c.componentId === editingComponentId) + 1}
           </div>
           <textarea
             value={editingContent}
             onChange={(e) => handleComponentEdit(e.target.value)}
-            className="w-full h-32 p-3 border rounded text-sm"
+            className="w-full h-32 p-3 border rounded text-sm resize-none"
             placeholder="Enter component content..."
+            autoFocus
           />
           <div className="flex gap-2 mt-3">
             <button
@@ -816,7 +829,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
               onClick={() => setEditingComponentId(null)}
               className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
             >
-              Close Editor
+              Close
             </button>
             <button
               type="button"

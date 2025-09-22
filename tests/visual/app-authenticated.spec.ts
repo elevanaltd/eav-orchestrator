@@ -114,7 +114,7 @@ test.describe('EAV Orchestrator - Authenticated App UI', () => {
 
       // Check how components are rendered
       // Look for component containers
-      const componentBlocks = page.locator('.component-block, .script-component, .component-card');
+      const componentBlocks = page.locator('.document-component');
       const componentCount = await componentBlocks.count();
       console.log(`Found ${componentCount} component blocks`);
 
@@ -165,8 +165,8 @@ test.describe('EAV Orchestrator - Authenticated App UI', () => {
       });
     }
 
-    // Check component spacing
-    const components = await page.locator('.script-component, .component-block').all();
+    // Check component spacing - updated for new Google Docs-style classes
+    const components = await page.locator('.document-component').all();
 
     if (components.length > 1) {
       // Check if components have excessive spacing
