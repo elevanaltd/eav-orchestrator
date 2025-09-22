@@ -199,10 +199,13 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       ] : [])
     ],
     content: initialContent || { type: 'doc', content: [] },
+    editable: true,
     editorProps: {
       attributes: {
         class: 'prose prose-sm focus:outline-none min-h-[200px] p-4',
-        'data-testid': 'editor-content'
+        'data-testid': 'editor-content',
+        'contenteditable': 'true',
+        'spellcheck': 'true'
       },
       handlePaste: (_view, event) => {
         // Get the pasted text
