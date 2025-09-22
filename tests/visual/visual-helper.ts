@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import fs from 'fs';
 
 export class VisualHelper {
   constructor(private page: Page) {}
@@ -183,13 +184,11 @@ export class VisualHelper {
    */
   async compareWithBaseline(
     locator: Locator,
-    baselineName: string,
-    tolerance: number = 0.2
+    baselineName: string
   ) {
     return await locator.screenshot({
       animations: 'disabled',
-      path: `tests/visual/screenshots/${baselineName}`,
-      threshold: tolerance,
+      path: `tests/visual/screenshots/${baselineName}`
     });
   }
 
@@ -214,7 +213,7 @@ export class VisualHelper {
 
     // Page HTML
     const html = await this.page.content();
-    require('fs').writeFileSync(`${stateDir}/page.html`, html);
+    fs.writeFileSync(`${stateDir}/page.html`, html);
 
     // Page title and URL
     const metadata = {
@@ -223,7 +222,7 @@ export class VisualHelper {
       viewport: await this.page.viewportSize(),
       timestamp,
     };
-    require('fs').writeFileSync(
+    fs.writeFileSync(
       `${stateDir}/metadata.json`,
       JSON.stringify(metadata, null, 2)
     );

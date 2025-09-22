@@ -3,7 +3,7 @@
 // Context7: consulted for @testing-library/jest-dom
 // Error-Architect: IndexedDB polyfill for Node.js test environment
 // Critical-Engineer: consulted for Test environment architecture (fake-indexeddb setup)
-import { afterEach, vi } from 'vitest';
+import { afterEach, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 // CRITICAL FIX: Use vitest-specific fake-indexeddb import to prevent hanging
@@ -197,6 +197,7 @@ vi.stubGlobal('fetch', vi.fn(async (url: string) => {
   } as Response;
 }));
 
+// MEMORY LEAK FIX: Enhanced cleanup hooks
 afterEach(() => {
   // TESTGUARD MEMORY FIX: Comprehensive cleanup
   // 1. Clean up React components
@@ -210,10 +211,55 @@ afterEach(() => {
 
   // 4. Clear any timers
   vi.clearAllTimers();
+  vi.useRealTimers(); // Reset to real timers after each test
 
   // 5. Clear mock editor reference if it exists
   if (typeof window !== 'undefined' && (window as any).__testEditor) {
     (window as any).__testEditor = null;
     (window as any).__triggerEditorUpdate = null;
+  }
+
+  // 6. MEMORY FIX: Clear IndexedDB connections
+  if (typeof window !== 'undefined' && window.indexedDB) {
+    // Close all open IndexedDB connections
+    const databases = window.indexedDB.databases ? window.indexedDB.databases() : Promise.resolve([]);
+    databases.then((dbs: any[]) => {
+      dbs.forEach(db => {
+        if (db.name) {
+          window.indexedDB.deleteDatabase(db.name);
+        }
+      });
+    }).catch(() => {
+      // Ignore errors in cleanup
+    });
+  }
+
+  // 7. MEMORY FIX: Force garbage collection hint (Node.js specific)
+  if (global.gc) {
+    global.gc();
+  }
+});
+
+// MEMORY LEAK FIX: Global teardown after all tests
+afterAll(() => {
+  // Final cleanup of any remaining resources
+  vi.clearAllMocks();
+  vi.clearAllTimers();
+  vi.restoreAllMocks();
+
+  // Clear all global references
+  if (typeof window !== 'undefined') {
+    // Clear any window properties we added
+    const windowAny = window as any;
+    Object.keys(windowAny).forEach(key => {
+      if (key.startsWith('__test')) {
+        delete windowAny[key];
+      }
+    });
+  }
+
+  // Force final garbage collection if available
+  if (global.gc) {
+    global.gc();
   }
 });

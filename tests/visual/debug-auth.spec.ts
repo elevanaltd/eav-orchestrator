@@ -67,7 +67,7 @@ test.describe('Auth Debug Tests', () => {
 
     // Check if we can access Supabase client
     const supabaseCheck = await page.evaluate(() => {
-      // @ts-ignore
+      // @ts-expect-error - window.supabase may not be defined
       return typeof window.supabase !== 'undefined';
     });
 
@@ -86,9 +86,9 @@ test.describe('Auth Debug Tests', () => {
     // Try to check Supabase auth directly
     const authState = await page.evaluate(async () => {
       try {
-        // @ts-ignore
+        // @ts-expect-error - window.supabase may not be defined
         if (window.supabase) {
-          // @ts-ignore
+          // @ts-expect-error - window.supabase may not be defined
           const { data, error } = await window.supabase.auth.getSession();
           return {
             hasClient: true,

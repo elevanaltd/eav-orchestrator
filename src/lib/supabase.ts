@@ -18,52 +18,74 @@
  */
 
 // Context7: consulted for @supabase/supabase-js
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-// Critical-Engineer: Use singleton client to prevent multiple instances
-import { supabase as singletonClient } from './supabaseClient';
+import { type SupabaseClient, createClient } from '@supabase/supabase-js';
 
-// Environment configuration with validation
-// Testable environment access function with new key format support
-const getEnvironmentConfig = () => {
-  // Allow test environment to override via process.env
-  const supabaseUrl = process.env.NODE_ENV === 'test'
-    ? (process.env.VITE_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL)
-    : import.meta.env.VITE_SUPABASE_URL;
-
-  // Support new PUBLISHABLE_KEY format with fallback to legacy ANON_KEY
-  // Migration transition: Check for new key first, fallback to old for compatibility
-  let supabaseAnonKey: string | undefined;
-
-  if (process.env.NODE_ENV === 'test') {
-    supabaseAnonKey =
-      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      process.env.VITE_SUPABASE_ANON_KEY ||
-      import.meta.env?.VITE_SUPABASE_ANON_KEY;
-  } else {
-    supabaseAnonKey =
-      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      import.meta.env.VITE_SUPABASE_ANON_KEY;
-  }
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY) required');
-  }
-
-  return { supabaseUrl, supabaseAnonKey };
-};
-
-// Legacy variables kept for compatibility (now unused - singleton handles this)
+// ERROR-ARCHITECT: Lazy singleton pattern for proper test isolation
+// Module-level variables for singleton management
+let supabaseClient: SupabaseClient | null = null;
+let initError: Error | null = null;
+let isInitialized = false;
 
 /**
  * Get or create Supabase client singleton
  * Returns null if initialization fails (handled by App-level error boundary)
  * Circuit breaker integration maintained through CustomSupabaseProvider
+ *
+ * ERROR-ARCHITECT: Lazy initialization pattern for test isolation
+ * Creates client on first access, allowing tests to mock createClient
  */
 export const getSupabase = (): SupabaseClient | null => {
-  // Critical-Engineer: Use singleton client to prevent multiple GoTrueClient instances
-  // Return the singleton client instead of creating a new one
-  return singletonClient;
+  // Return cached result if already initialized
+  if (isInitialized) {
+    return supabaseClient;
+  }
+
+  // Check if we have an initialization error
+  if (initError) {
+    return null;
+  }
+
+  // Environment configuration
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    initError = new Error(
+      'Missing Supabase environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or legacy VITE_SUPABASE_ANON_KEY) required'
+    );
+    isInitialized = true;
+    if (process.env.NODE_ENV !== 'test') {
+      // Only log in production - tests handle null gracefully
+      console.error('Supabase initialization failed:', initError.message);
+    }
+    return null;
+  }
+
+  try {
+    // Create singleton client on first access
+    supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'eav-orchestrator-auth', // Prevent session conflicts
+      },
+      realtime: {
+        params: {
+          eventsPerSecond: 10, // Match CustomSupabaseProvider configuration
+        },
+      },
+    });
+    isInitialized = true;
+    return supabaseClient;
+  } catch (error) {
+    initError = error as Error;
+    isInitialized = true;
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Supabase initialization failed:', error);
+    }
+    return null;
+  }
 };
 
 // Export alias for compatibility
@@ -250,11 +272,15 @@ export const getUserRole = async (userId: string): Promise<UserRole | null> => {
 /**
  * Reset the Supabase singleton (primarily for testing)
  * WARNING: This should only be used in test environments
+ *
+ * ERROR-ARCHITECT: Properly resets singleton state for test isolation
  */
 export const resetSupabaseClient = (): void => {
   if (process.env.NODE_ENV !== 'test') {
     console.warn('resetSupabaseClient() should only be called in test environment');
   }
+  // Clear all singleton state for next test
   supabaseClient = null;
-  initializationError = null;
+  initError = null;
+  isInitialized = false;
 };

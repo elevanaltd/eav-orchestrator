@@ -172,8 +172,7 @@ test.describe('TipTap Collaborative Editor Visual Tests', () => {
     if (await editor.count() > 0) {
       await expect(editor).toHaveScreenshot('tiptap-mobile.png', {
         animations: 'disabled',
-        threshold: 0.2,
-        fullPage: false,
+        threshold: 0.2
       });
 
       // Check if toolbar collapses or changes on mobile

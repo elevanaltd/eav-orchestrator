@@ -50,7 +50,7 @@ export class AuthHelper {
         timeout: 10000
       });
       console.log('Login successful - app loaded');
-    } catch (error) {
+    } catch (_error) {
       console.log('Login may have failed or app is slow to load');
       // Take a screenshot for debugging
       await this.page.screenshot({ path: 'tests/visual/debug-login-attempt.png' });

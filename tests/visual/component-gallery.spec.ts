@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { VisualHelper } from './visual-helper';
 
 test.describe('Component Gallery Visual Tests', () => {
@@ -20,7 +20,7 @@ test.describe('Component Gallery Visual Tests', () => {
       await visualHelper.takeStableScreenshot(
         buttonContainer,
         'buttons-gallery.png',
-        { additionalMasks: ['.dynamic-text'] }
+        { maskDynamic: true }
       );
     }
   });
@@ -36,7 +36,7 @@ test.describe('Component Gallery Visual Tests', () => {
         await visualHelper.takeStableScreenshot(
           form,
           `form-${i}.png`,
-          { additionalMasks: ['.error-message', '.success-message'] }
+          { maskDynamic: true }
         );
       }
     }
@@ -133,7 +133,7 @@ test.describe('Component Gallery Visual Tests', () => {
       await visualHelper.takeStableScreenshot(
         element,
         `dataviz-${i}.png`,
-        { additionalMasks: ['.tooltip', '.hover-info'] }
+        { maskDynamic: true }
       );
     }
   });

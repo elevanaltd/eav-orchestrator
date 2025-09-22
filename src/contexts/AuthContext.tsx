@@ -12,9 +12,9 @@
  */
 
 import React, { createContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 // Critical-Engineer: consulted for Authentication strategy and React integration pattern
-import { supabase } from '../lib/supabaseClient'; // Use singleton client
+import { getSupabase } from '../lib/supabase'; // Use lazy singleton getter
 import { auth, getUserRole, type UserRole } from '../lib/supabase';
 
 interface AuthState {
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let mounted = true; // Track if component is still mounted
 
     // Handle auth state updates
-    const handleAuthChange = async (session: any) => {
+    const handleAuthChange = async (session: Session | null) => {
       if (!mounted) return; // Prevent updates after unmount
 
       try {
@@ -130,7 +130,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Critical-Engineer: consulted for Authentication strategy and React integration pattern
     // Use reactive onAuthStateChange for subsequent changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const supabaseClient = getSupabase();
+    if (!supabaseClient) {
+      console.error('🔐 AuthProvider: Supabase client not available');
+      setState({
+        user: null,
+        role: null,
+        loading: false,
+        error: 'Authentication system unavailable',
+      });
+      return;
+    }
+
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
       async (_event, session) => {
         console.log('🔐 AuthProvider: Auth state change callback fired!', _event, session ? 'session exists' : 'no session');
         authStateReceived = true; // Mark that we've received auth state
@@ -147,7 +159,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       clearTimeout(fallbackTimer); // Clear the fallback timer
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - subscription runs once
+  // Note: state.loading is intentionally omitted from dependencies
+  // We only want to set up the subscription once on mount
 
   const signIn = async (email: string, password: string): Promise<void> => {
     try {

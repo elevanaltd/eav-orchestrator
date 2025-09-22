@@ -14,19 +14,29 @@ import { CustomSupabaseProvider } from './custom-supabase-provider';
 
 // TESTGUARD-APPROVED: Fixing test harness to match actual module exports
 // Mock supabase module with complete interface
-vi.mock('../supabase', async () => {
-  const actualSupabaseModule = await vi.importActual<typeof import('../supabase')>('../supabase');
+// ERROR-ARCHITECT: Updated for lazy singleton pattern
+vi.mock('../supabase', () => {
   return {
-    ...actualSupabaseModule, // Keep all original exports
-    getUser: vi.fn(), // Explicitly mock the functions we need to control
-    getSupabase: vi.fn().mockReturnValue({
-      from: vi.fn(),
-      auth: { getUser: vi.fn() }
-    }),
-    getSupabaseClient: vi.fn().mockReturnValue({
-      from: vi.fn(),
-      auth: { getUser: vi.fn() }
-    })
+    getUser: vi.fn(),
+    getSupabase: vi.fn(),
+    getSupabaseClient: vi.fn(),
+    resetSupabaseClient: vi.fn(),
+    auth: {
+      signIn: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
+      getUser: vi.fn(),
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn()
+    },
+    getUserRole: vi.fn(),
+    roles: {
+      ADMIN: 'admin',
+      INTERNAL: 'internal',
+      FREELANCER: 'freelancer',
+      CLIENT: 'client',
+      VIEWER: 'viewer'
+    }
   };
 });
 
@@ -77,10 +87,20 @@ describe('AuthenticatedProviderFactory', () => {
     onStatusChange: vi.fn()
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     ydoc = new Y.Doc();
     mockConfig.ydoc = ydoc;
     vi.clearAllMocks();
+
+    // ERROR-ARCHITECT: Setup default mock for getSupabaseClient
+    const { getSupabaseClient } = await import('../supabase');
+    vi.mocked(getSupabaseClient).mockReturnValue({
+      from: vi.fn(),
+      auth: { getUser: vi.fn() },
+      channel: vi.fn(),
+      removeChannel: vi.fn(),
+      rpc: vi.fn()
+    } as any);
   });
 
   afterEach(() => {
