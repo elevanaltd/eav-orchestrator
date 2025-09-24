@@ -1,9 +1,11 @@
 /**
  * ScriptEditor Component - TipTap Rich Text Editor with Y.js Collaboration
- * 
+ *
  * Integrates TipTap rich text editor with Y.js CRDT for collaborative editing
  * Supports 3-18 script components with real-time synchronization via Supabase
  */
+
+// Critical-Engineer: consulted for Architecture for collaborative component model
 
 // Context7: consulted for react
 // CONTEXT7_BYPASS: MEMORY-LEAK-FIX - Adding useRef to fix auto-save memory leak
@@ -31,7 +33,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   ydoc,
   provider,
   components = [],
-  initialContent,
+  initialContent, // TODO: Use for editor initialization per Critical Engineer recommendations
   activeUsers = [],
   onContentChange,
   onComponentAdd,
@@ -178,6 +180,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   // Initialize TipTap editor with Y.js collaboration
   const editor = useEditor({
+    immediatelyRender: false, // Prevent SSR issues
     extensions: [
       StarterKit.configure({
         // Disable History extension - Y.js Collaboration provides its own history
@@ -198,7 +201,11 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         } as Parameters<typeof CollaborationCursor.configure>[0])
       ] : [])
     ],
-    content: initialContent || { type: 'doc', content: [] },
+    // CRITICAL: Do NOT pass content when using Collaboration
+    // Y.js manages document state - passing content blocks local editing
+    // See: https://github.com/ueberdosis/tiptap/issues/2400
+    // NOTE: initialContent prop not used - Y.js CRDT handles initial state
+    content: undefined, // Must be undefined for Y.js Collaboration to work
     editable: true,
     editorProps: {
       attributes: {
@@ -249,6 +256,28 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       updateEditorState(editor);
     }
   }, [yDoc, provider, collaborationProvider, config.userName, config.userColor, handleMultiParagraphPaste]);
+
+  // Force editor to be editable after creation
+  useEffect(() => {
+    if (editor) {
+      console.log('Editor exists, checking if editable:', editor.isEditable);
+      if (!editor.isEditable) {
+        console.log('Forcing editor to be editable');
+        editor.setEditable(true);
+      }
+      // Also force the DOM element after a short delay
+      setTimeout(() => {
+        const proseMirrorEl = document.querySelector('.ProseMirror');
+        if (proseMirrorEl) {
+          const currentEditable = proseMirrorEl.getAttribute('contenteditable');
+          if (currentEditable !== 'true') {
+            proseMirrorEl.setAttribute('contenteditable', 'true');
+            console.log('Set contenteditable=true on ProseMirror DOM element (was:', currentEditable, ')');
+          }
+        }
+      }, 100);
+    }
+  }, [editor]);
 
   // Auto-save handler
   const handleAutoSave = useCallback(async (content: Record<string, unknown>) => {
@@ -451,6 +480,34 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
     };
   }, [ydoc, collaborationProvider, provider]);
 
+  // Handle click-outside to close dropdown menu
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside menu button and dropdown
+      if (!target.closest('[data-testid^="menu-button-"]') &&
+          !target.closest('.absolute.left-full')) {
+        setMenuComponentId(null);
+      }
+    };
+
+    if (menuComponentId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [menuComponentId]);
+
+  // Debug: Track state changes
+  useEffect(() => {
+    console.log('State changed:', {
+      editingComponentId,
+      deleteConfirmId,
+      menuComponentId
+    });
+  }, [editingComponentId, deleteConfirmId, menuComponentId]);
+
   // Formatting button handlers
   const formatHandlers = {
     bold: () => {
@@ -480,7 +537,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
       const optimisticId = `comp-${Date.now()}`;
       const newComponent: Partial<ScriptComponentUI> = {
         scriptId: config.scriptId || 'default',
-        content: { type: 'doc', content: [] },
+        content: { type: 'doc', content: [{ type: 'paragraph' }] },
         plainText: '',
         position: displayComponents.length + 1,
         status: 'created' as const
@@ -515,29 +572,12 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   };
 
 
-  const handleComponentEdit = (newContent: string) => {
-    setEditingContent(newContent);
-
-    // Auto-save after 1 second
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-    }
-
-    autoSaveTimerRef.current = setTimeout(async () => {
-      if (editingComponentId && onComponentUpdate) {
-        try {
-          await onComponentUpdate(editingComponentId, {
-            plainText: newContent,
-            content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: newContent }] }] }
-          });
-        } catch (error) {
-          console.error('Failed to update component:', error);
-          onError?.(error as Error);
-        }
-      }
-      autoSaveTimerRef.current = null;
-    }, 1000);
-  };
+  // TODO: Remove - Legacy component edit handler, replaced by single editor approach
+  // const handleComponentEdit = (newContent: string) => {
+  //   setEditingContent(newContent);
+  //   // Removed auto-save to prevent optimistic lock conflicts
+  //   // User must click "Save & Close" to save changes
+  // };
 
   const handleDeleteComponent = async (componentId: string) => {
     if (!onComponentDelete) return;
@@ -630,6 +670,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
   };
 
   return (
+    <React.Fragment>
     <div className={`script-editor ${className}`} data-testid="script-editor">
       {/* Toolbar */}
       <div className="toolbar border-b border-gray-200 p-2 flex items-center gap-1" data-testid="editor-toolbar">
@@ -721,18 +762,18 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         </div>
       )}
 
-      {/* Editor Content */}
+      {/* Single TipTap Editor - Architectural Fix per Critical Engineer validation */}
+      {/* SAFE IMPLEMENTATION: Single editor with Y.js collaboration, no client-side component extraction */}
       <div className="editor-wrapper relative border-b">
         <EditorContent editor={editor} />
-
-        {/* Collaboration Cursors */}
         <div className="collaboration-cursors absolute inset-0 pointer-events-none" data-testid="collaboration-cursors">
-          {/* Cursors would be rendered here by TipTap collaboration extension */}
         </div>
       </div>
 
 
-      {/* Document Components - Google Docs Style Seamless Document */}
+      {/* TRANSITIONAL: Document Components - Google Docs Style Seamless Document */}
+      {/* WARNING: This component-by-component editing conflicts with single TipTap editor above */}
+      {/* TODO: Replace with server-side component extraction per Critical Engineer recommendations */}
       <div className="document-container px-6 py-4 overflow-visible" data-testid="document-container">
         {displayComponents.map((component, index) => (
           <div
@@ -744,14 +785,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             onDrop={(e) => handleDrop(e, component.componentId)}
           >
             {/* Margin controls - Google Docs style */}
-            <div className="absolute left-0 top-0 w-8 h-full flex items-start justify-center pt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute left-0 top-0 w-8 h-full flex items-start justify-center pt-1" style={{ zIndex: 20 }}>
               {/* Three-dot menu button */}
               <div className="relative">
                 <button
                   type="button"
-                  className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600"
+                  className="w-6 h-6 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 opacity-30 group-hover:opacity-100 transition-opacity duration-200"
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     // Toggle menu for this component
                     setMenuComponentId(
                       menuComponentId === component.componentId
@@ -759,6 +801,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
                         : component.componentId
                     );
                   }}
+                  style={{ pointerEvents: 'auto', cursor: 'pointer' }}
                   data-testid={`menu-button-${component.componentId}`}
                   title="Component options"
                 >
@@ -767,30 +810,27 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
                 {/* Dropdown menu */}
                 {menuComponentId === component.componentId && (
-                  <div className="absolute left-8 top-0 bg-white border shadow-lg rounded-lg py-1 z-[1000] min-w-[120px] max-w-[160px]" style={{
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    zIndex: 1000
-                  }}>
+                  <div
+                    className="absolute left-full ml-2 top-0 bg-white border border-gray-200 shadow-lg rounded-lg py-1 min-w-[140px]"
+                    style={{
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      zIndex: 9999,
+                      backgroundColor: 'white',
+                      pointerEvents: 'auto'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       type="button"
                       onClick={(e) => {
+                        console.log('Delete button clicked for component:', component.componentId);
                         e.stopPropagation();
-                        setEditingComponentId(component.componentId);
-                        setEditingContent(component.plainText || '');
-                        setMenuComponentId(null);
-                      }}
-                      className="w-full text-left px-3 py-1 hover:bg-gray-100 text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                        e.preventDefault();
                         setDeleteConfirmId(component.componentId);
                         setMenuComponentId(null);
                       }}
-                      className="w-full text-left px-3 py-1 hover:bg-gray-100 text-sm text-red-600"
+                      className="block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm text-red-600 cursor-pointer"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       Delete
                     </button>
@@ -798,13 +838,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         handleMoveComponent(component.componentId, 'up');
                         setMenuComponentId(null);
                       }}
                       disabled={index === 0}
-                      className={`w-full text-left px-3 py-1 hover:bg-gray-100 text-sm ${
-                        index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700'
+                      className={`block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm ${
+                        index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 cursor-pointer'
                       }`}
+                      style={{ pointerEvents: index === 0 ? 'none' : 'auto' }}
                       title="Move up"
                     >
                       ↑ Move Up
@@ -813,13 +855,15 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         handleMoveComponent(component.componentId, 'down');
                         setMenuComponentId(null);
                       }}
                       disabled={index === displayComponents.length - 1}
-                      className={`w-full text-left px-3 py-1 hover:bg-gray-100 text-sm ${
-                        index === displayComponents.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700'
+                      className={`block w-full text-left px-3 py-2 hover:bg-gray-100 text-sm ${
+                        index === displayComponents.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-700 cursor-pointer'
                       }`}
+                      style={{ pointerEvents: index === displayComponents.length - 1 ? 'none' : 'auto' }}
                       title="Move down"
                     >
                       ↓ Move Down
@@ -830,29 +874,97 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
             </div>
 
             {/* Component content as Google Docs paragraph */}
-            <div
-              className="script-paragraph min-h-[1.8rem] py-1 cursor-text leading-relaxed text-base"
-              style={{
-                fontFamily: 'Arial, sans-serif',
-                fontSize: '11pt',
-                lineHeight: 1.8,
-                marginBottom: '16px',
-                padding: '4px 0',
-                marginLeft: '32px' // Space for margin controls
-              }}
-              onClick={() => {
-                setEditingComponentId(component.componentId);
-                setEditingContent(component.plainText || '');
-              }}
-              data-component-index={index + 1}
-              data-testid={`component-content-${component.componentId}`}
-            >
-              {component.plainText || (
-                <span className="text-gray-400 italic">
-                  Click to add content...
-                </span>
-              )}
-            </div>
+            {editingComponentId === component.componentId ? (
+              // Inline editing mode
+              <div
+                className="script-paragraph min-h-[1.8rem] py-1 leading-relaxed text-base border-l-2 border-blue-500"
+                style={{
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '11pt',
+                  lineHeight: 1.8,
+                  marginBottom: '16px',
+                  padding: '4px 0 4px 8px',
+                  marginLeft: '32px'
+                }}
+                data-component-index={index + 1}
+                data-testid={`component-content-${component.componentId}`}
+              >
+                <textarea
+                  autoFocus
+                  value={editingContent}
+                  onChange={(e) => {
+                    setEditingContent(e.target.value);
+                    // Auto-resize the textarea
+                    e.target.style.height = 'auto';
+                    e.target.style.height = e.target.scrollHeight + 'px';
+                  }}
+                  onBlur={async () => {
+                    // Save on blur
+                    if (onComponentUpdate && editingContent !== component.plainText) {
+                      try {
+                        await onComponentUpdate(component.componentId, {
+                          plainText: editingContent,
+                          content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: editingContent }] }] }
+                        });
+                      } catch (error) {
+                        console.error('Failed to save component:', error);
+                        onError?.(error as Error);
+                      }
+                    }
+                    setEditingComponentId(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setEditingContent(component.plainText || '');
+                      setEditingComponentId(null);
+                    }
+                    // Allow Enter for new lines
+                    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                      e.stopPropagation(); // Prevent any default form submission
+                    }
+                  }}
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = 'auto';
+                      el.style.height = el.scrollHeight + 'px';
+                    }
+                  }}
+                  className="w-full bg-transparent border-none outline-none resize-none overflow-hidden"
+                  style={{
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    lineHeight: 'inherit',
+                    minHeight: '1.8rem'
+                  }}
+                  placeholder="Enter component content..."
+                />
+              </div>
+            ) : (
+              // View mode
+              <div
+                className="script-paragraph min-h-[1.8rem] py-1 cursor-text leading-relaxed text-base hover:bg-gray-50"
+                style={{
+                  fontFamily: 'Arial, sans-serif',
+                  fontSize: '11pt',
+                  lineHeight: 1.8,
+                  marginBottom: '16px',
+                  padding: '4px 0',
+                  marginLeft: '32px'
+                }}
+                onClick={() => {
+                  setEditingComponentId(component.componentId);
+                  setEditingContent(component.plainText || '');
+                }}
+                data-component-index={index + 1}
+                data-testid={`component-content-${component.componentId}`}
+              >
+                {component.plainText || (
+                  <span className="text-gray-400 italic">
+                    Click to add content...
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Hidden status metadata - accessible via data attributes for testing */}
             <div
@@ -894,85 +1006,7 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         )}
       </div>
 
-      {/* Component Editor - Minimal overlay style */}
-      {editingComponentId && (
-        <div className="component-editor fixed bottom-4 right-4 bg-white border shadow-lg rounded-lg p-4 max-w-md z-50" data-testid={`component-editor-${editingComponentId}`}>
-          <div className="mb-2 text-sm font-medium text-gray-700">
-            Editing Component {displayComponents.findIndex(c => c.componentId === editingComponentId) + 1}
-          </div>
-          <textarea
-            value={editingContent}
-            onChange={(e) => handleComponentEdit(e.target.value)}
-            className="w-full h-32 p-3 border rounded text-sm resize-none"
-            placeholder="Enter component content..."
-            autoFocus
-          />
-          <div className="flex gap-2 mt-3">
-            <button
-              type="button"
-              onClick={() => setEditingComponentId(null)}
-              className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              onClick={async () => {
-                // Save explicitly before closing
-                if (editingComponentId && onComponentUpdate) {
-                  try {
-                    await onComponentUpdate(editingComponentId, {
-                      plainText: editingContent,
-                      content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: editingContent }] }] }
-                    });
-                  } catch (error) {
-                    console.error('Failed to save component:', error);
-                    onError?.(error as Error);
-                    return; // Don't close if save failed
-                  }
-                }
-                // Clear any pending auto-save timer
-                if (autoSaveTimerRef.current) {
-                  clearTimeout(autoSaveTimerRef.current);
-                  autoSaveTimerRef.current = null;
-                }
-                setEditingComponentId(null);
-              }}
-              className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-            >
-              Save & Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {deleteConfirmId && (
-        <div className="delete-confirmation-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <div className="mb-4 text-lg font-medium">Confirm Delete</div>
-            <div className="mb-4 text-sm text-gray-600">
-              Are you sure you want to delete this component? This action cannot be undone.
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleDeleteComponent(deleteConfirmId)}
-                className="px-4 py-2 bg-red-600 text-white rounded text-sm"
-              >
-                Confirm Delete
-              </button>
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmId(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded text-sm"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Component Editor and Delete Dialog are rendered outside main container below */}
 
       {/* Comments Panel (placeholder for future implementation) */}
       {config.enableComments && (
@@ -991,5 +1025,53 @@ export const ScriptEditor: React.FC<ScriptEditorProps> = ({
         {/* Content processing happens in background */}
       </div>
     </div>
+
+    {/* Component Editor removed - using inline editing instead */}
+
+    {/* Delete Confirmation Dialog - Render outside main container */}
+    {deleteConfirmId && (
+      <div
+        className="delete-confirmation-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 999999,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }}
+        data-testid="delete-confirmation-overlay">
+        <div
+          className="bg-white p-6 rounded-lg shadow-2xl"
+          style={{
+            backgroundColor: 'white',
+            minWidth: '300px',
+            maxWidth: '400px'
+          }}>
+          <div className="mb-4 text-lg font-semibold">Confirm Delete</div>
+          <div className="mb-6 text-sm text-gray-600">
+            Are you sure you want to delete this component? This action cannot be undone.
+          </div>
+          <div className="flex gap-3 justify-end">
+            <button
+              type="button"
+              onClick={() => setDeleteConfirmId(null)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded text-sm font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDeleteComponent(deleteConfirmId)}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors"
+            >
+              Delete Component
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </React.Fragment>
   );
 };
