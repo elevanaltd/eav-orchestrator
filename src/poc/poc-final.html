@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAV Orchestrator - Final Architecture POC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .main-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .panel-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-draft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Editor with auto-numbered paragraphs */
+        .editor-container {
+            position: relative;
+            padding-left: 70px;
+            min-height: 400px;
+            counter-reset: component;
+        }
+
+        .editor-content {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #1a1a1a;
+            outline: none;
+        }
+
+        .editor-content h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .editor-content p {
+            margin-bottom: 18px;
+            position: relative;
+            counter-increment: component;
+        }
+
+        /* Auto-numbered component labels using CSS counters */
+        .editor-content p::before {
+            content: "C" counter(component);
+            position: absolute;
+            left: -55px;
+            top: 2px;
+            background: #64748b;
+            color: white;
+            padding: 3px 11px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+
+            /* Never selectable or copyable */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            pointer-events: none;
+        }
+
+        /* Change tracking - highlight modified components */
+        .editor-content p.modified::before {
+            background: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        .editor-content p.modified {
+            background: linear-gradient(to right, transparent, #fef3c7 10px, #fef3c7 calc(100% - 10px), transparent);
+            padding: 0 10px;
+            margin-left: -10px;
+            margin-right: -10px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Comment indicators */
+        .has-comment {
+            position: relative;
+        }
+
+        .has-comment::after {
+            content: "💬";
+            position: absolute;
+            right: -30px;
+            top: 0;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Action buttons */
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Workflow status */
+        .workflow-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .workflow-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .workflow-item {
+            padding: 16px;
+            border-radius: 8px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .workflow-item.ready {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+
+        .workflow-item.changed {
+            background: #fef3c7;
+            border-color: #fde047;
+        }
+
+        .workflow-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .workflow-label {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .workflow-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .workflow-status.ready {
+            background: #86efac;
+            color: #14532d;
+        }
+
+        .workflow-status.needs-update {
+            background: #fde047;
+            color: #713f12;
+        }
+
+        .workflow-details {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .changed-components {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .info-box strong {
+            color: #1e40af;
+        }
+
+        .info-box p {
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 EAV Orchestrator - Production Workflow</h1>
+        <p class="subtitle">Single editor with automatic paragraph components and change tracking</p>
+
+        <!-- Main Editor -->
+        <div class="main-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Script Editor</h2>
+                <div class="status-bar">
+                    <div class="status-item">
+                        <span>Components:</span>
+                        <span class="status-value" id="component-count">5</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Words:</span>
+                        <span class="status-value">247</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Status:</span>
+                        <span class="status-badge status-approved">Approved</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-content" contenteditable="true" id="editor">
+                    <h2>MVHR System - Homeowner Guide</h2>
+
+                    <p>This comprehensive guide will walk you through the operation and maintenance of your Mechanical Ventilation Heat Recovery system.</p>
+
+                    <p class="has-comment">Effective ventilation is essential for a healthy home — and can help prevent problems such as condensation and mould. Your home's mechanical ventilation heat recovery system, or MVHR, is located in the utility cupboard and works by extracting stale air from wet rooms like bathrooms and kitchens, while bringing in fresh air from outside.</p>
+
+                    <p>The top two filters are supplied on your MVHR and will filter your outgoing and incoming air, but there's a third filter slot that's initially empty. This additional filter can be purchased separately and provides extra filtration for incoming air.</p>
+
+                    <p>Bear in mind that filters on your MVHR will collect dirt and debris and over time will become much less effective. Regular maintenance is essential to ensure optimal performance.</p>
+
+                    <p>We recommend checking filters every three months and replacing them when they appear dirty or clogged. Clean filters not only improve air quality but also help maintain energy efficiency throughout your home.</p>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <button class="action-button btn-primary" onclick="sendForReview()">
+                    📤 Send for Review
+                </button>
+                <button class="action-button btn-secondary" onclick="simulateEdit()">
+                    ✏️ Simulate Edit (C3)
+                </button>
+                <button class="action-button btn-success" onclick="processScript()">
+                    🚀 Process Full Script
+                </button>
+            </div>
+        </div>
+
+        <!-- Workflow Status -->
+        <div class="workflow-panel">
+            <h3 class="workflow-title">Downstream Processing Status</h3>
+
+            <div class="workflow-grid">
+                <div class="workflow-item ready" id="voice-status">
+                    <div class="workflow-item-header">
+                        <span class="workflow-label">🎵 Voice Generation</span>
+                        <span class="workflow-status ready">Ready</span>
+                    </div>
+                    <div class="workflow-details">
+                        All 5 components processed<br>
+                        Total duration: 2:14<br>
+                        Pronunciations: MVHR → M-V-H-R
+                    </div>
+                </div>
+
+                <div class="workflow-item ready" id="scene-status">
+                    <div class="workflow-item-header">
+                        <span class="workflow-label">🎬 Scene Planning</span>
+                        <span class="workflow-status ready">Ready</span>
+                    </div>
+                    <div class="workflow-details">
+                        5 scenes mapped (1:1)<br>
+                        Shot list generated<br>
+                        Equipment requirements set
+                    </div>
+                </div>
+
+                <div class="workflow-item ready" id="edit-status">
+                    <div class="workflow-item-header">
+                        <span class="workflow-label">✂️ Edit Guidance</span>
+                        <span class="workflow-status ready">Ready</span>
+                    </div>
+                    <div class="workflow-details">
+                        Timeline markers set<br>
+                        Transitions defined<br>
+                        Graphics requirements listed
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>How it works:</strong>
+                <p>1. Write complete script with each paragraph as a component (C1, C2, etc.)</p>
+                <p>2. Send for client review and approval</p>
+                <p>3. Once approved, process entire script for Voice + Scene + Edit</p>
+                <p>4. Later edits to specific components flag only those for reprocessing</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-update component count
+        function updateComponentCount() {
+            const paragraphs = document.querySelectorAll('#editor p');
+            document.getElementById('component-count').textContent = paragraphs.length;
+        }
+
+        // Monitor for new paragraphs
+        document.getElementById('editor').addEventListener('input', function() {
+            updateComponentCount();
+        });
+
+        // Simulate editing a component
+        function simulateEdit() {
+            // Mark component 3 as modified
+            const paragraphs = document.querySelectorAll('#editor p');
+            if (paragraphs[2]) {
+                paragraphs[2].classList.add('modified');
+
+                // Update workflow status
+                const voiceStatus = document.getElementById('voice-status');
+                const sceneStatus = document.getElementById('scene-status');
+
+                voiceStatus.classList.remove('ready');
+                voiceStatus.classList.add('changed');
+                voiceStatus.querySelector('.workflow-status').textContent = 'Needs Update';
+                voiceStatus.querySelector('.workflow-status').classList.add('needs-update');
+
+                // Add changed component indicator
+                if (!voiceStatus.querySelector('.changed-components')) {
+                    const changedDiv = document.createElement('div');
+                    changedDiv.className = 'changed-components';
+                    changedDiv.textContent = '⚠️ Component C3 has changed';
+                    voiceStatus.querySelector('.workflow-details').appendChild(changedDiv);
+                }
+
+                sceneStatus.classList.remove('ready');
+                sceneStatus.classList.add('changed');
+                sceneStatus.querySelector('.workflow-status').textContent = 'Needs Update';
+                sceneStatus.querySelector('.workflow-status').classList.add('needs-update');
+
+                if (!sceneStatus.querySelector('.changed-components')) {
+                    const changedDiv = document.createElement('div');
+                    changedDiv.className = 'changed-components';
+                    changedDiv.textContent = '⚠️ Scene 3 needs review';
+                    sceneStatus.querySelector('.workflow-details').appendChild(changedDiv);
+                }
+
+                alert('Component C3 edited. Voice and Scene flagged for update.');
+            }
+        }
+
+        // Process full script
+        function processScript() {
+            alert('Processing entire script:\n\n' +
+                  '1. Sending all 5 components for voice generation\n' +
+                  '2. Creating 1:1 scene mapping for each component\n' +
+                  '3. Generating edit guidance for full timeline\n\n' +
+                  'Each component is processed individually but sent as a batch.');
+        }
+
+        // Send for review
+        function sendForReview() {
+            alert('Script sent for client review. Comments can be added to any component.');
+        }
+
+        // Initialize
+        updateComponentCount();
+    </script>
+</body>
+</html>

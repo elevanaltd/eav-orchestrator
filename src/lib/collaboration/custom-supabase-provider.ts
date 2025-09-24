@@ -299,12 +299,12 @@ export class CustomSupabaseProvider {
     const persistOperation = async () => {
       const stateVector = Y.encodeStateVector(this.ydoc);
 
-      // CRITICAL FIX: Use new append_yjs_update function with proper CRDT handling
-      // projectId (this.projectId) is validated by RLS policies in database function
+      // CRITICAL FIX: Use verified working append_yjs_update function
+      // Updated to use correct bytea format and new return column names
       const { data, error } = await this.supabaseClient.rpc('append_yjs_update', {
         p_document_id: this.documentId,
-        p_update_data: Array.from(updateData), // Send incremental update, not full state
-        p_new_state_vector: Array.from(stateVector),
+        p_update_data: updateData, // Send as Uint8Array (bytea)
+        p_new_state_vector: stateVector, // Send as Uint8Array (bytea)
         p_expected_version: this.currentVersion
       });
 
@@ -313,9 +313,17 @@ export class CustomSupabaseProvider {
         throw error;
       }
 
-      // Update version on success
-      if (data && data[0]?.success && data[0]?.new_version) {
-        this.currentVersion = data[0].new_version;
+      // Update version on success - using new column names
+      if (data && data[0]?.func_success && data[0]?.func_new_version) {
+        this.currentVersion = data[0].func_new_version;
+        console.debug('Y.js update persisted successfully', {
+          sequence: data[0].func_sequence_number,
+          newVersion: data[0].func_new_version
+        });
+      } else {
+        const errorMsg = data[0]?.func_error_message || 'Unknown persistence error';
+        console.error('Y.js persistence failed:', errorMsg);
+        throw new Error(errorMsg);
       }
 
       return data;

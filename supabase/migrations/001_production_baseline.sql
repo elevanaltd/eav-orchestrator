@@ -21,7 +21,6 @@
 -- Future migrations will be incremental changes from this baseline.
 -- ============================================================================
 
-\restrict n8uGAAoIy6dJxpGsjGU2bmGYlHkc7JHthp1TkfXkFdm9wlsNdMgLvVD54ZfDMgZ
 
 
 SET statement_timeout = 0;
@@ -2435,6 +2434,5 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 
 
 
-\unrestrict n8uGAAoIy6dJxpGsjGU2bmGYlHkc7JHthp1TkfXkFdm9wlsNdMgLvVD54ZfDMgZ
 
 RESET ALL;
